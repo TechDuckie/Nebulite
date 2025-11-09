@@ -30,10 +30,19 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3' };
   const images = {};
+  const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
-  Promise.all(Object.values(assets).map(loadImg)).then(imgs=>{ images.player=imgs[0]; images.enemy=imgs[1]; images.laser=imgs[2]; images.boss=imgs[3]; });
+  function loadAudio(src){ return new Promise(res => { const a = new Audio(); a.src = src; a.oncanplaythrough = ()=>res(a); a.onerror = ()=>res(new Audio()); }); }
+  Promise.all(Object.values(assets).map(src => {
+    if(src.endsWith('.png')) return loadImg(src);
+    if(src.endsWith('.mp3')) return loadAudio(src);
+  })).then(loadedAssets=>{
+    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.laser=loadedAssets[2]; images.boss=loadedAssets[3];
+    audio.music1 = loadedAssets[4]; audio.boss1 = loadedAssets[5];
+    Object.values(audio).forEach(a => a.loop = true);
+  });
 
   // Game state and constants
   const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5 };
@@ -42,6 +51,17 @@
   const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
   const unlocked = [true, false, false, false]; // unlock array
   let currentLevelIndex = 0;
+
+  const audioState = { masterVolume: 1, sfxVolume: 1, currentMusic: null };
+  function playMusic(key){
+    if(audioState.currentMusic) audioState.currentMusic.pause();
+    const a = audio[key];
+    if(a){ a.currentTime = 0; a.volume = audioState.masterVolume; a.play(); audioState.currentMusic = a; }
+  }
+  function stopMusic(){
+    if(audioState.currentMusic) audioState.currentMusic.pause();
+    audioState.currentMusic = null;
+  }
 
   // Level definitions generator for Level 1 (we'll allow later custom rules)
   function makeLevel1(){
@@ -52,6 +72,8 @@
     }
     return {
       waves,
+      waveMusic: 'music1',
+      bossMusic: 'boss1',
       boss: {
         name: 'Mech-Tra',
         sprite: 'assets/boss1.png',
@@ -93,6 +115,7 @@
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
     screenVictory.style.display = (s===STATE.VICTORY)?'flex':'none';
     screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
+    if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     gameState = s;
   }
 
@@ -112,6 +135,7 @@
   function startLevel(index){
     currentLevelIndex = index;
     const lvl = LEVELS[index];
+    playMusic(lvl.waveMusic);
     // reset state
     state.enemies.length = 0; state.lasers.length = 0; state.bossBullets.length = 0; state.boss = null;
     state.player.x = canvas.width/DPR/2; state.player.y = canvas.height/DPR - 110; state.player.vx = 0; state.player.vy = 0;
@@ -207,6 +231,7 @@
         // all waves done -> spawn boss if not spawned yet
         if(!state.boss && state.enemies.length === 0 && state.lasers.length === 0){
           spawnBoss(level);
+          playMusic(level.bossMusic);
           bossBar.style.display = 'block';
           bossName.textContent = level.boss.name;
           bossName.style.display = 'block';
@@ -463,8 +488,14 @@
   btnRetry.addEventListener('click', ()=>{ startLevel(currentLevelIndex); });
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
 
-  masterVolume.addEventListener('input', (e) => { console.log('Master Volume:', e.target.value); });
-  sfxVolume.addEventListener('input', (e) => { console.log('SFX Volume:', e.target.value); });
+  masterVolume.addEventListener('input', (e) => {
+    audioState.masterVolume = e.target.value / 100;
+    if(audioState.currentMusic) audioState.currentMusic.volume = audioState.masterVolume;
+  });
+  sfxVolume.addEventListener('input', (e) => {
+    audioState.sfxVolume = e.target.value / 100;
+    // todo: apply to sfx
+  });
 
   // initialize UI
   rebuildLevelSelect();
