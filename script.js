@@ -24,6 +24,7 @@
   const btnRetry = document.getElementById('btnRetry');
   const btnToLevels = document.getElementById('btnToLevels');
   const btnGameOverToMenu = document.getElementById('btnGameOverToMenu');
+  const btnDialogueGo = document.getElementById('btnDialogueGo');
   const masterVolume = document.getElementById('masterVolume');
   const sfxVolume = document.getElementById('sfxVolume');
 
@@ -37,7 +38,7 @@
   const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png' };
   const images = {};
   const audio = {};
-  function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
+  function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
   function loadAudio(src){ return new Promise(res => { const a = new Audio(); a.src = src; a.oncanplaythrough = ()=>res(a); a.onerror = ()=>res(new Audio()); }); }
   Promise.all(Object.values(assets).map(src => {
     if(src.endsWith('.png')) return loadImg(src);
@@ -114,7 +115,7 @@
     waveSpawnTimer:0,
     waveCleared: false,
     warningFlash: { active: false, timer: 0, flashes: 0 },
-    dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50 },
+    dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50, goButtonTimerSet: false },
     lastTime: performance.now()
   };
 
@@ -144,6 +145,8 @@
         state.dialogue.letterIndex = 0;
         state.dialogue.timer = 0;
         state.dialogue.active = true;
+        state.dialogue.goButtonTimerSet = false;
+        btnDialogueGo.style.display = 'none'; // Hide the button initially
         showScreen(STATE.DIALOGUE);
       });
   }
@@ -235,6 +238,24 @@
 
   // game update loop
   function update(dt){
+    // Dialogue typewriter effect
+    if (gameState === STATE.DIALOGUE && state.dialogue.active) {
+      state.dialogue.timer += dt;
+      if (state.dialogue.letterIndex < state.dialogue.fullText.length && state.dialogue.timer * 1000 > state.dialogue.speed) {
+        state.dialogue.text += state.dialogue.fullText[state.dialogue.letterIndex];
+        state.dialogue.letterIndex++;
+        state.dialogue.timer = 0;
+        dialogueText.textContent = state.dialogue.text;
+      } else if (state.dialogue.letterIndex >= state.dialogue.fullText.length && !state.dialogue.goButtonTimerSet) {
+        // Dialogue is complete, start a timer to show the "GO" button
+        state.dialogue.goButtonTimerSet = true; // Ensure timer is only set once
+        setTimeout(() => {
+          btnDialogueGo.style.display = 'block';
+        }, 5000);
+      }
+      return; // Don't update the rest of the game while in dialogue
+    }
+
     if(gameState !== STATE.PLAYING) return;
 
     // warning flash
@@ -427,17 +448,6 @@
 
     // debug
     dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} BossBullets:${state.bossBullets.length}` ;
-
-    // Dialogue typewriter effect
-    if (gameState === STATE.DIALOGUE && state.dialogue.active) {
-      state.dialogue.timer += dt;
-      if (state.dialogue.letterIndex < state.dialogue.fullText.length && state.dialogue.timer * 1000 > state.dialogue.speed) {
-        state.dialogue.text += state.dialogue.fullText[state.dialogue.letterIndex];
-        state.dialogue.letterIndex++;
-        state.dialogue.timer = 0;
-        dialogueText.textContent = state.dialogue.text;
-      }
-    }
   }
 
   // render
@@ -567,16 +577,10 @@
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
   btnGameOverToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
 
-  screenDialogue.addEventListener('click', () => {
+  btnDialogueGo.addEventListener('click', () => {
     if (gameState === STATE.DIALOGUE) {
-      if (state.dialogue.letterIndex < state.dialogue.fullText.length) {
-        state.dialogue.text = state.dialogue.fullText;
-        state.dialogue.letterIndex = state.dialogue.fullText.length;
-        dialogueText.textContent = state.dialogue.text;
-      } else {
-        state.dialogue.active = false;
-        beginLevelGameplay();
-      }
+      state.dialogue.active = false;
+      beginLevelGameplay();
     }
   });
 
