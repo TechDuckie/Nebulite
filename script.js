@@ -519,6 +519,7 @@
   const btnFire = document.getElementById('btn-fire');
   const btnSecondary = document.getElementById('btn-secondary');
 
+  const knob = document.getElementById('knob');
   // joystick: track single pointer for movement on left half
   let joystickPointer = null, joyBase={x:0,y:0}, joyMax=60;
   window.addEventListener('pointerdown', e=>{
@@ -539,9 +540,14 @@
     // normalized
     state.player.vx = (nx / max) * state.player.speed;
     state.player.vy = (ny / max) * state.player.speed;
+    knob.style.transform = `translate(${nx}px, ${ny}px)`;
   });
   window.addEventListener('pointerup', e=>{
-    if(e.pointerId === joystickPointer){ joystickPointer = null; state.player.vx = 0; state.player.vy = 0; }
+    if(e.pointerId === joystickPointer){
+      joystickPointer = null;
+      state.player.vx = 0; state.player.vy = 0;
+      knob.style.transform = 'translate(0,0)';
+    }
   });
 
   // fire button pointerdown triggers laser immediately; can hold to spam if you want (no capture)
