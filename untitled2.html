@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <title>Mobile Space Shooter — Levels & Waves</title>
+  <style>
+    :root{--bg:#120b1b;--ui:#ddd}
+    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    #gameWrap{position:fixed;inset:0;overflow:hidden}
+    canvas{display:block;width:100vw;height:100vh;background:var(--bg);}
+    /* UI overlay */
+    .ui {position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;}
+    .hud {position:fixed;left:10px;top:10px;color:var(--ui);font-size:14px;pointer-events:none}
+    .hud .hearts{display:inline-block;margin-left:8px}
+    .hearts span{color:#e74c3c;margin-right:6px;font-size:18px}
+    .waveInfo{position:fixed;left:50%;top:10px;transform:translateX(-50%);color:var(--ui);font-size:14px}
+    .bossBar{position:fixed;left:50%;top:34px;transform:translateX(-50%);width:60%;height:12px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;display:none}
+    .bossBarInner{height:100%;background:linear-gradient(90deg,#ff4d4d,#ffb86b);width:100%}
+    /* joystick + buttons */
+    .left-joystick, .right-buttons{position:absolute;pointer-events:auto}
+    .left-joystick{left:8px;bottom:8px;width:140px;height:140px;max-width:22vw;max-height:22vw;}
+    .right-buttons{right:8px;bottom:8px;width:170px;height:140px;display:flex;gap:12px;justify-content:flex-end;align-items:flex-end;max-width:30vw;max-height:22vw;pointer-events:auto}
+    .btn{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);backdrop-filter:blur(4px);touch-action:manipulation}
+    .btn:active{transform:translateY(2px) scale(0.98)}
+    .btn img{width:36px;height:36px;object-fit:contain}
+    /* screens (menu/levels) */
+    .screen {position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6));color:var(--ui);z-index:40}
+    .panel{background:rgba(10,8,15,0.9);padding:20px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:92%;max-width:420px;text-align:center}
+    .btn-ui{background:#2b2b3a;color:white;border:none;padding:12px 18px;border-radius:10px;margin:8px;font-size:16px}
+    .levels-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .level-btn{width:88px;height:88px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ui);border:2px solid rgba(255,255,255,0.04)}
+    .level-btn.locked{opacity:0.35}
+    .small{font-size:12px;color:#aaa;margin-top:6px}
+    .debug{position:fixed;left:8px;bottom:8px;color:#999;font-size:12px;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div id="gameWrap">
+    <canvas id="game"></canvas>
+
+    <div class="ui" id="uiRoot">
+      <div class="hud" id="hud">
+        <span id="scoreText">Score: 0</span>
+        <span class="hearts" id="hearts"></span>
+      </div>
+      <div class="waveInfo" id="waveInfo">Wave 0 / 0</div>
+      <div class="bossBar" id="bossBar"><div class="bossBarInner" id="bossBarInner"></div></div>
+
+      <div class="left-joystick" id="joystick" aria-hidden>
+        <svg viewBox="0 0 140 140" width="100%" height="100%"><circle cx="70" cy="70" r="44" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/><circle id="knob" cx="70" cy="70" r="22" fill="rgba(255,255,255,0.06)"/></svg>
+      </div>
+
+      <div class="right-buttons">
+        <div class="btn" id="btn-secondary" title="Toggle auto-fire"><svg width="36" height="36" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="rgba(255,255,255,0.85)"/></svg></div>
+        <div class="btn" id="btn-fire" title="Shoot (laser)"><img src="laser1.png" alt="shoot" onerror="this.style.display='none'"/></div>
+      </div>
+
+      <div class="debug" id="dbg">DEBUG</div>
+    </div>
+
+    <!-- Screens -->
+    <div class="screen" id="screenMenu">
+      <div class="panel">
+        <h1>Space Shooter</h1>
+        <p class="small">Mobile portrait — joystick left, buttons right</p>
+        <button class="btn-ui" id="btnPlay">Play</button>
+        <div class="small">or choose level</div>
+        <div style="margin-top:10px"><button class="btn-ui" id="btnLevelSelect">Level Select</button></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenLevels" style="display:none">
+      <div class="panel">
+        <h2>Select Level</h2>
+        <div class="levels-grid" id="levelsGrid"></div>
+        <div class="small">Defeat boss to unlock the next level.</div>
+        <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenVictory" style="display:none">
+      <div class="panel">
+        <h2>Victory!</h2>
+        <p>Boss defeated — level unlocked.</p>
+        <button class="btn-ui" id="btnVictoryContinue">Continue</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screenGameOver" style="display:none">
+      <div class="panel">
+        <h2>Game Over</h2>
+        <button class="btn-ui" id="btnRetry">Retry Level</button>
+        <div style="margin-top:8px"><button class="btn-ui" id="btnToLevels">Level Select</button></div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+(function(){
+  // Canvas setup
+  const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
+  const DPR = Math.max(1, window.devicePixelRatio || 1);
+  function resize(){ canvas.width = Math.floor(innerWidth * DPR); canvas.height = Math.floor(innerHeight * DPR); canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  addEventListener('resize', resize); resize();
+
+  // UI refs
+  const screenMenu = document.getElementById('screenMenu');
+  const screenLevels = document.getElementById('screenLevels');
+  const screenVictory = document.getElementById('screenVictory');
+  const screenGameOver = document.getElementById('screenGameOver');
+  const btnPlay = document.getElementById('btnPlay');
+  const btnLevelSelect = document.getElementById('btnLevelSelect');
+  const btnBackToMenu = document.getElementById('btnBackToMenu');
+  const levelsGrid = document.getElementById('levelsGrid');
+  const btnVictoryContinue = document.getElementById('btnVictoryContinue');
+  const btnRetry = document.getElementById('btnRetry');
+  const btnToLevels = document.getElementById('btnToLevels');
+
+  const waveInfo = document.getElementById('waveInfo');
+  const bossBar = document.getElementById('bossBar'), bossBarInner = document.getElementById('bossBarInner');
+  const heartsEl = document.getElementById('hearts');
+  const dbg = document.getElementById('dbg');
+
+  // Assets (graceful fallback)
+  const assets = { player: 'player.png', enemy: 'enemySmall.png', laser: 'laser1.png', boss: 'boss1.png' };
+  const images = {};
+  function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
+  Promise.all(Object.values(assets).map(loadImg)).then(imgs=>{ images.player=imgs[0]; images.enemy=imgs[1]; images.laser=imgs[2]; images.boss=imgs[3]; });
+
+  // Game state and constants
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4 };
+  let gameState = STATE.MENU;
+
+  const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
+  const unlocked = [true, false, false, false]; // unlock array
+  let currentLevelIndex = 0;
+
+  // Level definitions generator for Level 1 (we'll allow later custom rules)
+  function makeLevel1(){
+    // waves: 10 waves with enemy counts 3..12 (increment by 1 per wave)
+    const waves = [];
+    for(let w=0; w<10; w++){
+      waves.push({ enemyCount: 3 + w, enemySpeed: 80 + w*6, spawnRate: 300 }); // spawnRate ms between spawn
+    }
+    return {
+      waves,
+      boss: {
+        sprite: 'boss1.png',
+        hp: 10,
+        w: 120, h: 120,
+        speed: 40,     // movement lerp speed
+        fireRate: 1100, // ms between shots
+        bulletSpeed: 180
+      }
+    };
+  }
+
+  const LEVELS = [ makeLevel1(), /* placeholders for other levels */ {}, {} , {} ];
+
+  // Entities
+  const state = {
+    player: { x:0, y:0, w:64, h:64, speed: 280, vx:0, vy:0, hp:3 },
+    enemies: [],
+    lasers: [],
+    bossBullets: [],
+    boss: null,
+    score: 0,
+    waveIndex: 0,
+    waveProgress: 0, // enemies spawned in current wave
+    waveSpawning: false,
+    waveSpawnTimer:0,
+    waveCleared: false,
+    lastTime: performance.now()
+  };
+
+  // helpers
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  function rectIntersect(a,b){ return !(b.x > a.x + a.w || b.x + b.w < a.x || b.y > a.y + a.h || b.y + b.h < a.y); }
+
+  // UI functions
+  function showScreen(s){
+    screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
+    screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
+    screenVictory.style.display = (s===STATE.VICTORY)?'flex':'none';
+    screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
+    gameState = s;
+  }
+
+  // Build level select buttons
+  function rebuildLevelSelect(){
+    levelsGrid.innerHTML = '';
+    for(let i=0;i<LEVEL_COUNT;i++){
+      const b = document.createElement('div');
+      b.className = 'level-btn' + (unlocked[i] ? '' : ' locked');
+      b.textContent = 'Level ' + (i+1);
+      b.addEventListener('click', ()=>{ if(unlocked[i]) startLevel(i); });
+      levelsGrid.appendChild(b);
+    }
+  }
+
+  // Start a level
+  function startLevel(index){
+    currentLevelIndex = index;
+    const lvl = LEVELS[index];
+    // reset state
+    state.enemies.length = 0; state.lasers.length = 0; state.bossBullets.length = 0; state.boss = null;
+    state.player.x = canvas.width/DPR/2; state.player.y = canvas.height/DPR - 110; state.player.vx = 0; state.player.vy = 0;
+    state.player.hp = 3;
+    state.score = 0;
+    state.waveIndex = 0;
+    state.waveProgress = 0;
+    state.waveSpawning = true;
+    state.waveSpawnTimer = 0;
+    state.lastTime = performance.now();
+    waveInfo.textContent = `Wave 0 / ${LEVELS[currentLevelIndex].waves.length}`;
+    bossBar.style.display = 'none';
+    updateHearts();
+    showScreen(STATE.PLAYING);
+    // begin spawning first wave on next frame
+  }
+
+  // HUD hearts
+  function updateHearts(){
+    heartsEl.innerHTML = '';
+    for(let i=0;i<state.player.hp;i++){
+      const s = document.createElement('span'); s.textContent = '♥'; heartsEl.appendChild(s);
+    }
+  }
+
+  // Spawning functions
+  function spawnEnemy(speedOverride){
+    const W = canvas.width / DPR, H = canvas.height / DPR;
+    const w = 48, h = 48; // enemies 48x48 (middle ground)
+    const x = Math.random() * (W - w) + w/2;
+    const e = { x: x - w/2, y: -h, w, h, speed: speedOverride || (80 + Math.random()*60) };
+    state.enemies.push(e);
+  }
+
+  function spawnLaserFromPlayer(){
+    const p = state.player;
+    const w = 16, h = 32; // narrow laser
+    state.lasers.push({ x: p.x - w/2, y: p.y - p.h/2 - h, w, h, speed: 520 });
+  }
+
+  function spawnBoss(level){
+    const cfg = level.boss;
+    const W = canvas.width / DPR, H = canvas.height / DPR;
+    const b = { x: W/2 - cfg.w/2, y: -cfg.h, w: cfg.w, h: cfg.h, hp: cfg.hp, cfg, lastFire:0 };
+    state.boss = b;
+  }
+
+  function spawnBossBullet(boss){
+    const cfg = boss.cfg;
+    // boss bullet straight down (for level1) - spawn centered under boss
+    const bw = 12, bh = 24;
+    const x = boss.x + boss.w/2 - bw/2;
+    const y = boss.y + boss.h/2 + 8;
+    // for straight-down: vx=0, vy = bulletSpeed
+    state.bossBullets.push({ x, y, w:bw, h:bh, vy: cfg.bulletSpeed });
+  }
+
+  // game update loop
+  function update(dt){
+    if(gameState !== STATE.PLAYING) return;
+
+    // spawn waves
+    const level = LEVELS[currentLevelIndex];
+    if(level && !state.boss){
+      const totalWaves = level.waves.length;
+      if(state.waveIndex < totalWaves){
+        const waveCfg = level.waves[state.waveIndex];
+
+        // start spawning if not started
+        if(state.waveSpawning){
+          state.waveSpawnTimer += dt*1000;
+          if(state.waveSpawnTimer >= waveCfg.spawnRate && state.waveProgress < waveCfg.enemyCount){
+            spawnEnemy(waveCfg.enemySpeed);
+            state.waveProgress++;
+            state.waveSpawnTimer = 0;
+          }
+          // if finished spawning enemies for this wave and no enemies left on screen -> advance to next wave
+          if(state.waveProgress >= waveCfg.enemyCount){
+            state.waveSpawning = false;
+          }
+        } else {
+          // check if enemies cleared
+          if(state.enemies.length === 0 && state.lasers.length === 0){
+            // advance to next wave
+            state.waveIndex++;
+            state.waveProgress = 0;
+            state.waveSpawning = true;
+            state.waveSpawnTimer = 0;
+          }
+        }
+      } else {
+        // all waves done -> spawn boss if not spawned yet
+        if(!state.boss && state.enemies.length === 0 && state.lasers.length === 0){
+          spawnBoss(level);
+          bossBar.style.display = 'block';
+          bossBarInner.style.width = '100%';
+        }
+      }
+    }
+
+    // update enemies
+    for(let i=state.enemies.length-1;i>=0;i--){
+      const e = state.enemies[i];
+      e.y += e.speed * dt;
+      if(e.y > canvas.height/DPR + 40) state.enemies.splice(i,1);
+    }
+
+    // update lasers (player)
+    for(let i=state.lasers.length-1;i>=0;i--){
+      const L = state.lasers[i];
+      L.y -= L.speed * dt;
+      if(L.y + L.h < -40) state.lasers.splice(i,1);
+    }
+
+    // update boss bullets
+    for(let i=state.bossBullets.length-1;i>=0;i--){
+      const b = state.bossBullets[i];
+      b.y += b.vy * dt;
+      if(b.y > canvas.height/DPR + 40) state.bossBullets.splice(i,1);
+    }
+
+    // boss behavior
+    if(state.boss){
+      const boss = state.boss;
+      // descend to visible area
+      if(boss.y < 80) boss.y += (boss.cfg.speed/2) * dt;
+      else {
+        // track player slowly (lerp)
+        const targetX = state.player.x + state.player.w/2 - boss.w/2;
+        boss.x += (targetX - boss.x) * (Math.min(1, boss.cfg.speed/200) * dt * 2.2); // smooth follow
+        // firing straight down at intervals
+        const now = performance.now();
+        if(now - boss.lastFire > boss.cfg.fireRate){
+          spawnBossBullet(boss);
+          boss.lastFire = now;
+        }
+      }
+      // boss collision with player lasers
+      for(let li=state.lasers.length-1; li>=0; li--){
+        const L = state.lasers[li];
+        const rectBoss = {x: boss.x, y: boss.y, w: boss.w, h: boss.h};
+        const rectLaser = {x: L.x, y: L.y, w: L.w, h: L.h};
+        if(rectIntersect(rectBoss, rectLaser)){
+          state.lasers.splice(li,1);
+          boss.hp--;
+          state.score += 15;
+          if(boss.hp <= 0){
+            // boss defeated
+            state.boss = null;
+            bossBar.style.display = 'none';
+            unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
+            // show victory
+            showScreen(STATE.VICTORY);
+          } else {
+            // update boss bar
+            const pct = Math.max(0, boss.hp / boss.cfg.hp);
+            bossBarInner.style.width = (pct*100) + '%';
+          }
+          break;
+        }
+      }
+    }
+
+    // lasers hitting enemies
+    for(let ei=state.enemies.length-1; ei>=0; ei--){
+      const e = state.enemies[ei];
+      const re = {x:e.x, y:e.y, w:e.w, h:e.h};
+      for(let li=state.lasers.length-1; li>=0; li--){
+        const L = state.lasers[li];
+        const rl = {x:L.x, y:L.y, w:L.w, h:L.h};
+        if(rectIntersect(re, rl)){
+          state.enemies.splice(ei,1);
+          state.lasers.splice(li,1);
+          state.score += 5;
+          break;
+        }
+      }
+    }
+
+    // boss bullets hitting player (straight down, for level1)
+    for(let bi=state.bossBullets.length-1; bi>=0; bi--){
+      const b = state.bossBullets[bi];
+      const rb = {x:b.x, y:b.y, w:b.w, h:b.h};
+      const rp = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
+      if(rectIntersect(rb, rp)){
+        state.bossBullets.splice(bi,1);
+        // player takes damage
+        state.player.hp--;
+        updateHearts();
+        if(state.player.hp <= 0){
+          // game over
+          showScreen(STATE.GAMEOVER);
+        }
+      }
+    }
+
+    // enemies touching player
+    for(let ei=state.enemies.length-1; ei>=0; ei--){
+      const e = state.enemies[ei];
+      const re = {x:e.x, y:e.y, w:e.w, h:e.h};
+      const rp = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
+      if(rectIntersect(re, rp)){
+        state.enemies.splice(ei,1);
+        state.player.hp--;
+        updateHearts();
+        if(state.player.hp <= 0){
+          showScreen(STATE.GAMEOVER);
+        }
+      }
+    }
+
+    // player movement apply
+    state.player.x += state.player.vx * dt;
+    state.player.y += state.player.vy * dt;
+    // constrain player to screen with margin
+    const margin = 32;
+    state.player.x = clamp(state.player.x, margin, canvas.width/DPR - margin);
+    state.player.y = clamp(state.player.y, margin, canvas.height/DPR - 120);
+
+    // HUD updates
+    waveInfo.textContent = (() => {
+      const totalWaves = level ? level.waves.length : 0;
+      const current = Math.min(totalWaves, Math.max(0, state.waveIndex + (state.boss ? totalWaves : 0)));
+      const displayIndex = (state.boss ? totalWaves : (state.waveIndex + 1 <= totalWaves ? state.waveIndex + (state.waveSpawning || state.enemies.length>0 ? 1 : 0) : totalWaves)) ;
+      return `Wave ${Math.min(displayIndex, totalWaves)} / ${totalWaves}`;
+    })();
+
+    // debug
+    dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} BossBullets:${state.bossBullets.length}` ;
+  }
+
+  // render
+  function render(){
+    ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR);
+    // bg
+    ctx.fillStyle = '#120b1b';
+    ctx.fillRect(0,0,canvas.width/DPR,canvas.height/DPR);
+
+    // draw player (center x,y)
+    const p = state.player;
+    drawImageCentered(images.player, p.x, p.y, p.w, p.h);
+
+    // enemies
+    state.enemies.forEach(e => drawImageCentered(images.enemy, e.x + e.w/2, e.y + e.h/2, e.w, e.h));
+
+    // lasers
+    ctx.save();
+    state.lasers.forEach(L => {
+      // either draw image or fallback
+      if(images.laser && images.laser.complete) drawImageCentered(images.laser, L.x + L.w/2, L.y + L.h/2, L.w, L.h);
+      else { ctx.fillStyle = '#7ff'; ctx.fillRect(L.x, L.y, L.w, L.h); }
+    });
+    ctx.restore();
+
+    // boss
+    if(state.boss){
+      const b = state.boss;
+      drawImageCentered(images.boss, b.x + b.w/2, b.y + b.h/2, b.w, b.h);
+    }
+
+    // boss bullets
+    state.bossBullets.forEach(bb => {
+      ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
+    });
+
+    // optional small HUD on canvas (player pos)
+    // nothing else here
+  }
+
+  function drawImageCentered(img, cx, cy, w, h){
+    if(!img) return;
+    ctx.drawImage(img, cx - w/2, cy - h/2, w, h);
+  }
+
+  // main loop
+  function loop(t){
+    const dt = Math.min(40, t - state.lastTime);
+    state.lastTime = t;
+    update(dt/1000);
+    render();
+    requestAnimationFrame(loop);
+  }
+  state.lastTime = performance.now();
+  requestAnimationFrame(loop);
+
+  // controls: joystick + fire + auto-fire
+  const btnFire = document.getElementById('btn-fire');
+  const btnSecondary = document.getElementById('btn-secondary');
+
+  // joystick: track single pointer for movement on left half
+  let joystickPointer = null, joyBase={x:0,y:0}, joyMax=60;
+  window.addEventListener('pointerdown', e=>{
+    if(e.clientX < innerWidth * 0.55){
+      joystickPointer = e.pointerId;
+      joyBase.x = e.clientX; joyBase.y = e.clientY;
+      state.player.vx = 0; state.player.vy = 0;
+    }
+  });
+  window.addEventListener('pointermove', e=>{
+    if(e.pointerId !== joystickPointer) return;
+    const dx = e.clientX - joyBase.x;
+    const dy = e.clientY - joyBase.y;
+    const dist = Math.hypot(dx, dy);
+    const max = joyMax;
+    const nx = dist>max ? dx / dist * max : dx;
+    const ny = dist>max ? dy / dist * max : dy;
+    // normalized
+    state.player.vx = (nx / max) * state.player.speed;
+    state.player.vy = (ny / max) * state.player.speed;
+  });
+  window.addEventListener('pointerup', e=>{
+    if(e.pointerId === joystickPointer){ joystickPointer = null; state.player.vx = 0; state.player.vy = 0; }
+  });
+
+  // fire button pointerdown triggers laser immediately; can hold to spam if you want (no capture)
+  btnFire.addEventListener('pointerdown', e=>{
+    spawnLaserFromPlayer();
+  });
+  // also allow tap on canvas to shoot (optional)
+  canvas.addEventListener('click', e=> spawnLaserFromPlayer());
+
+  // auto-fire toggle
+  btnSecondary.addEventListener('click', ()=>{
+    LEVELS[currentLevelIndex].autoFire = !LEVELS[currentLevelIndex].autoFire;
+    btnSecondary.style.background = LEVELS[currentLevelIndex].autoFire ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)';
+    // simple auto-shot loop using timeout
+    if(LEVELS[currentLevelIndex].autoFire){
+      (function af(){
+        if(gameState !== STATE.PLAYING) return;
+        if(!LEVELS[currentLevelIndex].autoFire) return;
+        spawnLaserFromPlayer();
+        setTimeout(af, 200);
+      })();
+    }
+  });
+
+  // menu / level select UI wiring
+  btnPlay.addEventListener('click', ()=>{ startLevel(0); });
+  btnLevelSelect.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
+  btnBackToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
+  btnVictoryContinue.addEventListener('click', ()=>{ showScreen(STATE.LEVEL_SELECT); rebuildLevelSelect(); });
+  btnRetry.addEventListener('click', ()=>{ startLevel(currentLevelIndex); });
+  btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
+
+  // initialize UI
+  rebuildLevelSelect();
+  showScreen(STATE.MENU);
+  updateHearts();
+
+})();
+</script>
+</body>
+</html>
