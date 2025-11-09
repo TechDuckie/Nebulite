@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <title>Mobile Space Shooter — Levels & Waves</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="gameWrap">
+    <canvas id="game"></canvas>
+
+    <div class="ui" id="uiRoot">
+      <div class="hud" id="hud">
+        <span id="scoreText">Score: 0</span>
+        <span class="hearts" id="hearts"></span>
+      </div>
+      <div class="waveInfo" id="waveInfo">Wave 0 / 0</div>
+      <div class="bossBar" id="bossBar"><div class="bossBarInner" id="bossBarInner"></div></div>
+
+      <div class="left-joystick" id="joystick" aria-hidden>
+        <svg viewBox="0 0 140 140" width="100%" height="100%"><circle cx="70" cy="70" r="44" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/><circle id="knob" cx="70" cy="70" r="22" fill="rgba(255,255,255,0.06)"/></svg>
+      </div>
+
+      <div class="right-buttons">
+        <div class="btn" id="btn-secondary" title="Toggle auto-fire"><svg width="36" height="36" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="rgba(255,255,255,0.85)"/></svg></div>
+        <div class="btn" id="btn-fire" title="Shoot (laser)"><img src="assets/laser1.png" alt="shoot" onerror="this.style.display='none'"/></div>
+      </div>
+
+      <div class="debug" id="dbg">DEBUG</div>
+    </div>
+
+    <!-- Screens -->
+    <div class="screen" id="screenMenu">
+      <div class="panel">
+        <h1>Space Shooter</h1>
+        <p class="small">Mobile portrait — joystick left, buttons right</p>
+        <button class="btn-ui" id="btnPlay">Play</button>
+        <div class="small">or choose level</div>
+        <div style="margin-top:10px"><button class="btn-ui" id="btnLevelSelect">Level Select</button></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenLevels" style="display:none">
+      <div class="panel">
+        <h2>Select Level</h2>
+        <div class="levels-grid" id="levelsGrid"></div>
+        <div class="small">Defeat boss to unlock the next level.</div>
+        <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenVictory" style="display:none">
+      <div class="panel">
+        <h2>Victory!</h2>
+        <p>Boss defeated — level unlocked.</p>
+        <button class="btn-ui" id="btnVictoryContinue">Continue</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screenGameOver" style="display:none">
+      <div class="panel">
+        <h2>Game Over</h2>
+        <button class="btn-ui" id="btnRetry">Retry Level</button>
+        <div style="margin-top:8px"><button class="btn-ui" id="btnToLevels">Level Select</button></div>
+      </div>
+    </div>
+
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>

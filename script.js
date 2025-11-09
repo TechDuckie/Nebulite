@@ -1,103 +1,3 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
-  <title>Mobile Space Shooter — Levels & Waves</title>
-  <style>
-    :root{--bg:#120b1b;--ui:#ddd}
-    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    #gameWrap{position:fixed;inset:0;overflow:hidden}
-    canvas{display:block;width:100vw;height:100vh;background:var(--bg);}
-    /* UI overlay */
-    .ui {position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;}
-    .hud {position:fixed;left:10px;top:10px;color:var(--ui);font-size:14px;pointer-events:none}
-    .hud .hearts{display:inline-block;margin-left:8px}
-    .hearts span{color:#e74c3c;margin-right:6px;font-size:18px}
-    .waveInfo{position:fixed;left:50%;top:10px;transform:translateX(-50%);color:var(--ui);font-size:14px}
-    .bossBar{position:fixed;left:50%;top:34px;transform:translateX(-50%);width:60%;height:12px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;display:none}
-    .bossBarInner{height:100%;background:linear-gradient(90deg,#ff4d4d,#ffb86b);width:100%}
-    /* joystick + buttons */
-    .left-joystick, .right-buttons{position:absolute;pointer-events:auto}
-    .left-joystick{left:8px;bottom:8px;width:140px;height:140px;max-width:22vw;max-height:22vw;}
-    .right-buttons{right:8px;bottom:8px;width:170px;height:140px;display:flex;gap:12px;justify-content:flex-end;align-items:flex-end;max-width:30vw;max-height:22vw;pointer-events:auto}
-    .btn{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);backdrop-filter:blur(4px);touch-action:manipulation}
-    .btn:active{transform:translateY(2px) scale(0.98)}
-    .btn img{width:36px;height:36px;object-fit:contain}
-    /* screens (menu/levels) */
-    .screen {position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6));color:var(--ui);z-index:40}
-    .panel{background:rgba(10,8,15,0.9);padding:20px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:92%;max-width:420px;text-align:center}
-    .btn-ui{background:#2b2b3a;color:white;border:none;padding:12px 18px;border-radius:10px;margin:8px;font-size:16px}
-    .levels-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-    .level-btn{width:88px;height:88px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ui);border:2px solid rgba(255,255,255,0.04)}
-    .level-btn.locked{opacity:0.35}
-    .small{font-size:12px;color:#aaa;margin-top:6px}
-    .debug{position:fixed;left:8px;bottom:8px;color:#999;font-size:12px;pointer-events:none}
-  </style>
-</head>
-<body>
-  <div id="gameWrap">
-    <canvas id="game"></canvas>
-
-    <div class="ui" id="uiRoot">
-      <div class="hud" id="hud">
-        <span id="scoreText">Score: 0</span>
-        <span class="hearts" id="hearts"></span>
-      </div>
-      <div class="waveInfo" id="waveInfo">Wave 0 / 0</div>
-      <div class="bossBar" id="bossBar"><div class="bossBarInner" id="bossBarInner"></div></div>
-
-      <div class="left-joystick" id="joystick" aria-hidden>
-        <svg viewBox="0 0 140 140" width="100%" height="100%"><circle cx="70" cy="70" r="44" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="2"/><circle id="knob" cx="70" cy="70" r="22" fill="rgba(255,255,255,0.06)"/></svg>
-      </div>
-
-      <div class="right-buttons">
-        <div class="btn" id="btn-secondary" title="Toggle auto-fire"><svg width="36" height="36" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="rgba(255,255,255,0.85)"/></svg></div>
-        <div class="btn" id="btn-fire" title="Shoot (laser)"><img src="laser1.png" alt="shoot" onerror="this.style.display='none'"/></div>
-      </div>
-
-      <div class="debug" id="dbg">DEBUG</div>
-    </div>
-
-    <!-- Screens -->
-    <div class="screen" id="screenMenu">
-      <div class="panel">
-        <h1>Space Shooter</h1>
-        <p class="small">Mobile portrait — joystick left, buttons right</p>
-        <button class="btn-ui" id="btnPlay">Play</button>
-        <div class="small">or choose level</div>
-        <div style="margin-top:10px"><button class="btn-ui" id="btnLevelSelect">Level Select</button></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screenLevels" style="display:none">
-      <div class="panel">
-        <h2>Select Level</h2>
-        <div class="levels-grid" id="levelsGrid"></div>
-        <div class="small">Defeat boss to unlock the next level.</div>
-        <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screenVictory" style="display:none">
-      <div class="panel">
-        <h2>Victory!</h2>
-        <p>Boss defeated — level unlocked.</p>
-        <button class="btn-ui" id="btnVictoryContinue">Continue</button>
-      </div>
-    </div>
-
-    <div class="screen" id="screenGameOver" style="display:none">
-      <div class="panel">
-        <h2>Game Over</h2>
-        <button class="btn-ui" id="btnRetry">Retry Level</button>
-        <div style="margin-top:8px"><button class="btn-ui" id="btnToLevels">Level Select</button></div>
-      </div>
-    </div>
-
-  </div>
-
-<script>
 (function(){
   // Canvas setup
   const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
@@ -124,7 +24,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'player.png', enemy: 'enemySmall.png', laser: 'laser1.png', boss: 'boss1.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png' };
   const images = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
   Promise.all(Object.values(assets).map(loadImg)).then(imgs=>{ images.player=imgs[0]; images.enemy=imgs[1]; images.laser=imgs[2]; images.boss=imgs[3]; });
@@ -147,7 +47,7 @@
     return {
       waves,
       boss: {
-        sprite: 'boss1.png',
+        sprite: 'assets/boss1.png',
         hp: 10,
         w: 120, h: 120,
         speed: 40,     // movement lerp speed
@@ -554,6 +454,3 @@
   updateHearts();
 
 })();
-</script>
-</body>
-</html>

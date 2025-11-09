@@ -1,0 +1,28 @@
+:root{--bg:#120b1b;--ui:#ddd}
+    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    #gameWrap{position:fixed;inset:0;overflow:hidden}
+    canvas{display:block;width:100vw;height:100vh;background:var(--bg);}
+    /* UI overlay */
+    .ui {position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;}
+    .hud {position:fixed;left:10px;top:10px;color:var(--ui);font-size:14px;pointer-events:none}
+    .hud .hearts{display:inline-block;margin-left:8px}
+    .hearts span{color:#e74c3c;margin-right:6px;font-size:18px}
+    .waveInfo{position:fixed;left:50%;top:10px;transform:translateX(-50%);color:var(--ui);font-size:14px}
+    .bossBar{position:fixed;left:50%;top:34px;transform:translateX(-50%);width:60%;height:12px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;display:none}
+    .bossBarInner{height:100%;background:linear-gradient(90deg,#ff4d4d,#ffb86b);width:100%}
+    /* joystick + buttons */
+    .left-joystick, .right-buttons{position:absolute;pointer-events:auto}
+    .left-joystick{left:8px;bottom:8px;width:140px;height:140px;max-width:22vw;max-height:22vw;}
+    .right-buttons{right:8px;bottom:8px;width:170px;height:140px;display:flex;gap:12px;justify-content:flex-end;align-items:flex-end;max-width:30vw;max-height:22vw;pointer-events:auto}
+    .btn{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);backdrop-filter:blur(4px);touch-action:manipulation}
+    .btn:active{transform:translateY(2px) scale(0.98)}
+    .btn img{width:36px;height:36px;object-fit:contain}
+    /* screens (menu/levels) */
+    .screen {position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.6));color:var(--ui);z-index:40}
+    .panel{background:rgba(10,8,15,0.9);padding:20px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:92%;max-width:420px;text-align:center}
+    .btn-ui{background:#2b2b3a;color:white;border:none;padding:12px 18px;border-radius:10px;margin:8px;font-size:16px}
+    .levels-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .level-btn{width:88px;height:88px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ui);border:2px solid rgba(255,255,255,0.04)}
+    .level-btn.locked{opacity:0.35}
+    .small{font-size:12px;color:#aaa;margin-top:6px}
+    .debug{position:fixed;left:8px;bottom:8px;color:#999;font-size:12px;pointer-events:none}
