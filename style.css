@@ -1,5 +1,10 @@
+@font-face {
+    font-family: 'Poppkorn';
+    src: url('assets/PoppkornRegular-MzKY.ttf') format('truetype');
+}
+
 :root{--bg:#120b1b;--ui:#ddd}
-    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:"Poppkorn", system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
     #gameWrap{position:fixed;inset:0;overflow:hidden}
     canvas{display:block;width:100vw;height:100vh;background:var(--bg);}
     /* UI overlay */
