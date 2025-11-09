@@ -30,7 +30,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -42,7 +42,7 @@
     images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.laser=loadedAssets[2]; images.boss=loadedAssets[3];
     audio.music1 = loadedAssets[4]; audio.boss1 = loadedAssets[5];
     images.warn = loadedAssets[6];
-    audio.laserShoot = loadedAssets[7]; audio.playerDamage = loadedAssets[8];
+    audio.laserShoot = loadedAssets[7]; audio.playerDamage = loadedAssets[8]; audio.explosion = loadedAssets[9];
     audio.music1.loop = true; audio.boss1.loop = true;
   });
 
@@ -338,6 +338,7 @@
           state.enemies.splice(ei,1);
           state.lasers.splice(li,1);
           state.score += 5;
+          playSfx('explosion');
           break;
         }
       }
