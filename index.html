@@ -37,6 +37,7 @@
         <h1 class="game-title">Spacewave</h1>
         <div>
           <button class="btn-ui" id="btnPlay">Play</button>
+          <button class="btn-ui" id="btnSettings">Settings</button>
           <button class="btn-ui" id="btnLevelSelect">Level Select</button>
         </div>
       </div>
@@ -48,6 +49,23 @@
         <div class="levels-grid" id="levelsGrid"></div>
         <div class="small">Defeat boss to unlock the next level.</div>
         <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenSettings" style="display:none">
+      <div class="panel">
+        <h2>Settings</h2>
+        <div class="settings-container">
+          <div class="setting">
+            <label for="masterVolume">Master Volume</label>
+            <input type="range" id="masterVolume" min="0" max="100" value="100">
+          </div>
+          <div class="setting">
+            <label for="sfxVolume">SFX Volume</label>
+            <input type="range" id="sfxVolume" min="0" max="100" value="100">
+          </div>
+        </div>
+        <div style="margin-top:10px"><button class="btn-ui" id="btnSettingsBack">Back</button></div>
       </div>
     </div>
 

@@ -41,6 +41,17 @@
       margin-bottom: 40px;
     }
 
+    .panel {
+      background: rgba(10, 8, 15, 0.9);
+      padding: 20px;
+      border-radius: 0;
+      border: 2px solid white;
+      width: 92%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+
     .btn-ui {
       font-family: "Poppkorn", sans-serif;
       background: transparent;
@@ -72,4 +83,51 @@
   font-size: 14px;
   display: none;
   font-family: "Poppkorn", sans-serif;
+}
+
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 10px;
+}
+
+.setting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.setting label {
+  font-size: 18px;
+  font-family: "Poppkorn", sans-serif;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80%;
+  height: 8px;
+  background: transparent;
+  border: 2px solid white;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: white;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: white;
+  cursor: pointer;
+  border: none;
 }

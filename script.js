@@ -8,15 +8,20 @@
   // UI refs
   const screenMenu = document.getElementById('screenMenu');
   const screenLevels = document.getElementById('screenLevels');
+  const screenSettings = document.getElementById('screenSettings');
   const screenVictory = document.getElementById('screenVictory');
   const screenGameOver = document.getElementById('screenGameOver');
   const btnPlay = document.getElementById('btnPlay');
   const btnLevelSelect = document.getElementById('btnLevelSelect');
+  const btnSettings = document.getElementById('btnSettings');
   const btnBackToMenu = document.getElementById('btnBackToMenu');
+  const btnSettingsBack = document.getElementById('btnSettingsBack');
   const levelsGrid = document.getElementById('levelsGrid');
   const btnVictoryContinue = document.getElementById('btnVictoryContinue');
   const btnRetry = document.getElementById('btnRetry');
   const btnToLevels = document.getElementById('btnToLevels');
+  const masterVolume = document.getElementById('masterVolume');
+  const sfxVolume = document.getElementById('sfxVolume');
 
   const waveInfo = document.getElementById('waveInfo');
   const bossBar = document.getElementById('bossBar'), bossBarInner = document.getElementById('bossBarInner');
@@ -31,7 +36,7 @@
   Promise.all(Object.values(assets).map(loadImg)).then(imgs=>{ images.player=imgs[0]; images.enemy=imgs[1]; images.laser=imgs[2]; images.boss=imgs[3]; });
 
   // Game state and constants
-  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4 };
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5 };
   let gameState = STATE.MENU;
 
   const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
@@ -85,6 +90,7 @@
   function showScreen(s){
     screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
+    screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
     screenVictory.style.display = (s===STATE.VICTORY)?'flex':'none';
     screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
     gameState = s;
@@ -450,10 +456,15 @@
   // menu / level select UI wiring
   btnPlay.addEventListener('click', ()=>{ startLevel(0); });
   btnLevelSelect.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
+  btnSettings.addEventListener('click', ()=>{ showScreen(STATE.SETTINGS); });
   btnBackToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
+  btnSettingsBack.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
   btnVictoryContinue.addEventListener('click', ()=>{ showScreen(STATE.LEVEL_SELECT); rebuildLevelSelect(); });
   btnRetry.addEventListener('click', ()=>{ startLevel(currentLevelIndex); });
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
+
+  masterVolume.addEventListener('input', (e) => { console.log('Master Volume:', e.target.value); });
+  sfxVolume.addEventListener('input', (e) => { console.log('SFX Volume:', e.target.value); });
 
   // initialize UI
   rebuildLevelSelect();
