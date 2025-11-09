@@ -30,7 +30,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -41,6 +41,7 @@
   })).then(loadedAssets=>{
     images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.laser=loadedAssets[2]; images.boss=loadedAssets[3];
     audio.music1 = loadedAssets[4]; audio.boss1 = loadedAssets[5];
+    images.warn = loadedAssets[6];
     Object.values(audio).forEach(a => a.loop = true);
   });
 
@@ -101,6 +102,7 @@
     waveSpawning: false,
     waveSpawnTimer:0,
     waveCleared: false,
+    warningFlash: { active: false, timer: 0, flashes: 0 },
     lastTime: performance.now()
   };
 
@@ -182,6 +184,7 @@
     const W = canvas.width / DPR, H = canvas.height / DPR;
     const b = { x: W/2 - cfg.w/2, y: -cfg.h, w: cfg.w, h: cfg.h, hp: cfg.hp, cfg, lastFire:0 };
     state.boss = b;
+    state.warningFlash = { active: true, timer: 0, flashes: 3 };
   }
 
   function spawnBossBullet(boss){
@@ -197,6 +200,16 @@
   // game update loop
   function update(dt){
     if(gameState !== STATE.PLAYING) return;
+
+    // warning flash
+    if(state.warningFlash.active){
+      state.warningFlash.timer += dt;
+      if(state.warningFlash.timer > state.warningFlash.flashes * 0.8){
+        state.warningFlash.active = false;
+      }
+    }
+
+
 
     // spawn waves
     const level = LEVELS[currentLevelIndex];
@@ -264,17 +277,21 @@
     // boss behavior
     if(state.boss){
       const boss = state.boss;
-      // descend to visible area
-      if(boss.y < 80) boss.y += (boss.cfg.speed/2) * dt;
-      else {
-        // track player slowly (lerp)
-        const targetX = state.player.x + state.player.w/2 - boss.w/2;
-        boss.x += (targetX - boss.x) * (Math.min(1, boss.cfg.speed/200) * dt * 2.2); // smooth follow
-        // firing straight down at intervals
-        const now = performance.now();
-        if(now - boss.lastFire > boss.cfg.fireRate){
-          spawnBossBullet(boss);
-          boss.lastFire = now;
+      if(state.warningFlash.active) {
+        // Boss is waiting for warning to finish, do nothing
+      } else {
+        // descend to visible area
+        if(boss.y < 80) boss.y += (boss.cfg.speed/2) * dt;
+        else {
+          // track player slowly (lerp)
+          const targetX = state.player.x + state.player.w/2 - boss.w/2;
+          boss.x += (targetX - boss.x) * (Math.min(1, boss.cfg.speed/200) * dt * 2.2); // smooth follow
+          // firing straight down at intervals
+          const now = performance.now();
+          if(now - boss.lastFire > boss.cfg.fireRate){
+            spawnBossBullet(boss);
+            boss.lastFire = now;
+          }
         }
       }
       // boss collision with player lasers
@@ -282,7 +299,7 @@
         const L = state.lasers[li];
         const rectBoss = {x: boss.x, y: boss.y, w: boss.w, h: boss.h};
         const rectLaser = {x: L.x, y: L.y, w: L.w, h: L.h};
-        if(rectIntersect(rectBoss, rectLaser)){
+        if(boss.y >= 80 && rectIntersect(rectBoss, rectLaser)){
           state.lasers.splice(li,1);
           boss.hp--;
           state.score += 15;
@@ -406,6 +423,17 @@
     state.bossBullets.forEach(bb => {
       ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
     });
+
+    // warning flash
+    if(state.warningFlash.active && images.warn){
+      const flashOpacity = Math.abs(Math.sin(state.warningFlash.timer * Math.PI * 2 / 0.8)); // Flash 3 times over 2.4 seconds
+      ctx.save();
+      ctx.globalAlpha = flashOpacity;
+      const warnW = canvas.width / DPR * 0.8 / 3;
+      const warnH = warnW * (images.warn.height / images.warn.width);
+      drawImageCentered(images.warn, canvas.width/DPR/2, canvas.height/DPR/2, warnW, warnH);
+      ctx.restore();
+    }
 
     // optional small HUD on canvas (player pos)
     // nothing else here
