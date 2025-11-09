@@ -20,6 +20,7 @@
 
   const waveInfo = document.getElementById('waveInfo');
   const bossBar = document.getElementById('bossBar'), bossBarInner = document.getElementById('bossBarInner');
+  const bossName = document.getElementById('bossName');
   const heartsEl = document.getElementById('hearts');
   const dbg = document.getElementById('dbg');
 
@@ -47,6 +48,7 @@
     return {
       waves,
       boss: {
+        name: 'Mech-Tra',
         sprite: 'assets/boss1.png',
         hp: 10,
         w: 120, h: 120,
@@ -116,6 +118,7 @@
     state.lastTime = performance.now();
     waveInfo.textContent = `Wave 0 / ${LEVELS[currentLevelIndex].waves.length}`;
     bossBar.style.display = 'none';
+    bossName.style.display = 'none';
     updateHearts();
     showScreen(STATE.PLAYING);
     // begin spawning first wave on next frame
@@ -199,6 +202,8 @@
         if(!state.boss && state.enemies.length === 0 && state.lasers.length === 0){
           spawnBoss(level);
           bossBar.style.display = 'block';
+          bossName.textContent = level.boss.name;
+          bossName.style.display = 'block';
           bossBarInner.style.width = '100%';
         }
       }
@@ -254,6 +259,7 @@
             // boss defeated
             state.boss = null;
             bossBar.style.display = 'none';
+            bossName.style.display = 'none';
             unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
             // show victory
             showScreen(STATE.VICTORY);
@@ -295,6 +301,7 @@
         updateHearts();
         if(state.player.hp <= 0){
           // game over
+          bossName.style.display = 'none';
           showScreen(STATE.GAMEOVER);
         }
       }
