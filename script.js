@@ -20,6 +20,7 @@
   const btnVictoryContinue = document.getElementById('btnVictoryContinue');
   const btnRetry = document.getElementById('btnRetry');
   const btnToLevels = document.getElementById('btnToLevels');
+  const btnGameOverToMenu = document.getElementById('btnGameOverToMenu');
   const masterVolume = document.getElementById('masterVolume');
   const sfxVolume = document.getElementById('sfxVolume');
 
@@ -524,6 +525,7 @@
   btnVictoryContinue.addEventListener('click', ()=>{ showScreen(STATE.LEVEL_SELECT); rebuildLevelSelect(); });
   btnRetry.addEventListener('click', ()=>{ startLevel(currentLevelIndex); });
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
+  btnGameOverToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
 
   masterVolume.addEventListener('input', (e) => {
     audioState.masterVolume = e.target.value / 100;
