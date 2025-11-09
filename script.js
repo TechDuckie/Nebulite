@@ -11,6 +11,9 @@
   const screenSettings = document.getElementById('screenSettings');
   const screenVictory = document.getElementById('screenVictory');
   const screenGameOver = document.getElementById('screenGameOver');
+  const screenDialogue = document.getElementById('screenDialogue');
+  const dialogueImage = document.getElementById('dialogueImage');
+  const dialogueText = document.getElementById('dialogueText');
   const btnPlay = document.getElementById('btnPlay');
   const btnLevelSelect = document.getElementById('btnLevelSelect');
   const btnSettings = document.getElementById('btnSettings');
@@ -31,7 +34,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -44,11 +47,12 @@
     audio.music1 = loadedAssets[4]; audio.boss1 = loadedAssets[5];
     images.warn = loadedAssets[6];
     audio.laserShoot = loadedAssets[7]; audio.playerDamage = loadedAssets[8]; audio.explosion = loadedAssets[9];
+    images.lyra = loadedAssets[10];
     audio.music1.loop = true; audio.boss1.loop = true;
   });
 
   // Game state and constants
-  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5 };
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6 };
   let gameState = STATE.MENU;
 
   const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
@@ -81,6 +85,7 @@
       waves,
       waveMusic: 'music1',
       bossMusic: 'boss1',
+      dialogue: 'dialogue1',
       boss: {
         name: 'Mech-Tra',
         sprite: 'assets/boss1.png',
@@ -109,6 +114,7 @@
     waveSpawnTimer:0,
     waveCleared: false,
     warningFlash: { active: false, timer: 0, flashes: 0 },
+    dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50 },
     lastTime: performance.now()
   };
 
@@ -122,9 +128,44 @@
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
     screenVictory.style.display = (s===STATE.VICTORY)?'flex':'none';
-    screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
+    screenGameOver.style.display = (s===STATE.GAMOVER)?'flex':'none';
+    screenDialogue.style.display = (s===STATE.DIALOGUE)?'flex':'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     gameState = s;
+  }
+
+  function showDialogue(dialogueKey) {
+    fetch(`assets/${dialogueKey}.json`)
+      .then(res => res.json())
+      .then(data => {
+        dialogueImage.src = data.characterImage;
+        state.dialogue.fullText = data.text;
+        state.dialogue.text = '';
+        state.dialogue.letterIndex = 0;
+        state.dialogue.timer = 0;
+        state.dialogue.active = true;
+        showScreen(STATE.DIALOGUE);
+      });
+  }
+
+  function beginLevelGameplay() {
+    const lvl = LEVELS[currentLevelIndex];
+    playMusic(lvl.waveMusic);
+    // reset state
+    state.enemies.length = 0; state.lasers.length = 0; state.bossBullets.length = 0; state.boss = null;
+    state.player.x = canvas.width/DPR/2; state.player.y = canvas.height/DPR - 110; state.player.vx = 0; state.player.vy = 0;
+    state.player.hp = 3;
+    state.score = 0;
+    state.waveIndex = 0;
+    state.waveProgress = 0;
+    state.waveSpawning = true;
+    state.waveSpawnTimer = 0;
+    state.lastTime = performance.now();
+    waveInfo.textContent = `Wave 0 / ${LEVELS[currentLevelIndex].waves.length}`;
+    bossBar.style.display = 'none';
+    bossName.style.display = 'none';
+    updateHearts();
+    showScreen(STATE.PLAYING);
   }
 
   // Build level select buttons
@@ -143,23 +184,11 @@
   function startLevel(index){
     currentLevelIndex = index;
     const lvl = LEVELS[index];
-    playMusic(lvl.waveMusic);
-    // reset state
-    state.enemies.length = 0; state.lasers.length = 0; state.bossBullets.length = 0; state.boss = null;
-    state.player.x = canvas.width/DPR/2; state.player.y = canvas.height/DPR - 110; state.player.vx = 0; state.player.vy = 0;
-    state.player.hp = 3;
-    state.score = 0;
-    state.waveIndex = 0;
-    state.waveProgress = 0;
-    state.waveSpawning = true;
-    state.waveSpawnTimer = 0;
-    state.lastTime = performance.now();
-    waveInfo.textContent = `Wave 0 / ${LEVELS[currentLevelIndex].waves.length}`;
-    bossBar.style.display = 'none';
-    bossName.style.display = 'none';
-    updateHearts();
-    showScreen(STATE.PLAYING);
-    // begin spawning first wave on next frame
+    if (lvl.dialogue) {
+      showDialogue(lvl.dialogue);
+    } else {
+      beginLevelGameplay();
+    }
   }
 
   // HUD hearts
@@ -398,6 +427,17 @@
 
     // debug
     dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} BossBullets:${state.bossBullets.length}` ;
+
+    // Dialogue typewriter effect
+    if (gameState === STATE.DIALOGUE && state.dialogue.active) {
+      state.dialogue.timer += dt;
+      if (state.dialogue.letterIndex < state.dialogue.fullText.length && state.dialogue.timer * 1000 > state.dialogue.speed) {
+        state.dialogue.text += state.dialogue.fullText[state.dialogue.letterIndex];
+        state.dialogue.letterIndex++;
+        state.dialogue.timer = 0;
+        dialogueText.textContent = state.dialogue.text;
+      }
+    }
   }
 
   // render
@@ -526,6 +566,19 @@
   btnRetry.addEventListener('click', ()=>{ startLevel(currentLevelIndex); });
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
   btnGameOverToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
+
+  screenDialogue.addEventListener('click', () => {
+    if (gameState === STATE.DIALOGUE) {
+      if (state.dialogue.letterIndex < state.dialogue.fullText.length) {
+        state.dialogue.text = state.dialogue.fullText;
+        state.dialogue.letterIndex = state.dialogue.fullText.length;
+        dialogueText.textContent = state.dialogue.text;
+      } else {
+        state.dialogue.active = false;
+        beginLevelGameplay();
+      }
+    }
+  });
 
   masterVolume.addEventListener('input', (e) => {
     audioState.masterVolume = e.target.value / 100;
