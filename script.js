@@ -5,6 +5,12 @@
   function resize(){ canvas.width = Math.floor(innerWidth * DPR); canvas.height = Math.floor(innerHeight * DPR); canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
   addEventListener('resize', resize); resize();
 
+  // Starfield
+  const starfield = document.getElementById('starfield');
+  const stars = [];
+  const NUM_STAR_IMAGES = 20;
+  const MAX_STARS = 150;
+
   // UI refs
   const screenMenu = document.getElementById('screenMenu');
   const screenLevels = document.getElementById('screenLevels');
@@ -129,7 +135,7 @@
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
     screenVictory.style.display = (s===STATE.VICTORY)?'flex':'none';
-    screenGameOver.style.display = (s===STATE.GAMOVER)?'flex':'none';
+    screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
     screenDialogue.style.display = (s===STATE.DIALOGUE)?'flex':'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     gameState = s;
@@ -236,8 +242,37 @@
     state.bossBullets.push({ x, y, w:bw, h:bh, vy: cfg.bulletSpeed });
   }
 
+  function spawnStar() {
+    if (stars.length >= MAX_STARS) return;
+    const star = document.createElement('div');
+    star.className = 'star';
+    const starIndex = Math.floor(Math.random() * NUM_STAR_IMAGES) + 1;
+    star.style.backgroundImage = `url('assets/stars/star${starIndex}.png')`;
+    const size = Math.random() * 15 + 5;
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    star.style.left = `${Math.random() * 100}vw`;
+    star.style.top = '-20px';
+    star.dataset.speed = Math.random() * 2 + 1;
+    starfield.appendChild(star);
+    stars.push(star);
+  }
+
   // game update loop
   function update(dt){
+    // Starfield update (always runs)
+    if (Math.random() > 0.95) {
+      spawnStar();
+    }
+    stars.forEach((star, index) => {
+      const newTop = parseFloat(star.style.top) + parseFloat(star.dataset.speed);
+      star.style.top = `${newTop}px`;
+      if (newTop > window.innerHeight) {
+        star.remove();
+        stars.splice(index, 1);
+      }
+    });
+
     // Dialogue typewriter effect
     if (gameState === STATE.DIALOGUE && state.dialogue.active) {
       state.dialogue.timer += dt;
@@ -257,6 +292,7 @@
     }
 
     if(gameState !== STATE.PLAYING) return;
+
 
     // warning flash
     if(state.warningFlash.active){
@@ -453,9 +489,6 @@
   // render
   function render(){
     ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR);
-    // bg
-    ctx.fillStyle = '#120b1b';
-    ctx.fillRect(0,0,canvas.width/DPR,canvas.height/DPR);
 
     // draw player (center x,y)
     const p = state.player;
