@@ -73,6 +73,12 @@
       margin-bottom: 40px;
     }
 
+    .menu-panel > div {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .panel {
       background: rgba(10, 8, 15, 0.9);
       padding: 20px;
