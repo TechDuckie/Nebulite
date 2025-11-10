@@ -69,7 +69,7 @@
       font-family: 'Poppkorn', sans-serif;
       font-size: clamp(3rem, 15vw, 6rem);
       color: var(--ui);
-      text-shadow: 4px 4px 0px #ffb86b;
+      text-shadow: 4px 4px 0px #4b8bcf, 8px 8px 0px #e641ba;
       margin-bottom: 40px;
     }
 
