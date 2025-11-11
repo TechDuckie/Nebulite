@@ -113,6 +113,7 @@
     player: { x:0, y:0, w:64, h:64, speed: 280, vx:0, vy:0, hp:3 },
     enemies: [],
     lasers: [],
+    particles: [],
     bossBullets: [],
     boss: null,
     score: 0,
@@ -259,6 +260,25 @@
     stars.push(star);
   }
 
+  function spawnParticles(x, y) {
+    const particleCount = 15;
+    const particleSize = 8;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 100 + 50;
+      state.particles.push({
+        x,
+        y,
+        w: particleSize,
+        h: particleSize,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        gravity: 150,
+      });
+    }
+  }
+
   // game update loop
   function update(dt){
     // Starfield update (always runs)
@@ -295,6 +315,17 @@
 
     if(gameState !== STATE.PLAYING) return;
 
+    // update particles
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+      const p = state.particles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += p.gravity * dt;
+      p.life -= dt;
+      if (p.life <= 0) {
+        state.particles.splice(i, 1);
+      }
+    }
 
     // warning flash
     if(state.warningFlash.active){
@@ -424,6 +455,7 @@
         const L = state.lasers[li];
         const rl = {x:L.x, y:L.y, w:L.w, h:L.h};
         if(rectIntersect(re, rl)){
+          spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
           state.enemies.splice(ei,1);
           state.lasers.splice(li,1);
           state.score += 5;
@@ -505,6 +537,14 @@
       // either draw image or fallback
       if(images.laser && images.laser.complete) drawImageCentered(images.laser, L.x + L.w/2, L.y + L.h/2, L.w, L.h);
       else { ctx.fillStyle = '#7ff'; ctx.fillRect(L.x, L.y, L.w, L.h); }
+    });
+    ctx.restore();
+
+    // particles
+    ctx.save();
+    state.particles.forEach(p => {
+      ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
     });
     ctx.restore();
 
