@@ -286,15 +286,32 @@
   function spawnThrusterParticle() {
     const p = state.player;
     const particleSize = 4;
-    const angle = Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Downward cone
-    const speed = 150 + Math.random() * 50;
+    const spread = 15; // Increased spread
+
+    // Left engine
+    const angleLeft = Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Downward cone
+    const speedLeft = 150 + Math.random() * 50;
     state.thrusterParticles.push({
-      x: p.x,
+      x: p.x - spread,
       y: p.y + p.h / 2,
       w: particleSize,
       h: particleSize,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
+      vx: Math.cos(angleLeft) * speedLeft,
+      vy: Math.sin(angleLeft) * speedLeft,
+      life: 0.5,
+      color: '#d7feff',
+    });
+
+    // Right engine
+    const angleRight = Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Downward cone
+    const speedRight = 150 + Math.random() * 50;
+    state.thrusterParticles.push({
+      x: p.x + spread,
+      y: p.y + p.h / 2,
+      w: particleSize,
+      h: particleSize,
+      vx: Math.cos(angleRight) * speedRight,
+      vy: Math.sin(angleRight) * speedRight,
       life: 0.5,
       color: '#d7feff',
     });
