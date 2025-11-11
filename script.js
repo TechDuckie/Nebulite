@@ -536,6 +536,7 @@
         state.bossBullets.splice(bi,1);
         // player takes damage
         state.player.hp--;
+        spawnParticles(state.player.x, state.player.y);
         playSfx('playerDamage');
         updateHearts();
         if(state.player.hp <= 0){
@@ -554,6 +555,7 @@
       if(rectIntersect(re, rp)){
         state.enemies.splice(ei,1);
         state.player.hp--;
+        spawnParticles(state.player.x, state.player.y);
         playSfx('playerDamage');
         updateHearts();
         if(state.player.hp <= 0){
