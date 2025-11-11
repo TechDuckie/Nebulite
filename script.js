@@ -42,7 +42,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -58,7 +58,9 @@
     images.lyra = loadedAssets[10];
     audio.typewriter = loadedAssets[11];
     images.motherShip = loadedAssets[12];
+    audio.menu = loadedAssets[13];
     audio.music1.loop = true; audio.boss1.loop = true;
+    audio.menu.loop = true;
   });
 
   // Game state and constants
@@ -143,10 +145,12 @@
     screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
     screenDialogue.style.display = (s===STATE.DIALOGUE)?'flex':'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
+    if(s === STATE.MENU) playMusic('menu');
     gameState = s;
   }
 
   function showDialogue(dialogueKey) {
+    playMusic('menu');
     fetch(`assets/${dialogueKey}.json`)
       .then(res => res.json())
       .then(data => {
@@ -342,7 +346,7 @@
         state.dialogue.letterIndex++;
         state.dialogue.timer = 0;
         dialogueText.textContent = state.dialogue.text;
-        playSfx('typewriter', 0.5);
+        playSfx('typewriter', 0.2);
       } else if (state.dialogue.letterIndex >= state.dialogue.fullText.length && !state.dialogue.goButtonTimerSet) {
         // Dialogue is complete, start a timer to show the "GO" button
         state.dialogue.goButtonTimerSet = true; // Ensure timer is only set once
