@@ -41,7 +41,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -55,6 +55,7 @@
     images.warn = loadedAssets[6];
     audio.laserShoot = loadedAssets[7]; audio.playerDamage = loadedAssets[8]; audio.explosion = loadedAssets[9];
     images.lyra = loadedAssets[10];
+    audio.typewriter = loadedAssets[11];
     audio.music1.loop = true; audio.boss1.loop = true;
   });
 
@@ -76,9 +77,9 @@
     if(audioState.currentMusic) audioState.currentMusic.pause();
     audioState.currentMusic = null;
   }
-  function playSfx(key){
+  function playSfx(key, volumeMultiplier = 1){
     const a = audio[key];
-    if(a){ a.currentTime = 0; a.volume = audioState.sfxVolume; a.play(); }
+    if(a){ a.currentTime = 0; a.volume = audioState.sfxVolume * volumeMultiplier; a.play(); }
   }
 
   // Level definitions generator for Level 1 (we'll allow later custom rules)
@@ -281,6 +282,7 @@
         state.dialogue.letterIndex++;
         state.dialogue.timer = 0;
         dialogueText.textContent = state.dialogue.text;
+        playSfx('typewriter', 0.5);
       } else if (state.dialogue.letterIndex >= state.dialogue.fullText.length && !state.dialogue.goButtonTimerSet) {
         // Dialogue is complete, start a timer to show the "GO" button
         state.dialogue.goButtonTimerSet = true; // Ensure timer is only set once
