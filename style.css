@@ -22,6 +22,21 @@
       background-repeat: no-repeat;
       animation: fadeIn 0.5s ease-out;
     }
+    #motherShipImage {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 300px;
+      animation: float 6s ease-in-out infinite;
+      z-index: 50;
+    }
+    @keyframes float {
+      0% { transform: translate(-50%, 0px); }
+      50% { transform: translate(-50%, -20px); }
+      100% { transform: translate(-50%, 0px); }
+    }
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
