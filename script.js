@@ -114,6 +114,7 @@
     enemies: [],
     lasers: [],
     particles: [],
+    thrusterParticles: [],
     bossBullets: [],
     boss: null,
     score: 0,
@@ -282,6 +283,23 @@
     }
   }
 
+  function spawnThrusterParticle() {
+    const p = state.player;
+    const particleSize = 4;
+    const angle = Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Downward cone
+    const speed = 150 + Math.random() * 50;
+    state.thrusterParticles.push({
+      x: p.x,
+      y: p.y + p.h / 2,
+      w: particleSize,
+      h: particleSize,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0.5,
+      color: '#d7feff',
+    });
+  }
+
   // game update loop
   function update(dt){
     // Starfield update (always runs)
@@ -327,6 +345,24 @@
       p.life -= dt;
       if (p.life <= 0) {
         state.particles.splice(i, 1);
+      }
+    }
+
+    // update thruster particles
+    for (let i = state.thrusterParticles.length - 1; i >= 0; i--) {
+      const p = state.thrusterParticles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= dt;
+      if (p.life <= 0) {
+        state.thrusterParticles.splice(i, 1);
+      }
+    }
+
+    // spawn thruster particles if player is moving
+    if (state.player.vx !== 0 || state.player.vy !== 0) {
+      if (Math.random() > 0.5) { // Don't spawn every frame
+        spawnThrusterParticle();
       }
     }
 
@@ -526,6 +562,15 @@
   // render
   function render(){
     ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR);
+
+    // thruster particles
+    ctx.save();
+    state.thrusterParticles.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life;
+      ctx.fillRect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h);
+    });
+    ctx.restore();
 
     // draw player (center x,y)
     const p = state.player;
