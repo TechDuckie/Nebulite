@@ -263,9 +263,11 @@
   function spawnParticles(x, y) {
     const particleCount = 15;
     const particleSize = 8;
+    const colors = ['#FFA500', '#FFFF00', '#FF0000']; // Orange, Yellow, Red
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 100 + 50;
+      const color = colors[Math.floor(Math.random() * colors.length)];
       state.particles.push({
         x,
         y,
@@ -275,6 +277,7 @@
         vy: Math.sin(angle) * speed,
         life: 1,
         gravity: 150,
+        color,
       });
     }
   }
@@ -543,7 +546,8 @@
     // particles
     ctx.save();
     state.particles.forEach(p => {
-      ctx.fillStyle = `rgba(255, 255, 255, ${p.life})`;
+      ctx.fillStyle = `${p.color}`;
+      ctx.globalAlpha = p.life;
       ctx.fillRect(p.x, p.y, p.w, p.h);
     });
     ctx.restore();
