@@ -136,7 +136,7 @@
     waveSpawnTimer:0,
     waveCleared: false,
     warningFlash: { active: false, timer: 0, flashes: 0 },
-    dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50, goButtonTimerSet: false },
+    dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50, goButtonTimerSet: false, onComplete: null },
     lastTime: performance.now()
   };
 
@@ -158,7 +158,7 @@
     gameState = s;
   }
 
-  function showDialogue(dialogueKey) {
+  function showDialogue(dialogueKey, onComplete) {
     playMusic('menu');
     fetch(`assets/${dialogueKey}.json`)
       .then(res => res.json())
@@ -170,6 +170,7 @@
         state.dialogue.timer = 0;
         state.dialogue.active = true;
         state.dialogue.goButtonTimerSet = false;
+        state.dialogue.onComplete = onComplete; // Store the callback
         btnDialogueGo.style.display = 'none'; // Hide the button initially
         showScreen(STATE.DIALOGUE);
       });
@@ -212,7 +213,7 @@
     currentLevelIndex = index;
     const lvl = LEVELS[index];
     if (lvl.dialogue) {
-      showDialogue(lvl.dialogue);
+      showDialogue(lvl.dialogue, beginLevelGameplay);
     } else {
       beginLevelGameplay();
     }
@@ -475,46 +476,56 @@
     // boss behavior
     if(state.boss){
       const boss = state.boss;
-      if(state.warningFlash.active) {
-        // Boss is waiting for warning to finish, do nothing
-      } else {
-        // descend to visible area
-        if(boss.y < 80) boss.y += (boss.cfg.speed/2) * dt;
-        else {
-          // track player slowly (lerp)
-          const targetX = state.player.x + state.player.w/2 - boss.w/2;
-          boss.x += (targetX - boss.x) * (Math.min(1, boss.cfg.speed/200) * dt * 2.2); // smooth follow
-          // firing straight down at intervals
-          const now = performance.now();
-          if(now - boss.lastFire > boss.cfg.fireRate){
-            spawnBossBullet(boss);
-            boss.lastFire = now;
+
+      if (!boss.isDefeated) {
+        if(state.warningFlash.active) {
+          // Boss is waiting for warning to finish, do nothing
+        } else {
+          // descend to visible area
+          if(boss.y < 80) boss.y += (boss.cfg.speed/2) * dt;
+          else {
+            // track player slowly (lerp)
+            const targetX = state.player.x + state.player.w/2 - boss.w/2;
+            boss.x += (targetX - boss.x) * (Math.min(1, boss.cfg.speed/200) * dt * 2.2); // smooth follow
+            // firing straight down at intervals
+            const now = performance.now();
+            if(now - boss.lastFire > boss.cfg.fireRate){
+              spawnBossBullet(boss);
+              boss.lastFire = now;
+            }
           }
         }
-      }
-      // boss collision with player lasers
-      for(let li=state.lasers.length-1; li>=0; li--){
-        const L = state.lasers[li];
-        const rectBoss = {x: boss.x, y: boss.y, w: boss.w, h: boss.h};
-        const rectLaser = {x: L.x, y: L.y, w: L.w, h: L.h};
-        if(boss.y >= 80 && rectIntersect(rectBoss, rectLaser)){
-          state.lasers.splice(li,1);
-          boss.hp--;
-          state.score += 15;
-          if(boss.hp <= 0){
-            // boss defeated
-            state.boss = null;
-            bossBar.style.display = 'none';
-            bossName.style.display = 'none';
-            unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
-            // show victory
-            showScreen(STATE.VICTORY);
-          } else {
-            // update boss bar
-            const pct = Math.max(0, boss.hp / boss.cfg.hp);
-            bossBarInner.style.width = (pct*100) + '%';
+        // boss collision with player lasers
+        for(let li=state.lasers.length-1; li>=0; li--){
+          const L = state.lasers[li];
+          const rectBoss = {x: boss.x, y: boss.y, w: boss.w, h: boss.h};
+          const rectLaser = {x: L.x, y: L.y, w: L.w, h: L.h};
+          if(boss.y >= 80 && rectIntersect(rectBoss, rectLaser)){
+            state.lasers.splice(li,1);
+            boss.hp--;
+            state.score += 15;
+            if(boss.hp <= 0){
+              boss.isDefeated = true;
+              bossBar.style.display = 'none';
+              bossName.style.display = 'none';
+              unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
+              spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2);
+              playSfx('explosion');
+              // show post-boss dialogue after a delay
+              setTimeout(() => {
+                showDialogue('dialogueClear1', () => {
+                  state.boss = null;
+                  showScreen(STATE.VICTORY);
+                  rebuildLevelSelect();
+                });
+              }, 5000); // 5 second delay
+            } else {
+              // update boss bar
+              const pct = Math.max(0, boss.hp / boss.cfg.hp);
+              bossBarInner.style.width = (pct*100) + '%';
+            }
+            break;
           }
-          break;
         }
       }
     }
@@ -635,7 +646,7 @@
     ctx.restore();
 
     // boss
-    if(state.boss){
+    if(state.boss && !state.boss.isDefeated){
       const b = state.boss;
       drawImageCentered(images.boss, b.x + b.w/2, b.y + b.h/2, b.w, b.h);
     }
@@ -747,7 +758,12 @@
   btnDialogueGo.addEventListener('click', () => {
     if (gameState === STATE.DIALOGUE) {
       state.dialogue.active = false;
-      beginLevelGameplay();
+      if (state.dialogue.onComplete) {
+        state.dialogue.onComplete();
+        state.dialogue.onComplete = null; // Clear the callback after execution
+      } else {
+        beginLevelGameplay(); // Fallback for intro dialogue
+      }
     }
   });
 
