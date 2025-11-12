@@ -35,6 +35,7 @@
   const btnDialogueGo = document.getElementById('btnDialogueGo');
   const masterVolume = document.getElementById('masterVolume');
   const sfxVolume = document.getElementById('sfxVolume');
+  const vibration = document.getElementById('vibration');
 
   const waveInfo = document.getElementById('waveInfo');
   const bossBar = document.getElementById('bossBar'), bossBarInner = document.getElementById('bossBarInner');
@@ -72,7 +73,7 @@
   const unlocked = [true, false, false, false]; // unlock array
   let currentLevelIndex = 0;
 
-  const audioState = { masterVolume: 1, sfxVolume: 1, currentMusic: null };
+  const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, currentMusic: null };
   function playMusic(key){
     if(audioState.currentMusic) audioState.currentMusic.pause();
     const a = audio[key];
@@ -85,6 +86,12 @@
   function playSfx(key, volumeMultiplier = 1){
     const a = audio[key];
     if(a){ a.currentTime = 0; a.volume = audioState.sfxVolume * volumeMultiplier; a.play(); }
+  }
+
+  function triggerVibration(duration = 50) {
+    if (audioState.vibration && window.navigator.vibrate) {
+      window.navigator.vibrate(duration);
+    }
   }
 
   // Level definitions generator for Level 1 (we'll allow later custom rules)
@@ -233,6 +240,7 @@
     const w = 16, h = 32; // narrow laser
     state.lasers.push({ x: p.x - w/2, y: p.y - p.h/2 - h, w, h, speed: 520 });
     playSfx('laserShoot');
+    triggerVibration(20);
   }
 
   function spawnBoss(level){
@@ -540,6 +548,7 @@
         state.player.hp--;
         spawnParticles(state.player.x, state.player.y);
         playSfx('playerDamage');
+        triggerVibration(100);
         updateHearts();
         if(state.player.hp <= 0){
           // game over
@@ -559,6 +568,7 @@
         state.player.hp--;
         spawnParticles(state.player.x, state.player.y);
         playSfx('playerDamage');
+        triggerVibration(100);
         updateHearts();
         if(state.player.hp <= 0){
           showScreen(STATE.GAMEOVER);
@@ -748,6 +758,10 @@
   sfxVolume.addEventListener('input', (e) => {
     audioState.sfxVolume = e.target.value / 100;
     // todo: apply to sfx
+  });
+
+  vibration.addEventListener('change', (e) => {
+    audioState.vibration = e.target.checked;
   });
 
   // initialize UI
