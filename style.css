@@ -5,7 +5,7 @@
 
 :root{--bg:#120b1b;--ui:#ddd}
     html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:"Poppkorn", system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    #gameWrap{position:fixed;inset:0;overflow:hidden;z-index:2}
+    #gameWrap{position:fixed;top: 0; right: 0; bottom: 0; left: 0;overflow:hidden;z-index:2}
     canvas{display:block;width:100vw;height:100vh;background:transparent;}
     #starfield {
       position: fixed;
