@@ -1,0 +1,65 @@
+/* --- INTRO --- */
+#intro-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    color: #ddd;
+    font-family: 'Poppkorn', sans-serif;
+}
+
+#intro-card {
+    font-size: 1.5rem;
+    gap: 1rem;
+    animation: introFade 3s forwards 5s;
+}
+
+@keyframes introFade {
+    to { opacity: 0; }
+}
+
+#scroll-container {
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    animation: scrollUp 45s linear forwards 6s;
+}
+
+#scroll-text {
+    max-width: 800px;
+    text-align: center;
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+    padding: 0 20px;
+}
+
+@keyframes scrollUp {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-120%); }
+}
+
+#skip-intro {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ddd;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    font-family: "Poppkorn", sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    z-index: 1001;
+}
+
+#skip-intro:hover {
+    background: rgba(255, 255, 255, 0.3);
+}

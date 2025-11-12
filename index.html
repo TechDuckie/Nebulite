@@ -5,10 +5,59 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
   <title>Mobile Space Shooter — Levels & Waves</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="intro.css">
 </head>
 <body>
+  <div id="intro-screen">
+    <div id="skip-intro">Skip Intro</div>
+    <div id="intro-card">
+        <h1>Welcome to<br>SPACEWAVE</h1>
+        <p>Built for GitHub Game Off 2025</p>
+        <p>By Badankan — techDuckie</p>
+    </div>
+    <div id="scroll-container">
+        <div id="scroll-text">
+            <h2>SPACEWAVE</h2>
+            <p>
+                In the far reaches of the Asteron Expanse, peace once thrived
+                under a free alliance of star-faring worlds.
+            </p>
+            <p>
+                That peace shattered with the rise of the Mechron Dominion.
+                Forged from stolen star-forge technology and ruled by a cold
+                machine overmind, the Dominion swept across the galaxy with
+                terrifying precision.
+            </p>
+            <p>
+                Their elite war-constructs led every assault. Worlds resisting
+                their rule were silenced. Others simply vanished into their
+                steel networks.
+            </p>
+            <p>
+                Only a handful of strongholds remain.
+                The greatest among them: Starbase Helion, commanded by brilliant
+                tactician Lyra Starblade.
+            </p>
+            <p>
+                From Helion, she dispatches lone strike pilots into conquered
+                sectors — sabotaging Mechron fortresses, freeing captured
+                colonies, and searching for the Dominion’s hidden core.
+            </p>
+            <p>
+                Now, a new campaign begins.
+                Your mission: enter the first seized sector, crush the Dominion
+                vanguard, and destroy their war-construct —
+                the fearsome Mechron-Tar.
+            </p>
+            <p>
+                The fate of the stars rests in your hands.
+            </p>
+        </div>
+    </div>
+  </div>
+
   <div id="starfield"></div>
-  <div id="gameWrap">
+  <div id="gameWrap" style="display:none">
     <canvas id="game"></canvas>
 
     <div class="ui" id="uiRoot">
@@ -34,75 +83,76 @@
       <div class="debug" id="dbg">DEBUG</div>
     </div>
 
-    <!-- Dialogue Screen -->
-    <div class="screen" id="screenDialogue" style="display:none; justify-content: flex-end;">
-      <img id="motherShipImage" src="assets/motherShip.png" alt="Mother Ship"/>
-      <div class="panel dialogue-panel">
-        <img id="dialogueImage" src="" alt="Character"/>
-        <div class="dialogue-content">
-          <p id="dialogueText"></p>
-          <button class="btn-ui" id="btnDialogueGo" style="display:none;">GO</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Screens -->
-    <div class="screen" id="screenMenu">
-      <div class="menu-panel">
-        <h1 class="game-title">Spacewave</h1>
-        <div>
-          <button class="btn-ui" id="btnPlay">Play</button>
-          <button class="btn-ui" id="btnLevelSelect">Level Select</button>
-          <button class="btn-ui" id="btnSettings">Settings</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen" id="screenLevels" style="display:none">
-      <div class="panel">
-        <h2>Select Level</h2>
-        <div class="levels-grid" id="levelsGrid"></div>
-        <div class="small">Defeat boss to unlock the next level.</div>
-        <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screenSettings" style="display:none">
-      <div class="panel">
-        <h2>Settings</h2>
-        <div class="settings-container">
-          <div class="setting">
-            <label for="masterVolume">Master Volume</label>
-            <input type="range" id="masterVolume" min="0" max="100" value="100">
-          </div>
-          <div class="setting">
-            <label for="sfxVolume">SFX Volume</label>
-            <input type="range" id="sfxVolume" min="0" max="100" value="100">
-          </div>
-        </div>
-        <div style="margin-top:10px"><button class="btn-ui" id="btnSettingsBack">Back</button></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screenVictory" style="display:none">
-      <div class="panel">
-        <h2>Victory!</h2>
-        <p>Boss defeated — level unlocked.</p>
-        <button class="btn-ui" id="btnVictoryContinue">Continue</button>
-      </div>
-    </div>
-
-    <div class="screen" id="screenGameOver" style="display:none">
-      <div class="panel">
-        <h2>Game Over</h2>
-        <button class="btn-ui" id="btnRetry">Retry Level</button>
-        <div style="margin-top:8px"><button class="btn-ui" id="btnGameOverToMenu">Menu</button></div>
-        <div style="margin-top:8px"><button class="btn-ui" id="btnToLevels">Level Select</button></div>
-      </div>
-    </div>
-
   </div>
 
+  <!-- Dialogue Screen -->
+  <div class="screen" id="screenDialogue" style="display:none; justify-content: flex-end;">
+    <img id="motherShipImage" src="assets/motherShip.png" alt="Mother Ship"/>
+    <div class="panel dialogue-panel">
+      <img id="dialogueImage" src="" alt="Character"/>
+      <div class="dialogue-content">
+        <p id="dialogueText"></p>
+        <button class="btn-ui" id="btnDialogueGo" style="display:none;">GO</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screens -->
+  <div class="screen" id="screenMenu" style="display:none">
+    <div class="menu-panel">
+      <h1 class="game-title">Spacewave</h1>
+      <div>
+        <button class="btn-ui" id="btnPlay">Play</button>
+        <button class="btn-ui" id="btnLevelSelect">Level Select</button>
+        <button class="btn-ui" id="btnSettings">Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenLevels" style="display:none">
+    <div class="panel">
+      <h2>Select Level</h2>
+      <div class="levels-grid" id="levelsGrid"></div>
+      <div class="small">Defeat boss to unlock the next level.</div>
+      <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenSettings" style="display:none">
+    <div class="panel">
+      <h2>Settings</h2>
+      <div class="settings-container">
+        <div class="setting">
+          <label for="masterVolume">Master Volume</label>
+          <input type="range" id="masterVolume" min="0" max="100" value="100">
+        </div>
+        <div class="setting">
+          <label for="sfxVolume">SFX Volume</label>
+          <input type="range" id="sfxVolume" min="0" max="100" value="100">
+        </div>
+      </div>
+      <div style="margin-top:10px"><button class="btn-ui" id="btnSettingsBack">Back</button></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenVictory" style="display:none">
+    <div class="panel">
+      <h2>Victory!</h2>
+      <p>Boss defeated — level unlocked.</p>
+      <button class="btn-ui" id="btnVictoryContinue">Continue</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screenGameOver" style="display:none">
+    <div class="panel">
+      <h2>Game Over</h2>
+      <button class="btn-ui" id="btnRetry">Retry Level</button>
+      <div style="margin-top:8px"><button class="btn-ui" id="btnGameOverToMenu">Menu</button></div>
+      <div style="margin-top:8px"><button class="btn-ui" id="btnToLevels">Level Select</button></div>
+    </div>
+  </div>
+
+<script src="intro.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

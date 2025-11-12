@@ -7,6 +7,7 @@
 
   // Starfield
   const starfield = document.getElementById('starfield');
+  const gameWrap = document.getElementById('gameWrap');
   const stars = [];
   const NUM_STAR_IMAGES = 20;
   const MAX_STARS = 150;
@@ -138,6 +139,7 @@
 
   // UI functions
   function showScreen(s){
+    gameWrap.style.display = (s === STATE.PLAYING) ? 'block' : 'none';
     screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
@@ -750,7 +752,9 @@
 
   // initialize UI
   rebuildLevelSelect();
-  showScreen(STATE.MENU);
+  initIntro(() => {
+    showScreen(STATE.MENU);
+  });
   updateHearts();
 
 })();
