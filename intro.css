@@ -10,7 +10,7 @@
     text-align: center;
     flex-direction: column;
     color: #ddd;
-    font-family: 'Poppkorn', sans-serif;
+    font-family: 'Dedicool', sans-serif;
 }
 
 #intro-card {
@@ -53,7 +53,7 @@
     color: #ddd;
     border: 1px solid #ddd;
     padding: 5px 10px;
-    font-family: "Poppkorn", sans-serif;
+    font-family: "Dedicool", sans-serif;
     font-size: 0.9rem;
     cursor: pointer;
     transition: background 0.2s;

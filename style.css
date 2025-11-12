@@ -1,10 +1,15 @@
 @font-face {
+    font-family: 'Dedicool';
+    src: url('assets/Dedicool.ttf') format('truetype');
+}
+
+@font-face {
     font-family: 'Poppkorn';
     src: url('assets/PoppkornRegular-MzKY.ttf') format('truetype');
 }
 
 :root{--bg:#120b1b;--ui:#ddd}
-    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:"Poppkorn", system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:'Dedicool', sans-serif}
     #gameWrap{position:fixed;top: 0; right: 0; bottom: 0; left: 0;overflow:hidden;z-index:2}
     canvas{display:block;width:100vw;height:100vh;background:transparent;}
     #starfield {
@@ -81,7 +86,7 @@
       text-align: center;
     }
     .game-title {
-      font-family: 'Poppkorn', sans-serif;
+      font-family: 'Dedicool', sans-serif;
       font-size: clamp(3rem, 15vw, 6rem);
       color: var(--ui);
       text-shadow: 4px 4px 0px #4b8bcf, 8px 8px 0px #e641ba;
@@ -106,7 +111,7 @@
 
 
     .btn-ui {
-      font-family: "Poppkorn", sans-serif;
+      font-family: "Dedicool", sans-serif;
       background: transparent;
       color: white;
       border: 2px solid white;
@@ -174,7 +179,7 @@
   color: var(--ui);
   font-size: 14px;
   display: none;
-  font-family: "Poppkorn", sans-serif;
+  font-family: "Dedicool", sans-serif;
 }
 
 .settings-container {
@@ -194,7 +199,7 @@
 
 .setting label {
   font-size: 18px;
-  font-family: "Poppkorn", sans-serif;
+  font-family: "Dedicool", sans-serif;
 }
 
 input[type="range"] {
