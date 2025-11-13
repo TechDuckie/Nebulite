@@ -133,6 +133,12 @@
       background: white;
       color: var(--bg);
     }
+
+    #screenGameOver .panel .btn-ui {
+      width: 180px; /* Adjust as needed to fit 'Level Select' */
+      margin: 10px auto; /* Center block-level buttons */
+      display: block;
+    }
     .dialogue-panel {
       width: 100%;
       max-width: 100%;
