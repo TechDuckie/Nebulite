@@ -132,7 +132,7 @@
       waves,
       waveMusic: 'music1',
       bossMusic: 'boss1',
-      dialogue: 'dialogue1',
+      dialogue: 'dialogue2',
       boss: {
         name: 'Mecha-Drill',
         sprite: 'assets/boss2.png',
@@ -540,7 +540,8 @@
               playSfx('explosion');
               // show post-boss dialogue after a delay
               setTimeout(() => {
-                showDialogue('dialogueClear1', () => {
+                const victoryDialogue = currentLevelIndex === 1 ? 'dialogueClear2' : 'dialogueClear1';
+                showDialogue(victoryDialogue, () => {
                   state.boss = null;
                   showScreen(STATE.VICTORY);
                   rebuildLevelSelect();
