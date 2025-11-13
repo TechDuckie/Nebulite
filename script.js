@@ -250,9 +250,97 @@ class Boss {
     }
   }
 
+  class Player {
+    constructor() {
+      this.w = 64;
+      this.h = 64;
+      this.speed = 280;
+      this.hp = 3;
+      this.x = canvas.width / DPR / 2;
+      this.y = canvas.height / DPR - 110;
+      this.vx = 0;
+      this.vy = 0;
+    }
+
+    shoot() {
+      const w = 16, h = 32;
+      state.lasers.push({ x: this.x - w / 2, y: this.y - this.h / 2 - h, w, h, speed: 520 });
+      playSfx('laserShoot');
+      triggerVibration(20);
+    }
+
+    takeDamage(amount = 1) {
+      this.hp -= amount;
+      spawnParticles(this.x, this.y);
+      playSfx('playerDamage');
+      triggerVibration(100);
+      updateHearts();
+      if (this.hp <= 0) {
+        bossName.style.display = 'none';
+        showScreen(STATE.GAMEOVER);
+      }
+    }
+
+    update(dt) {
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+
+      const margin = 32;
+      this.x = clamp(this.x, margin, canvas.width / DPR - margin);
+      this.y = clamp(this.y, margin, canvas.height / DPR - 120);
+
+      if (this.vx !== 0 || this.vy !== 0) {
+        if (Math.random() > 0.5) {
+          const particleSize = 4;
+          const spread = 15;
+
+          // Left engine
+          const angleLeft = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+          const speedLeft = 150 + Math.random() * 50;
+          state.thrusterParticles.push({
+            x: this.x - spread,
+            y: this.y + this.h / 2,
+            w: particleSize,
+            h: particleSize,
+            vx: Math.cos(angleLeft) * speedLeft,
+            vy: Math.sin(angleLeft) * speedLeft,
+            life: 0.5,
+            color: '#d7feff',
+          });
+
+          // Right engine
+          const angleRight = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+          const speedRight = 150 + Math.random() * 50;
+          state.thrusterParticles.push({
+            x: this.x + spread,
+            y: this.y + this.h / 2,
+            w: particleSize,
+            h: particleSize,
+            vx: Math.cos(angleRight) * speedRight,
+            vy: Math.sin(angleRight) * speedRight,
+            life: 0.5,
+            color: '#d7feff',
+          });
+        }
+      }
+    }
+
+    render(ctx) {
+      drawImageCentered(images.player, this.x, this.y, this.w, this.h);
+    }
+
+    reset() {
+      this.hp = 3;
+      this.x = canvas.width / DPR / 2;
+      this.y = canvas.height / DPR - 110;
+      this.vx = 0;
+      this.vy = 0;
+    }
+  }
+
   // Entities
   const state = {
-    player: { x:0, y:0, w:64, h:64, speed: 280, vx:0, vy:0, hp:3 },
+    player: new Player(),
     enemies: [],
     lasers: [],
     particles: [],
@@ -311,8 +399,7 @@ class Boss {
     playMusic(lvl.waveMusic);
     // reset state
     state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
-    state.player.x = canvas.width/DPR/2; state.player.y = canvas.height/DPR - 110; state.player.vx = 0; state.player.vy = 0;
-    state.player.hp = 3;
+    state.player.reset();
     state.score = 0;
     state.waveIndex = 0;
     state.waveProgress = 0;
@@ -373,14 +460,6 @@ class Boss {
     state.enemies.push(enemy);
   }
 
-  function spawnLaserFromPlayer(){
-    const p = state.player;
-    const w = 16, h = 32; // narrow laser
-    state.lasers.push({ x: p.x - w/2, y: p.y - p.h/2 - h, w, h, speed: 520 });
-    playSfx('laserShoot');
-    triggerVibration(20);
-  }
-
   function spawnBoss(level){
     state.boss = new Boss(level.boss);
     state.warningFlash = { active: true, timer: 0, flashes: 3 };
@@ -422,40 +501,6 @@ class Boss {
         color,
       });
     }
-  }
-
-  function spawnThrusterParticle() {
-    const p = state.player;
-    const particleSize = 4;
-    const spread = 15; // Increased spread
-
-    // Left engine
-    const angleLeft = Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Downward cone
-    const speedLeft = 150 + Math.random() * 50;
-    state.thrusterParticles.push({
-      x: p.x - spread,
-      y: p.y + p.h / 2,
-      w: particleSize,
-      h: particleSize,
-      vx: Math.cos(angleLeft) * speedLeft,
-      vy: Math.sin(angleLeft) * speedLeft,
-      life: 0.5,
-      color: '#d7feff',
-    });
-
-    // Right engine
-    const angleRight = Math.PI / 2 + (Math.random() - 0.5) * 0.5; // Downward cone
-    const speedRight = 150 + Math.random() * 50;
-    state.thrusterParticles.push({
-      x: p.x + spread,
-      y: p.y + p.h / 2,
-      w: particleSize,
-      h: particleSize,
-      vx: Math.cos(angleRight) * speedRight,
-      vy: Math.sin(angleRight) * speedRight,
-      life: 0.5,
-      color: '#d7feff',
-    });
   }
 
   // game update loop
@@ -518,11 +563,7 @@ class Boss {
     }
 
     // spawn thruster particles if player is moving
-    if (state.player.vx !== 0 || state.player.vy !== 0) {
-      if (Math.random() > 0.5) { // Don't spawn every frame
-        spawnThrusterParticle();
-      }
-    }
+    state.player.update(dt);
 
     // warning flash
     if(state.warningFlash.active){
@@ -663,17 +704,7 @@ class Boss {
       const rp = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
       if(rectIntersect(rb, rp)){
         state.enemyBullets.splice(bi,1);
-        // player takes damage
-        state.player.hp--;
-        spawnParticles(state.player.x, state.player.y);
-        playSfx('playerDamage');
-        triggerVibration(100);
-        updateHearts();
-        if(state.player.hp <= 0){
-          // game over
-          bossName.style.display = 'none';
-          showScreen(STATE.GAMEOVER);
-        }
+        state.player.takeDamage();
       }
     }
 
@@ -684,24 +715,9 @@ class Boss {
       const rp = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
       if(rectIntersect(re, rp)){
         state.enemies.splice(ei,1);
-        state.player.hp--;
-        spawnParticles(state.player.x, state.player.y);
-        playSfx('playerDamage');
-        triggerVibration(100);
-        updateHearts();
-        if(state.player.hp <= 0){
-          showScreen(STATE.GAMEOVER);
-        }
+        state.player.takeDamage();
       }
     }
-
-    // player movement apply
-    state.player.x += state.player.vx * dt;
-    state.player.y += state.player.vy * dt;
-    // constrain player to screen with margin
-    const margin = 32;
-    state.player.x = clamp(state.player.x, margin, canvas.width/DPR - margin);
-    state.player.y = clamp(state.player.y, margin, canvas.height/DPR - 120);
 
     // HUD updates
     waveInfo.textContent = (() => {
@@ -729,8 +745,7 @@ class Boss {
     ctx.restore();
 
     // draw player (center x,y)
-    const p = state.player;
-    drawImageCentered(images.player, p.x, p.y, p.w, p.h);
+    state.player.render(ctx);
 
     // enemies
     state.enemies.forEach(e => e.render(ctx));
@@ -831,10 +846,10 @@ class Boss {
 
   // fire button pointerdown triggers laser immediately; can hold to spam if you want (no capture)
   btnFire.addEventListener('pointerdown', e=>{
-    spawnLaserFromPlayer();
+    state.player.shoot();
   });
   // also allow tap on canvas to shoot (optional)
-  canvas.addEventListener('click', e=> spawnLaserFromPlayer());
+  canvas.addEventListener('click', e=> state.player.shoot());
 
   // auto-fire toggle
   btnSecondary.addEventListener('click', ()=>{
@@ -845,7 +860,7 @@ class Boss {
       (function af(){
         if(gameState !== STATE.PLAYING) return;
         if(!LEVELS[currentLevelIndex].autoFire) return;
-        spawnLaserFromPlayer();
+        state.player.shoot();
         setTimeout(af, 200);
       })();
     }
