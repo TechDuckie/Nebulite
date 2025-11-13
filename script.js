@@ -147,6 +147,109 @@
 
   const LEVELS = [ makeLevel1(), makeLevel2() ];
 
+  class Enemy {
+    constructor(x, y, w, h, speed, sprite) {
+      this.x = x;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+      this.speed = speed;
+      this.sprite = sprite;
+    }
+
+    update(dt) {
+      this.y += this.speed * dt;
+    }
+
+    render(ctx) {
+      drawImageCentered(images[this.sprite] || images.enemy, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
+    }
+  }
+
+class Boss {
+    constructor(config) {
+      this.cfg = config;
+      const W = canvas.width / DPR;
+      this.x = W / 2 - this.cfg.w / 2;
+      this.y = -this.cfg.h;
+      this.w = this.cfg.w;
+      this.h = this.cfg.h;
+      this.hp = this.cfg.hp;
+      this.lastFire = 0;
+      this.isDefeated = false;
+    }
+
+    update(dt) {
+      if (this.isDefeated) return;
+
+      if (state.warningFlash.active) {
+        // Do nothing while warning is active
+        return;
+      }
+
+      // Descend to visible area
+      if (this.y < 80) {
+        this.y += (this.cfg.speed / 2) * dt;
+      } else {
+        // Track player slowly (lerp)
+        const targetX = state.player.x + state.player.w / 2 - this.w / 2;
+        this.x += (targetX - this.x) * (Math.min(1, this.cfg.speed / 200) * dt * 2.2);
+
+        // Firing
+        const now = performance.now();
+        if (now - this.lastFire > this.cfg.fireRate) {
+          this.fire();
+          this.lastFire = now;
+        }
+      }
+    }
+
+    fire() {
+      const bw = 12, bh = 24;
+      const x = this.x + this.w / 2 - bw / 2;
+      const y = this.y + this.h / 2 + 8;
+      state.enemyBullets.push({ x, y, w: bw, h: bh, vy: this.cfg.bulletSpeed });
+    }
+
+    render(ctx) {
+      if (!this.isDefeated) {
+        drawImageCentered(images[this.cfg.sprite] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
+      }
+    }
+  }
+
+  class ShootingEnemy extends Enemy {
+    constructor(x, y, w, h, speed, sprite) {
+      super(x, y, w, h, speed, sprite);
+      this.lastFire = 0;
+      this.fireRate = 1500; // ms
+      this.bulletSpeed = 180;
+    }
+
+    update(dt) {
+      super.update(dt); // Basic downward movement
+
+      // Lerp towards player's x position
+      const targetX = state.player.x + state.player.w / 2 - this.w / 2;
+      this.x += (targetX - this.x) * 0.01; // Slow follow
+
+      // Fire bullets
+      const now = performance.now();
+      if (now - this.lastFire > this.fireRate) {
+        this.lastFire = now;
+        const bw = 8, bh = 16;
+        const bullet = {
+          x: this.x + this.w / 2 - bw / 2,
+          y: this.y + this.h,
+          w: bw,
+          h: bh,
+          vy: this.bulletSpeed
+        };
+        state.enemyBullets.push(bullet); // Using enemyBullets array for now
+      }
+    }
+  }
+
   // Entities
   const state = {
     player: { x:0, y:0, w:64, h:64, speed: 280, vx:0, vy:0, hp:3 },
@@ -154,7 +257,7 @@
     lasers: [],
     particles: [],
     thrusterParticles: [],
-    bossBullets: [],
+    enemyBullets: [],
     boss: null,
     score: 0,
     waveIndex: 0,
@@ -207,7 +310,7 @@
     const lvl = LEVELS[currentLevelIndex];
     playMusic(lvl.waveMusic);
     // reset state
-    state.enemies.length = 0; state.lasers.length = 0; state.bossBullets.length = 0; state.boss = null;
+    state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
     state.player.x = canvas.width/DPR/2; state.player.y = canvas.height/DPR - 110; state.player.vx = 0; state.player.vy = 0;
     state.player.hp = 3;
     state.score = 0;
@@ -255,12 +358,19 @@
   }
 
   // Spawning functions
-  function spawnEnemy(speedOverride, spriteKey = 'enemy'){
+  function spawnEnemy(speedOverride, spriteKey = 'enemy') {
     const W = canvas.width / DPR, H = canvas.height / DPR;
-    const w = 48, h = 48; // enemies 48x48 (middle ground)
-    const x = Math.random() * (W - w) + w/2;
-    const e = { x: x - w/2, y: -h, w, h, speed: speedOverride || (80 + Math.random()*60), sprite: spriteKey };
-    state.enemies.push(e);
+    const w = 48, h = 48;
+    const x = Math.random() * (W - w);
+    const speed = speedOverride || (80 + Math.random() * 60);
+
+    let enemy;
+    if (spriteKey === 'enemySmall2') {
+      enemy = new ShootingEnemy(x, -h, w, h, speed, spriteKey);
+    } else {
+      enemy = new Enemy(x, -h, w, h, speed, spriteKey);
+    }
+    state.enemies.push(enemy);
   }
 
   function spawnLaserFromPlayer(){
@@ -272,21 +382,8 @@
   }
 
   function spawnBoss(level){
-    const cfg = level.boss;
-    const W = canvas.width / DPR, H = canvas.height / DPR;
-    const b = { x: W/2 - cfg.w/2, y: -cfg.h, w: cfg.w, h: cfg.h, hp: cfg.hp, cfg, lastFire:0, sprite: cfg.sprite };
-    state.boss = b;
+    state.boss = new Boss(level.boss);
     state.warningFlash = { active: true, timer: 0, flashes: 3 };
-  }
-
-  function spawnBossBullet(boss){
-    const cfg = boss.cfg;
-    // boss bullet straight down (for level1) - spawn centered under boss
-    const bw = 12, bh = 24;
-    const x = boss.x + boss.w/2 - bw/2;
-    const y = boss.y + boss.h/2 + 8;
-    // for straight-down: vx=0, vy = bulletSpeed
-    state.bossBullets.push({ x, y, w:bw, h:bh, vy: cfg.bulletSpeed });
   }
 
   function spawnStar() {
@@ -482,7 +579,7 @@
     // update enemies
     for(let i=state.enemies.length-1;i>=0;i--){
       const e = state.enemies[i];
-      e.y += e.speed * dt;
+      e.update(dt);
       if(e.y > canvas.height/DPR + 40) state.enemies.splice(i,1);
     }
 
@@ -493,50 +590,33 @@
       if(L.y + L.h < -40) state.lasers.splice(i,1);
     }
 
-    // update boss bullets
-    for(let i=state.bossBullets.length-1;i>=0;i--){
-      const b = state.bossBullets[i];
+    // update enemy bullets
+    for(let i=state.enemyBullets.length-1;i>=0;i--){
+      const b = state.enemyBullets[i];
       b.y += b.vy * dt;
-      if(b.y > canvas.height/DPR + 40) state.bossBullets.splice(i,1);
+      if(b.y > canvas.height/DPR + 40) state.enemyBullets.splice(i,1);
     }
 
     // boss behavior
     if(state.boss){
-      const boss = state.boss;
+      state.boss.update(dt);
 
-      if (!boss.isDefeated) {
-        if(state.warningFlash.active) {
-          // Boss is waiting for warning to finish, do nothing
-        } else {
-          // descend to visible area
-          if(boss.y < 80) boss.y += (boss.cfg.speed/2) * dt;
-          else {
-            // track player slowly (lerp)
-            const targetX = state.player.x + state.player.w/2 - boss.w/2;
-            boss.x += (targetX - boss.x) * (Math.min(1, boss.cfg.speed/200) * dt * 2.2); // smooth follow
-            // firing straight down at intervals
-            const now = performance.now();
-            if(now - boss.lastFire > boss.cfg.fireRate){
-              spawnBossBullet(boss);
-              boss.lastFire = now;
-            }
-          }
-        }
-        // boss collision with player lasers
+      // boss collision with player lasers
+      if (!state.boss.isDefeated) {
         for(let li=state.lasers.length-1; li>=0; li--){
           const L = state.lasers[li];
-          const rectBoss = {x: boss.x, y: boss.y, w: boss.w, h: boss.h};
+          const rectBoss = {x: state.boss.x, y: state.boss.y, w: state.boss.w, h: state.boss.h};
           const rectLaser = {x: L.x, y: L.y, w: L.w, h: L.h};
-          if(boss.y >= 80 && rectIntersect(rectBoss, rectLaser)){
+          if(state.boss.y >= 80 && rectIntersect(rectBoss, rectLaser)){
             state.lasers.splice(li,1);
-            boss.hp--;
+            state.boss.hp--;
             state.score += 15;
-            if(boss.hp <= 0){
-              boss.isDefeated = true;
+            if(state.boss.hp <= 0){
+              state.boss.isDefeated = true;
               bossBar.style.display = 'none';
               bossName.style.display = 'none';
               unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
-              spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2);
+              spawnParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
               playSfx('explosion');
               // show post-boss dialogue after a delay
               setTimeout(() => {
@@ -549,7 +629,7 @@
               }, 5000); // 5 second delay
             } else {
               // update boss bar
-              const pct = Math.max(0, boss.hp / boss.cfg.hp);
+              const pct = Math.max(0, state.boss.hp / state.boss.cfg.hp);
               bossBarInner.style.width = (pct*100) + '%';
             }
             break;
@@ -576,13 +656,13 @@
       }
     }
 
-    // boss bullets hitting player (straight down, for level1)
-    for(let bi=state.bossBullets.length-1; bi>=0; bi--){
-      const b = state.bossBullets[bi];
+    // enemy bullets hitting player
+    for(let bi=state.enemyBullets.length-1; bi>=0; bi--){
+      const b = state.enemyBullets[bi];
       const rb = {x:b.x, y:b.y, w:b.w, h:b.h};
       const rp = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
       if(rectIntersect(rb, rp)){
-        state.bossBullets.splice(bi,1);
+        state.enemyBullets.splice(bi,1);
         // player takes damage
         state.player.hp--;
         spawnParticles(state.player.x, state.player.y);
@@ -632,7 +712,7 @@
     })();
 
     // debug
-    dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} BossBullets:${state.bossBullets.length}` ;
+    dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} EnemyBullets:${state.enemyBullets.length}` ;
   }
 
   // render
@@ -653,7 +733,7 @@
     drawImageCentered(images.player, p.x, p.y, p.w, p.h);
 
     // enemies
-    state.enemies.forEach(e => drawImageCentered(images[e.sprite] || images.enemy, e.x + e.w/2, e.y + e.h/2, e.w, e.h));
+    state.enemies.forEach(e => e.render(ctx));
 
     // lasers
     ctx.save();
@@ -674,13 +754,12 @@
     ctx.restore();
 
     // boss
-    if(state.boss && !state.boss.isDefeated){
-      const b = state.boss;
-      drawImageCentered(images[b.sprite] || images.boss, b.x + b.w/2, b.y + b.h/2, b.w, b.h);
+    if(state.boss){
+      state.boss.render(ctx);
     }
 
-    // boss bullets
-    state.bossBullets.forEach(bb => {
+    // enemy bullets
+    state.enemyBullets.forEach(bb => {
       ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
     });
 
