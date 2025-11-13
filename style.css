@@ -49,9 +49,16 @@
     /* UI overlay */
     .ui {position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;}
     .hud {position:fixed;left:10px;top:10px;color:var(--ui);font-size:14px;pointer-events:none}
-    .hud .hearts{display:inline-block;margin-left:8px}
-    .hearts span{color:#e74c3c;margin-right:6px;font-size:18px}
-    .waveInfo{position:fixed;left:50%;top:10px;transform:translateX(-50%);color:var(--ui);font-size:14px}
+    .hud .hearts{
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .heart-icon{
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+    }    .waveInfo{position:fixed;left:50%;top:10px;transform:translateX(-50%);color:var(--ui);font-size:14px}
     .bossBar{position:fixed;left:50%;top:34px;transform:translateX(-50%);width:60%;height:12px;background:rgba(255,255,255,0.06);border: 2px solid white;box-sizing: border-box;overflow:hidden;display:none}
     .bossBarInner{height:100%;background:#ffb86b;width:100%}
     /* joystick + buttons */

@@ -45,7 +45,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -62,6 +62,7 @@
     audio.typewriter = loadedAssets[13];
     images.motherShip = loadedAssets[14];
     audio.menu = loadedAssets[15];
+    images.heart = loadedAssets[16];
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
   });
@@ -445,7 +446,10 @@ class Boss {
   function updateHearts(){
     heartsEl.innerHTML = '';
     for(let i=0;i<state.player.hp;i++){
-      const s = document.createElement('span'); s.textContent = '♥'; heartsEl.appendChild(s);
+      const img = document.createElement('img');
+      img.src = images.heart.src;
+      img.className = 'heart-icon'; // Add a class for potential styling
+      heartsEl.appendChild(img);
     }
   }
 
