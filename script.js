@@ -44,7 +44,7 @@
   const dbg = document.getElementById('dbg');
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -53,14 +53,14 @@
     if(src.endsWith('.png')) return loadImg(src);
     if(src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
   })).then(loadedAssets=>{
-    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.laser=loadedAssets[2]; images.boss=loadedAssets[3];
-    audio.music1 = loadedAssets[4]; audio.boss1 = loadedAssets[5];
-    images.warn = loadedAssets[6];
-    audio.laserShoot = loadedAssets[7]; audio.playerDamage = loadedAssets[8]; audio.explosion = loadedAssets[9];
-    images.lyra = loadedAssets[10];
-    audio.typewriter = loadedAssets[11];
-    images.motherShip = loadedAssets[12];
-    audio.menu = loadedAssets[13];
+    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.laser=loadedAssets[3]; images.boss=loadedAssets[4]; images.boss2=loadedAssets[5];
+    audio.music1 = loadedAssets[6]; audio.boss1 = loadedAssets[7];
+    images.warn = loadedAssets[8];
+    audio.laserShoot = loadedAssets[9]; audio.playerDamage = loadedAssets[10]; audio.explosion = loadedAssets[11];
+    images.lyra = loadedAssets[12];
+    audio.typewriter = loadedAssets[13];
+    images.motherShip = loadedAssets[14];
+    audio.menu = loadedAssets[15];
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
   });
@@ -69,8 +69,8 @@
   const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6 };
   let gameState = STATE.MENU;
 
-  const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
-  const unlocked = [true, false, false, false]; // unlock array
+  const LEVEL_COUNT = 2; // show 2 levels for selection (only 1 unlocked initially)
+  const unlocked = [true, false]; // unlock array
   let currentLevelIndex = 0;
 
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, currentMusic: null };
@@ -118,7 +118,34 @@
     };
   }
 
-  const LEVELS = [ makeLevel1(), /* placeholders for other levels */ {}, {} , {} ];
+  function makeLevel2() {
+    const waves = [];
+    for (let w = 0; w < 12; w++) {
+      waves.push({
+        enemyCount: 4 + w,
+        enemySpeed: 90 + w * 7,
+        spawnRate: 250,
+        enemySprite: 'enemySmall2'
+      });
+    }
+    return {
+      waves,
+      waveMusic: 'music1',
+      bossMusic: 'boss1',
+      dialogue: 'dialogue1',
+      boss: {
+        name: 'Mecha-Drill',
+        sprite: 'assets/boss2.png',
+        hp: 50,
+        w: 140, h: 140,
+        speed: 60,
+        fireRate: 800,
+        bulletSpeed: 220,
+      }
+    };
+  }
+
+  const LEVELS = [ makeLevel1(), makeLevel2() ];
 
   // Entities
   const state = {
@@ -228,11 +255,11 @@
   }
 
   // Spawning functions
-  function spawnEnemy(speedOverride){
+  function spawnEnemy(speedOverride, spriteKey = 'enemy'){
     const W = canvas.width / DPR, H = canvas.height / DPR;
     const w = 48, h = 48; // enemies 48x48 (middle ground)
     const x = Math.random() * (W - w) + w/2;
-    const e = { x: x - w/2, y: -h, w, h, speed: speedOverride || (80 + Math.random()*60) };
+    const e = { x: x - w/2, y: -h, w, h, speed: speedOverride || (80 + Math.random()*60), sprite: spriteKey };
     state.enemies.push(e);
   }
 
@@ -247,7 +274,7 @@
   function spawnBoss(level){
     const cfg = level.boss;
     const W = canvas.width / DPR, H = canvas.height / DPR;
-    const b = { x: W/2 - cfg.w/2, y: -cfg.h, w: cfg.w, h: cfg.h, hp: cfg.hp, cfg, lastFire:0 };
+    const b = { x: W/2 - cfg.w/2, y: -cfg.h, w: cfg.w, h: cfg.h, hp: cfg.hp, cfg, lastFire:0, sprite: cfg.sprite };
     state.boss = b;
     state.warningFlash = { active: true, timer: 0, flashes: 3 };
   }
@@ -421,7 +448,7 @@
         if(state.waveSpawning){
           state.waveSpawnTimer += dt*1000;
           if(state.waveSpawnTimer >= waveCfg.spawnRate && state.waveProgress < waveCfg.enemyCount){
-            spawnEnemy(waveCfg.enemySpeed);
+            spawnEnemy(waveCfg.enemySpeed, waveCfg.enemySprite);
             state.waveProgress++;
             state.waveSpawnTimer = 0;
           }
@@ -625,7 +652,7 @@
     drawImageCentered(images.player, p.x, p.y, p.w, p.h);
 
     // enemies
-    state.enemies.forEach(e => drawImageCentered(images.enemy, e.x + e.w/2, e.y + e.h/2, e.w, e.h));
+    state.enemies.forEach(e => drawImageCentered(images[e.sprite] || images.enemy, e.x + e.w/2, e.y + e.h/2, e.w, e.h));
 
     // lasers
     ctx.save();
@@ -648,7 +675,7 @@
     // boss
     if(state.boss && !state.boss.isDefeated){
       const b = state.boss;
-      drawImageCentered(images.boss, b.x + b.w/2, b.y + b.h/2, b.w, b.h);
+      drawImageCentered(images[b.sprite] || images.boss, b.x + b.w/2, b.y + b.h/2, b.w, b.h);
     }
 
     // boss bullets
