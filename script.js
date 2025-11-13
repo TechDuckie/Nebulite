@@ -42,6 +42,7 @@
   const bossName = document.getElementById('bossName');
   const heartsEl = document.getElementById('hearts');
   const dbg = document.getElementById('dbg');
+  dbg.style.display = 'none';
 
   // Assets (graceful fallback)
   const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3' };
@@ -355,7 +356,11 @@ class Boss {
     waveCleared: false,
     warningFlash: { active: false, timer: 0, flashes: 0 },
     dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50, goButtonTimerSet: false, onComplete: null },
-    lastTime: performance.now()
+    lastTime: performance.now(),
+    debug: false,
+    debugTapCount: 0,
+    lastDebugTap: 0,
+    fps: 0
   };
 
   // helpers
@@ -728,7 +733,7 @@ class Boss {
     })();
 
     // debug
-    dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} EnemyBullets:${state.enemyBullets.length}` ;
+    dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} EnemyBullets:${state.enemyBullets.length} FPS:${state.fps.toFixed(0)}` ;
   }
 
   // render
@@ -802,6 +807,7 @@ class Boss {
   function loop(t){
     const dt = Math.min(40, t - state.lastTime);
     state.lastTime = t;
+    state.fps = 1000 / dt; // Calculate FPS
     update(dt/1000);
     render();
     requestAnimationFrame(loop);
@@ -900,6 +906,44 @@ class Boss {
 
   vibration.addEventListener('change', (e) => {
     audioState.vibration = e.target.checked;
+  });
+
+  const settingsTitle = document.getElementById('settingsTitle');
+  settingsTitle.addEventListener('click', () => {
+    const now = performance.now();
+    if (now - state.lastDebugTap < 300) { // 300ms window for rapid taps
+      state.debugTapCount++;
+      if (state.debugTapCount >= 10) {
+        state.debug = !state.debug;
+        state.debugTapCount = 0; // Reset count after toggling
+        state.lastDebugTap = 0; // Reset timer to prevent immediate re-toggle
+
+        // Visual feedback for debug toggle
+        settingsTitle.style.transition = 'background-color 0.1s';
+        settingsTitle.style.backgroundColor = state.debug ? '#0f0' : '#f00';
+        setTimeout(() => {
+          settingsTitle.style.backgroundColor = '';
+          settingsTitle.style.transition = '';
+        }, 100);
+
+        // Apply debug settings
+        if (state.debug) {
+          dbg.style.display = 'block';
+          for (let i = 0; i < unlocked.length; i++) {
+            unlocked[i] = true;
+          }
+          rebuildLevelSelect();
+        } else {
+          dbg.style.display = 'none';
+          // Optionally re-lock levels if desired, but for now, keep them unlocked
+          // For a full reset, you'd need to store initial unlocked state
+          rebuildLevelSelect();
+        }
+      }
+    } else {
+      state.debugTapCount = 1;
+    }
+    state.lastDebugTap = now;
   });
 
   // initialize UI
