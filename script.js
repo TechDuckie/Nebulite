@@ -189,15 +189,26 @@
   class Enemy {
     constructor(x, y, w, h, speed, sprite) {
       this.x = x;
+      this.initialX = x; // Store initial X for oscillation
       this.y = y;
       this.w = w;
       this.h = h;
       this.speed = speed;
       this.sprite = sprite;
+      this.isAsteroid = sprite.startsWith('asteroid');
+      if (this.isAsteroid) {
+        this.oscillateSpeed = (Math.random() * 0.5 + 0.5) * 1.5; // Random speedfactor for oscillation
+        this.oscillateRange = Math.random() * 50 + 20; // Random range for oscillation
+        this.oscillateTime = Math.random() * Math.PI * 2; // Starting phase for sine wave
+      }
     }
 
     update(dt) {
       this.y += this.speed * dt;
+      if (this.isAsteroid) {
+        this.oscillateTime += this.oscillateSpeed * dt;
+        this.x = this.initialX + Math.sin(this.oscillateTime) * this.oscillateRange;
+      }
     }
 
     render(ctx) {
@@ -826,11 +837,17 @@ class Boss {
         const L = state.lasers[li];
         const rl = {x:L.x, y:L.y, w:L.w, h:L.h};
         if(rectIntersect(re, rl)){
-          spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
-          state.enemies.splice(ei,1);
-          state.lasers.splice(li,1);
-          state.score += 5;
-          playSfx('explosion');
+          // If it's an asteroid, remove the laser but not the asteroid
+          if (e.isAsteroid) {
+            state.lasers.splice(li,1);
+            playSfx('playerDamage', 0.5); // Play a lighter sound for laser hitting asteroid
+          } else {
+            spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
+            state.enemies.splice(ei,1);
+            state.lasers.splice(li,1);
+            state.score += 5;
+            playSfx('explosion');
+          }
           break;
         }
       }
