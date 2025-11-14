@@ -184,73 +184,75 @@ class Boss {
 
       if (this.cfg.canDash) {
         this.isDashing = false;
-        this.lastDash = 0;
+        this.lastDash = performance.now();
         this.dashCooldown = 7000; // 7 seconds
         this.dashPhase = null;
         this.dashTargetX = 0;
         this.dashTargetY = 0;
-        this.originalY = this.y;
+        this.hoverY = 80; // Normal Y position
       }
     }
 
     update(dt) {
-      if (this.isDefeated) return;
-
-      if (state.warningFlash.active) {
-        // Do nothing while warning is active
-        return;
-      }
+      if (this.isDefeated || state.warningFlash.active) return;
 
       const now = performance.now();
 
-      // Dash attack logic for Level 2 boss
-      if (this.cfg.canDash) {
-        if (!this.isDashing && now - this.lastDash > this.dashCooldown) {
+      // If dashing, execute dash logic and nothing else
+      if (this.isDashing) {
+        const dashSpeed = this.cfg.speed * 4;
+        if (this.dashPhase === 'down') {
+          this.y += dashSpeed * dt;
+          if (this.y >= this.dashTargetY) {
+            this.dashPhase = 'across';
+          }
+        } else if (this.dashPhase === 'across') {
+          const targetX = this.dashTargetX - this.w / 2;
+          this.x += (targetX - this.x) * 0.1;
+          if (Math.abs(this.x - targetX) < 10) {
+            this.dashPhase = 'up';
+          }
+        } else if (this.dashPhase === 'up') {
+          this.y -= dashSpeed * dt;
+          if (this.y <= this.hoverY) {
+            this.y = this.hoverY;
+            this.isDashing = false;
+            this.dashPhase = null;
+            this.lastDash = now; // Reset cooldown AFTER dash
+          }
+        }
+        return; // End update here if dashing
+      }
+
+      // --- If NOT dashing, perform normal behavior ---
+
+      // 1. Descend to hover position if not already there
+      const hoverY = this.cfg.canDash ? this.hoverY : 80;
+      if (this.y < hoverY) {
+        this.y += (this.cfg.speed / 2) * dt;
+        if (this.y >= hoverY) {
+          this.y = hoverY;
+          this.lastDash = now; // Start the timer once in position
+        }
+      }
+      // 2. Once in position, execute normal attacks and check for dash trigger
+      else {
+        // Track player
+        const targetX = state.player.x + state.player.w / 2 - this.w / 2;
+        this.x += (targetX - this.x) * (Math.min(1, this.cfg.speed / 200) * dt * 2.2);
+
+        // Fire
+        if (now - this.lastFire > this.cfg.fireRate) {
+          this.fire();
+          this.lastFire = now;
+        }
+
+        // Check if it's time to dash
+        if (this.cfg.canDash && now - this.lastDash > this.dashCooldown) {
           this.isDashing = true;
           this.dashPhase = 'down';
           this.dashTargetX = state.player.x;
           this.dashTargetY = state.player.y;
-          this.originalY = this.y;
-          this.lastDash = now;
-        }
-
-        if (this.isDashing) {
-          const dashSpeed = this.cfg.speed * 4;
-          if (this.dashPhase === 'down') {
-            this.y += dashSpeed * dt;
-            if (this.y >= this.dashTargetY) {
-              this.dashPhase = 'across';
-            }
-          } else if (this.dashPhase === 'across') {
-            const targetX = this.dashTargetX - this.w / 2;
-            this.x += (targetX - this.x) * 0.1;
-            if (Math.abs(this.x - targetX) < 10) {
-              this.dashPhase = 'up';
-            }
-          } else if (this.dashPhase === 'up') {
-            this.y -= dashSpeed * dt;
-            if (this.y <= this.originalY) {
-              this.y = this.originalY;
-              this.isDashing = false;
-              this.dashPhase = null;
-            }
-          }
-          return; // Skip normal behavior while dashing
-        }
-      }
-
-      // Descend to visible area
-      if (this.y < 80) {
-        this.y += (this.cfg.speed / 2) * dt;
-      } else {
-        // Track player slowly (lerp)
-        const targetX = state.player.x + state.player.w / 2 - this.w / 2;
-        this.x += (targetX - this.x) * (Math.min(1, this.cfg.speed / 200) * dt * 2.2);
-
-        // Firing
-        if (now - this.lastFire > this.cfg.fireRate) {
-          this.fire();
-          this.lastFire = now;
         }
       }
     }
