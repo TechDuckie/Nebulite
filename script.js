@@ -45,7 +45,11 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png' };
+  const NUM_ASTEROID_IMAGES = 28;
+  for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
+    assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
+  }
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -54,16 +58,19 @@
     if(src.endsWith('.png')) return loadImg(src);
     if(src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
   })).then(loadedAssets=>{
-    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.laser=loadedAssets[3]; images.boss=loadedAssets[4]; images.boss2=loadedAssets[5];
-    audio.music1 = loadedAssets[6]; audio.boss1 = loadedAssets[7];
-    images.warn = loadedAssets[8];
-    audio.laserShoot = loadedAssets[9]; audio.playerDamage = loadedAssets[10]; audio.explosion = loadedAssets[11];
-    images.lyra = loadedAssets[12];
-    audio.typewriter = loadedAssets[13];
-    images.motherShip = loadedAssets[14];
-    audio.menu = loadedAssets[15];
-    images.heart = loadedAssets[16];
-    images.shield = loadedAssets[17];
+    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.laser=loadedAssets[3]; images.boss=loadedAssets[4]; images.boss2=loadedAssets[5]; images.boss3=loadedAssets[6];
+    audio.music1 = loadedAssets[7]; audio.boss1 = loadedAssets[8];
+    images.warn = loadedAssets[9];
+    audio.laserShoot = loadedAssets[10]; audio.playerDamage = loadedAssets[11]; audio.explosion = loadedAssets[12];
+    images.lyra = loadedAssets[13];
+    audio.typewriter = loadedAssets[14];
+    images.motherShip = loadedAssets[15];
+    audio.menu = loadedAssets[16];
+    images.heart = loadedAssets[17];
+    images.shield = loadedAssets[18];
+    for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
+      images[`asteroid${i+1}`] = loadedAssets[19+i];
+    }
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
   });
@@ -72,8 +79,8 @@
   const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6 };
   let gameState = STATE.MENU;
 
-  const LEVEL_COUNT = 2; // show 2 levels for selection (only 1 unlocked initially)
-  const unlocked = [true, false]; // unlock array
+  const LEVEL_COUNT = 3; // show 3 levels for selection (only 1 unlocked initially)
+  const unlocked = [true, false, false]; // unlock array
   let currentLevelIndex = 0;
 
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, currentMusic: null };
@@ -149,7 +156,35 @@
     };
   }
 
-  const LEVELS = [ makeLevel1(), makeLevel2() ];
+  function makeLevel3() {
+    const waves = [];
+    for (let w = 0; w < 15; w++) {
+      waves.push({
+        enemyCount: 5 + w,
+        enemySpeed: 100 + w * 8,
+        spawnRate: 200,
+        enemySprite: 'asteroid'
+      });
+    }
+    return {
+      waves,
+      waveMusic: 'music1',
+      bossMusic: 'boss1',
+      dialogue: 'dialogue3',
+      boss: {
+        name: 'Asteroid Guardian',
+        spriteKey: 'boss3',
+        hp: 100,
+        w: 160, h: 160,
+        speed: 70,
+        fireRate: 700,
+        bulletSpeed: 250,
+        canDash: true,
+      }
+    };
+  }
+
+  const LEVELS = [ makeLevel1(), makeLevel2(), makeLevel3() ];
 
   class Enemy {
     constructor(x, y, w, h, speed, sprite) {
@@ -489,7 +524,7 @@ class Boss {
     showScreen(STATE.PLAYING);
 
     // Show/hide buttons based on level
-    if (currentLevelIndex === 1) { // Level 2
+    if (currentLevelIndex === 1 || currentLevelIndex === 2) { // Level 2 or 3
       btnSecondary.style.display = 'none';
       btnShield.style.display = 'flex';
     } else { // Level 1
@@ -542,6 +577,9 @@ class Boss {
     let enemy;
     if (spriteKey === 'enemySmall2') {
       enemy = new ShootingEnemy(x, -h, w, h, speed, spriteKey);
+    } else if (spriteKey === 'asteroid') {
+      const asteroidSprite = `asteroid${Math.floor(Math.random() * NUM_ASTEROID_IMAGES) + 1}`;
+      enemy = new Enemy(x, -h, w, h, speed, asteroidSprite);
     } else {
       enemy = new Enemy(x, -h, w, h, speed, spriteKey);
     }
@@ -757,7 +795,12 @@ class Boss {
               playSfx('explosion');
               // show post-boss dialogue after a delay
               setTimeout(() => {
-                const victoryDialogue = currentLevelIndex === 1 ? 'dialogueClear2' : 'dialogueClear1';
+                let victoryDialogue = 'dialogueClear1';
+                if (currentLevelIndex === 1) {
+                  victoryDialogue = 'dialogueClear2';
+                } else if (currentLevelIndex === 2) {
+                  victoryDialogue = 'dialogueClear3';
+                }
                 showDialogue(victoryDialogue, () => {
                   state.boss = null;
                   showScreen(STATE.VICTORY);
