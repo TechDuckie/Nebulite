@@ -111,7 +111,7 @@
       dialogue: 'dialogue1',
       boss: {
         name: 'Mech-Tra',
-        sprite: 'assets/boss1.png',
+        spriteKey: 'boss',
         hp: 10,
         w: 120, h: 120,
         speed: 40,     // movement lerp speed
@@ -138,7 +138,7 @@
       dialogue: 'dialogue2',
       boss: {
         name: 'Mecha-Drill',
-        sprite: 'assets/boss2.png',
+        spriteKey: 'boss2',
         hp: 50,
         w: 140, h: 140,
         speed: 60,
@@ -216,7 +216,7 @@ class Boss {
 
     render(ctx) {
       if (!this.isDefeated) {
-        drawImageCentered(images[this.cfg.sprite] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
+        drawImageCentered(images[this.cfg.spriteKey] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
       }
     }
   }
@@ -438,11 +438,13 @@ class Boss {
     updateHearts();
     showScreen(STATE.PLAYING);
 
-    // Hide btn-secondary for level 2, show for others
-    if (currentLevelIndex === 1) {
+    // Show/hide buttons based on level
+    if (currentLevelIndex === 1) { // Level 2
       btnSecondary.style.display = 'none';
-    } else {
-      btnSecondary.style.display = 'flex'; // Assuming it's a flex container
+      btnShield.style.display = 'flex';
+    } else { // Level 1
+      btnSecondary.style.display = 'flex';
+      btnShield.style.display = 'none';
     }
   }
 
