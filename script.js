@@ -144,6 +144,7 @@
         speed: 60,
         fireRate: 800,
         bulletSpeed: 220,
+        canDash: true,
       }
     };
   }
@@ -180,6 +181,16 @@ class Boss {
       this.hp = this.cfg.hp;
       this.lastFire = 0;
       this.isDefeated = false;
+
+      if (this.cfg.canDash) {
+        this.isDashing = false;
+        this.lastDash = 0;
+        this.dashCooldown = 7000; // 7 seconds
+        this.dashPhase = null;
+        this.dashTargetX = 0;
+        this.dashTargetY = 0;
+        this.originalY = this.y;
+      }
     }
 
     update(dt) {
@@ -188,6 +199,44 @@ class Boss {
       if (state.warningFlash.active) {
         // Do nothing while warning is active
         return;
+      }
+
+      const now = performance.now();
+
+      // Dash attack logic for Level 2 boss
+      if (this.cfg.canDash) {
+        if (!this.isDashing && now - this.lastDash > this.dashCooldown) {
+          this.isDashing = true;
+          this.dashPhase = 'down';
+          this.dashTargetX = state.player.x;
+          this.dashTargetY = state.player.y;
+          this.originalY = this.y;
+          this.lastDash = now;
+        }
+
+        if (this.isDashing) {
+          const dashSpeed = this.cfg.speed * 4;
+          if (this.dashPhase === 'down') {
+            this.y += dashSpeed * dt;
+            if (this.y >= this.dashTargetY) {
+              this.dashPhase = 'across';
+            }
+          } else if (this.dashPhase === 'across') {
+            const targetX = this.dashTargetX - this.w / 2;
+            this.x += (targetX - this.x) * 0.1;
+            if (Math.abs(this.x - targetX) < 10) {
+              this.dashPhase = 'up';
+            }
+          } else if (this.dashPhase === 'up') {
+            this.y -= dashSpeed * dt;
+            if (this.y <= this.originalY) {
+              this.y = this.originalY;
+              this.isDashing = false;
+              this.dashPhase = null;
+            }
+          }
+          return; // Skip normal behavior while dashing
+        }
       }
 
       // Descend to visible area
@@ -199,7 +248,6 @@ class Boss {
         this.x += (targetX - this.x) * (Math.min(1, this.cfg.speed / 200) * dt * 2.2);
 
         // Firing
-        const now = performance.now();
         if (now - this.lastFire > this.cfg.fireRate) {
           this.fire();
           this.lastFire = now;
