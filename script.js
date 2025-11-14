@@ -428,7 +428,7 @@ class Boss {
     state.player.reset();
     state.score = 0;
     state.waveIndex = 0;
-    state.waveProgress = 0;
+    state.waveProgress = 0; // enemies spawned in current wave
     state.waveSpawning = true;
     state.waveSpawnTimer = 0;
     state.lastTime = performance.now();
@@ -437,6 +437,13 @@ class Boss {
     bossName.style.display = 'none';
     updateHearts();
     showScreen(STATE.PLAYING);
+
+    // Hide btn-secondary for level 2, show for others
+    if (currentLevelIndex === 1) {
+      btnSecondary.style.display = 'none';
+    } else {
+      btnSecondary.style.display = 'flex'; // Assuming it's a flex container
+    }
   }
 
   // Build level select buttons
