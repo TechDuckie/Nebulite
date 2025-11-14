@@ -67,6 +67,9 @@
     .right-buttons{right:8px;bottom:8px;width:170px;height:140px;display:flex;gap:12px;justify-content:flex-end;align-items:flex-end;max-width:30vw;max-height:22vw;pointer-events:auto}
     .btn{width:64px;height:64px;border-radius:0;background:transparent;border:2px solid white;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
     .btn:active{transform:translateY(2px) scale(0.98)}
+    .btn.cooldown {
+      background-color: rgba(255, 0, 0, 0.5);
+    }
     .btn img{width:36px;height:36px;object-fit:contain}
     .joystick-base {
       width: 100%;

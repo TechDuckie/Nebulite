@@ -45,7 +45,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png' };
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -63,6 +63,7 @@
     images.motherShip = loadedAssets[14];
     audio.menu = loadedAssets[15];
     images.heart = loadedAssets[16];
+    images.shield = loadedAssets[17];
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
   });
@@ -262,6 +263,10 @@ class Boss {
       this.y = canvas.height / DPR - 110;
       this.vx = 0;
       this.vy = 0;
+      this.shieldActive = false;
+      this.shieldCooldown = 0;
+      this.shieldDuration = 3000; // 3 seconds
+      this.shieldCooldownTime = 5000; // 5 seconds
     }
 
     shoot() {
@@ -271,7 +276,19 @@ class Boss {
       triggerVibration(20);
     }
 
+    activateShield() {
+      const now = performance.now();
+      if (now > this.shieldCooldown) {
+        this.shieldActive = true;
+        this.shieldCooldown = now + this.shieldCooldownTime;
+        setTimeout(() => {
+          this.shieldActive = false;
+        }, this.shieldDuration);
+      }
+    }
+
     takeDamage(amount = 1) {
+      if (this.shieldActive) return;
       this.hp -= amount;
       spawnParticles(this.x, this.y);
       playSfx('playerDamage');
@@ -329,6 +346,9 @@ class Boss {
 
     render(ctx) {
       drawImageCentered(images.player, this.x, this.y, this.w, this.h);
+      if (this.shieldActive) {
+        drawImageCentered(images.shield, this.x, this.y, this.w * 1.2, this.h * 1.2);
+      }
     }
 
     reset() {
@@ -547,6 +567,14 @@ class Boss {
     }
 
     if(gameState !== STATE.PLAYING) return;
+
+    // Shield cooldown visual
+    const now = performance.now();
+    if (now < state.player.shieldCooldown) {
+      btnShield.classList.add('cooldown');
+    } else {
+      btnShield.classList.remove('cooldown');
+    }
 
     // update particles
     for (let i = state.particles.length - 1; i >= 0; i--) {
@@ -821,6 +849,7 @@ class Boss {
 
   // controls: joystick + fire + auto-fire
   const btnFire = document.getElementById('btn-fire');
+  const btnShield = document.getElementById('btn-shield');
   const btnSecondary = document.getElementById('btn-secondary');
 
   const knob = document.getElementById('knob');
@@ -857,6 +886,9 @@ class Boss {
   // fire button pointerdown triggers laser immediately; can hold to spam if you want (no capture)
   btnFire.addEventListener('pointerdown', e=>{
     state.player.shoot();
+  });
+  btnShield.addEventListener('pointerdown', e => {
+    state.player.activateShield();
   });
   // also allow tap on canvas to shoot (optional)
   canvas.addEventListener('click', e=> state.player.shoot());
