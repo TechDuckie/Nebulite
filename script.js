@@ -172,7 +172,7 @@
       bossMusic: 'boss1',
       dialogue: 'dialogue3',
       boss: {
-        name: 'Asteroid Guardian',
+        name: 'TY-Fyter',
         spriteKey: 'boss3',
         hp: 100,
         w: 160, h: 160,
