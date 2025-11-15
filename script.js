@@ -321,6 +321,7 @@ class Boss {
         this.specialAttackActive = false;
         this.specialAttackPhase = null;
         this.spinAngle = 0;
+        this.lastSpecialFire = 0;
       }
     }
 
@@ -333,7 +334,7 @@ class Boss {
       if (this.specialAttackActive) {
         const specialAttackSpeed = this.cfg.speed * 2;
         const centerX = canvas.width / DPR / 2 - this.w / 2;
-        const centerY = 150;
+        const centerY = canvas.height / DPR / 2;
 
         if (this.specialAttackPhase === 'moveToCenter') {
           this.x += (centerX - this.x) * 0.08;
@@ -344,6 +345,29 @@ class Boss {
           }
         } else if (this.specialAttackPhase === 'spinning') {
           this.spinAngle += 30 * dt; // Degrees per second
+          
+          // Fire projectiles in a stream
+          const specialFireRate = 100; // ms
+          if (now - this.lastSpecialFire > specialFireRate) {
+            this.lastSpecialFire = now;
+            const angle = this.spinAngle * Math.PI / 180;
+            const bulletSpeed = 250;
+            const bw = 60, bh = 60; // Large projectiles
+            
+            state.enemyBullets.push({
+              x: this.x + this.w / 2 - bw / 2,
+              y: this.y + this.h / 2 - bh / 2,
+              w: bw, h: bh,
+              vx: Math.cos(angle) * bulletSpeed,
+              vy: Math.sin(angle) * bulletSpeed,
+              sprite: 'enemyLaserBig',
+              piercing: true,
+              animationTimer: 0,
+              scaleX: 1,
+              animationSpeed: 0.2
+            });
+          }
+
           if (this.spinAngle >= 360) {
             this.specialAttackPhase = 'returnToPosition';
           }
@@ -458,14 +482,6 @@ class Boss {
         drawImageCentered(images[this.cfg.spriteKey] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
         if (this.specialAttackActive) {
           drawImageCentered(images.enemyShield1, this.x + this.w / 2, this.y + this.h / 2, this.w * 1.2, this.h * 1.2);
-          
-          ctx.save();
-          ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-          ctx.rotate(this.spinAngle * Math.PI / 180);
-          const laserW = canvas.width / DPR * 2; // Wider to cover edges when rotated
-          const laserH = 40; // Thicker beam
-          drawImageCentered(images.enemyLaserBig, 0, 0, laserW, laserH);
-          ctx.restore();
         }
       }
     }
@@ -935,15 +951,18 @@ class Boss {
     // update enemy bullets
     for(let i=state.enemyBullets.length-1;i>=0;i--){
       const b = state.enemyBullets[i];
+      b.x += (b.vx || 0) * dt;
       b.y += b.vy * dt;
-      if (b.sprite === 'enemyLaserSmall') {
+
+      if (b.sprite === 'enemyLaserSmall' || b.sprite === 'enemyLaserBig') {
         b.animationTimer += dt;
         if (b.animationTimer > b.animationSpeed) {
           b.animationTimer = 0;
           b.scaleX *= -1;
         }
       }
-      if(b.y > canvas.height/DPR + 40) state.enemyBullets.splice(i,1);
+
+      if(b.y > canvas.height/DPR + 40 || b.y < -40 || b.x < -40 || b.x > canvas.width/DPR + 40) state.enemyBullets.splice(i,1);
     }
 
     // boss behavior
@@ -1045,7 +1064,7 @@ class Boss {
       const rp = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
       if(rectIntersect(rb, rp)){
         state.enemyBullets.splice(bi,1);
-        state.player.takeDamage();
+        state.player.takeDamage(1, b.piercing || false);
       }
     }
 
