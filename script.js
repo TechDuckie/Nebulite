@@ -277,15 +277,19 @@
       const now = performance.now();
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-                  const bw = 16, bh = 48;
-                  const bullet = {
-                    x: this.x + this.w / 2 - bw / 2,
-                    y: this.y + this.h,
-                    w: bw,
-                    h: bh,
-                    vy: this.bulletSpeed,
-                    sprite: 'enemyLaserSmall'
-                  };        state.enemyBullets.push(bullet);
+                          const bw = 20, bh = 52;
+                          const bullet = {
+                            x: this.x + this.w / 2 - bw / 2,
+                            y: this.y + this.h,
+                            w: bw,
+                            h: bh,
+                            vy: this.bulletSpeed,
+                            sprite: 'enemyLaserSmall',
+                            animationTimer: 0,
+                            scaleX: 1,
+                            animationSpeed: 0.2 // flip every 0.2 seconds
+                          };
+                          state.enemyBullets.push(bullet);
       }
     }
   }
@@ -436,10 +440,17 @@ class Boss {
     }
 
     fire() {
-      const bw = 20, bh = 64;
+      const bw = 24, bh = 68;
       const x = this.x + this.w / 2 - bw / 2;
       const y = this.y + this.h / 2 + 8;
-      state.enemyBullets.push({ x, y, w: bw, h: bh, vy: this.cfg.bulletSpeed, sprite: 'enemyLaserSmall' });
+      state.enemyBullets.push({
+        x, y, w: bw, h: bh,
+        vy: this.cfg.bulletSpeed,
+        sprite: 'enemyLaserSmall',
+        animationTimer: 0,
+        scaleX: 1,
+        animationSpeed: 0.2
+      });
     }
 
     render(ctx) {
@@ -479,13 +490,17 @@ class Boss {
       const now = performance.now();
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-        const bw = 16, bh = 48;
+        const bw = 20, bh = 52;
         const bullet = {
           x: this.x + this.w / 2 - bw / 2,
           y: this.y + this.h,
           w: bw,
           h: bh,
-          vy: this.bulletSpeed
+          vy: this.bulletSpeed,
+          sprite: 'enemyLaserSmall',
+          animationTimer: 0,
+          scaleX: 1,
+          animationSpeed: 0.2
         };
         state.enemyBullets.push(bullet); // Using enemyBullets array for now
       }
@@ -921,6 +936,13 @@ class Boss {
     for(let i=state.enemyBullets.length-1;i>=0;i--){
       const b = state.enemyBullets[i];
       b.y += b.vy * dt;
+      if (b.sprite === 'enemyLaserSmall') {
+        b.animationTimer += dt;
+        if (b.animationTimer > b.animationSpeed) {
+          b.animationTimer = 0;
+          b.scaleX *= -1;
+        }
+      }
       if(b.y > canvas.height/DPR + 40) state.enemyBullets.splice(i,1);
     }
 
@@ -1095,7 +1117,15 @@ class Boss {
     // enemy bullets
     state.enemyBullets.forEach(bb => {
       if (bb.sprite && images[bb.sprite]) {
-        drawImageCentered(images[bb.sprite], bb.x + bb.w/2, bb.y + bb.h/2, bb.w, bb.h);
+        if (bb.scaleX && bb.scaleX !== 1) {
+          ctx.save();
+          ctx.translate(bb.x + bb.w / 2, bb.y + bb.h / 2);
+          ctx.scale(bb.scaleX, 1);
+          drawImageCentered(images[bb.sprite], 0, 0, bb.w, bb.h);
+          ctx.restore();
+        } else {
+          drawImageCentered(images[bb.sprite], bb.x + bb.w/2, bb.y + bb.h/2, bb.w, bb.h);
+        }
       } else {
         ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
       }
