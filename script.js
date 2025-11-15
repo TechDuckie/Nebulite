@@ -215,7 +215,7 @@
         name: 'Command Vessel',
         spriteKey: 'boss4',
         hp: 400,
-        w: 200, h: 200,
+        w: 180, h: 180,
         speed: 50,
         fireRate: 250,
         bulletSpeed: 280,
@@ -305,6 +305,7 @@ class Boss {
       this.hp = this.cfg.hp;
       this.lastFire = 0;
       this.isDefeated = false;
+      this.hoverY = 80;
 
       if (this.cfg.canDash) {
         this.isDashing = false;
@@ -313,7 +314,6 @@ class Boss {
         this.dashPhase = null;
         this.dashTargetX = 0;
         this.dashTargetY = 0;
-        this.hoverY = 80;
       }
 
       if (this.cfg.specialAttackCooldown) {
@@ -336,20 +336,20 @@ class Boss {
         const centerY = 150;
 
         if (this.specialAttackPhase === 'moveToCenter') {
-          this.x += (centerX - this.x) * 0.05;
-          this.y += (centerY - this.y) * 0.05;
+          this.x += (centerX - this.x) * 0.08;
+          this.y += (centerY - this.y) * 0.08;
           if (Math.abs(this.x - centerX) < 5 && Math.abs(this.y - centerY) < 5) {
             this.specialAttackPhase = 'spinning';
             this.spinAngle = 0;
           }
         } else if (this.specialAttackPhase === 'spinning') {
-          this.spinAngle += 60 * dt; // Degrees per second
+          this.spinAngle += 30 * dt; // Degrees per second
           if (this.spinAngle >= 360) {
             this.specialAttackPhase = 'returnToPosition';
           }
         } else if (this.specialAttackPhase === 'returnToPosition') {
-          this.x += (this.initialX - this.x) * 0.05;
-          this.y += (this.hoverY - this.y) * 0.05;
+          this.x += (this.initialX - this.x) * 0.08;
+          this.y += (this.hoverY - this.y) * 0.08;
           if (Math.abs(this.x - this.initialX) < 5 && Math.abs(this.y - this.hoverY) < 5) {
             this.specialAttackActive = false;
             this.specialAttackPhase = null;
@@ -462,8 +462,8 @@ class Boss {
           ctx.save();
           ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
           ctx.rotate(this.spinAngle * Math.PI / 180);
-          const laserW = canvas.width / DPR;
-          const laserH = 20;
+          const laserW = canvas.width / DPR * 2; // Wider to cover edges when rotated
+          const laserH = 40; // Thicker beam
           drawImageCentered(images.enemyLaserBig, 0, 0, laserW, laserH);
           ctx.restore();
         }
