@@ -184,6 +184,8 @@
         fireRate: 700,
         bulletSpeed: 250,
         canDash: true,
+        dashType: 'z-motion',
+        dashCooldown: 5000,
       }
     };
   }
@@ -235,7 +237,7 @@ class Boss {
       if (this.cfg.canDash) {
         this.isDashing = false;
         this.lastDash = performance.now();
-        this.dashCooldown = 7000; // 7 seconds
+        this.dashCooldown = this.cfg.dashCooldown || 7000; // Use config cooldown or default
         this.dashPhase = null;
         this.dashTargetX = 0;
         this.dashTargetY = 0;
@@ -251,24 +253,50 @@ class Boss {
       // If dashing, execute dash logic and nothing else
       if (this.isDashing) {
         const dashSpeed = this.cfg.speed * 4;
-        if (this.dashPhase === 'down') {
-          this.y += dashSpeed * dt;
-          if (this.y >= this.dashTargetY) {
-            this.dashPhase = 'across';
+
+        // Z-MOTION DASH (BOSS 3)
+        if (this.cfg.dashType === 'z-motion') {
+          if (this.dashPhase === 'z-down') {
+            this.dashTimer += dt;
+            const progress = Math.min(1, this.dashTimer / this.dashDuration);
+            this.y = this.dashInitialY + (this.dashTargetY - this.dashInitialY) * progress;
+            // Zig-zag motion using a sine wave
+            this.x = this.dashInitialX + Math.sin(progress * Math.PI * 4) * (canvas.width / DPR / 3);
+
+            if (progress >= 1) {
+              this.dashPhase = 'z-up';
+            }
+          } else if (this.dashPhase === 'z-up') {
+            this.y -= dashSpeed * dt;
+            if (this.y <= this.hoverY) {
+              this.y = this.hoverY;
+              this.isDashing = false;
+              this.dashPhase = null;
+              this.lastDash = now;
+            }
           }
-        } else if (this.dashPhase === 'across') {
-          const targetX = this.dashTargetX - this.w / 2;
-          this.x += (targetX - this.x) * 0.1;
-          if (Math.abs(this.x - targetX) < 10) {
-            this.dashPhase = 'up';
-          }
-        } else if (this.dashPhase === 'up') {
-          this.y -= dashSpeed * dt;
-          if (this.y <= this.hoverY) {
-            this.y = this.hoverY;
-            this.isDashing = false;
-            this.dashPhase = null;
-            this.lastDash = now; // Reset cooldown AFTER dash
+        }
+        // U-MOTION DASH (BOSS 2)
+        else {
+          if (this.dashPhase === 'down') {
+            this.y += dashSpeed * dt;
+            if (this.y >= this.dashTargetY) {
+              this.dashPhase = 'across';
+            }
+          } else if (this.dashPhase === 'across') {
+            const targetX = this.dashTargetX - this.w / 2;
+            this.x += (targetX - this.x) * 0.1;
+            if (Math.abs(this.x - targetX) < 10) {
+              this.dashPhase = 'up';
+            }
+          } else if (this.dashPhase === 'up') {
+            this.y -= dashSpeed * dt;
+            if (this.y <= this.hoverY) {
+              this.y = this.hoverY;
+              this.isDashing = false;
+              this.dashPhase = null;
+              this.lastDash = now; // Reset cooldown AFTER dash
+            }
           }
         }
         return; // End update here if dashing
@@ -300,9 +328,21 @@ class Boss {
         // Check if it's time to dash
         if (this.cfg.canDash && now - this.lastDash > this.dashCooldown) {
           this.isDashing = true;
-          this.dashPhase = 'down';
-          this.dashTargetX = state.player.x;
-          this.dashTargetY = state.player.y;
+          // Z-MOTION DASH SETUP
+          if (this.cfg.dashType === 'z-motion') {
+            this.dashPhase = 'z-down';
+            this.dashTimer = 0;
+            this.dashDuration = 1.5; // seconds for the downward part
+            this.dashInitialY = this.y;
+            this.dashTargetY = state.player.y;
+            this.dashInitialX = this.x;
+          }
+          // U-MOTION DASH SETUP
+          else {
+            this.dashPhase = 'down';
+            this.dashTargetX = state.player.x;
+            this.dashTargetY = state.player.y;
+          }
         }
       }
     }
