@@ -45,7 +45,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -68,8 +68,9 @@
     audio.menu = loadedAssets[16];
     images.heart = loadedAssets[17];
     images.shield = loadedAssets[18];
+    images.falcon = loadedAssets[19];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[19+i];
+      images[`asteroid${i+1}`] = loadedAssets[20+i];
     }
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
@@ -116,6 +117,7 @@
       waveMusic: 'music1',
       bossMusic: 'boss1',
       dialogue: 'dialogue1',
+      dialogueBackgroundImage: 'motherShip',
       boss: {
         name: 'Mech-Tra',
         spriteKey: 'boss',
@@ -143,6 +145,7 @@
       waveMusic: 'music1',
       bossMusic: 'boss1',
       dialogue: 'dialogue2',
+      dialogueBackgroundImage: 'motherShip',
       boss: {
         name: 'Mecha-Drill',
         spriteKey: 'boss2',
@@ -171,6 +174,7 @@
       waveMusic: 'music1',
       bossMusic: 'boss1',
       dialogue: 'dialogue3',
+      dialogueBackgroundImage: 'falcon',
       boss: {
         name: 'TY-Fyter',
         spriteKey: 'boss3',
@@ -498,12 +502,13 @@ class Boss {
     gameState = s;
   }
 
-  function showDialogue(dialogueKey, onComplete) {
+  function showDialogue(dialogueKey, onComplete, backgroundImageKey = 'motherShip') {
     playMusic('menu');
     fetch(`assets/${dialogueKey}.json`)
       .then(res => res.json())
       .then(data => {
         dialogueImage.src = data.characterImage;
+        motherShipImage.src = images[data.backgroundImage || backgroundImageKey].src;
         state.dialogue.fullText = data.text;
         state.dialogue.text = '';
         state.dialogue.letterIndex = 0;
@@ -561,7 +566,7 @@ class Boss {
     currentLevelIndex = index;
     const lvl = LEVELS[index];
     if (lvl.dialogue) {
-      showDialogue(lvl.dialogue, beginLevelGameplay);
+      showDialogue(lvl.dialogue, beginLevelGameplay, lvl.dialogueBackgroundImage);
     } else {
       beginLevelGameplay();
     }
@@ -807,6 +812,7 @@ class Boss {
               // show post-boss dialogue after a delay
               setTimeout(() => {
                 let victoryDialogue = 'dialogueClear1';
+                let dialogueBg = LEVELS[currentLevelIndex].dialogueBackgroundImage;
                 if (currentLevelIndex === 1) {
                   victoryDialogue = 'dialogueClear2';
                 } else if (currentLevelIndex === 2) {
@@ -816,7 +822,7 @@ class Boss {
                   state.boss = null;
                   showScreen(STATE.VICTORY);
                   rebuildLevelSelect();
-                });
+                }, dialogueBg);
               }, 5000); // 5 second delay
             } else {
               // update boss bar
