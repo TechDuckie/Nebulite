@@ -45,7 +45,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -69,8 +69,13 @@
     images.heart = loadedAssets[17];
     images.shield = loadedAssets[18];
     images.falcon = loadedAssets[19];
+    images.enemySmall4 = loadedAssets[20];
+    images.enemyLaserSmall = loadedAssets[21];
+    images.boss4 = loadedAssets[22];
+    images.enemyShield1 = loadedAssets[23];
+    images.enemyLaserBig = loadedAssets[24];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[20+i];
+      images[`asteroid${i+1}`] = loadedAssets[25+i];
     }
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
@@ -80,8 +85,8 @@
   const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6 };
   let gameState = STATE.MENU;
 
-  const LEVEL_COUNT = 3; // show 3 levels for selection (only 1 unlocked initially)
-  const unlocked = [true, false, false]; // unlock array
+  const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
+  const unlocked = [true, false, false, false]; // unlock array
   let currentLevelIndex = 0;
 
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, currentMusic: null };
@@ -190,7 +195,36 @@
     };
   }
 
-  const LEVELS = [ makeLevel1(), makeLevel2(), makeLevel3() ];
+  function makeLevel4() {
+    const waves = [];
+    for (let w = 0; w < 10; w++) {
+      waves.push({
+        enemyCount: 3 + w,
+        enemySpeed: 60 + w * 5,
+        spawnRate: 400,
+        enemySprite: 'enemySmall4'
+      });
+    }
+    return {
+      waves,
+      waveMusic: 'music1',
+      bossMusic: 'boss1',
+      dialogue: 'dialogue4',
+      dialogueBackgroundImage: 'motherShip',
+      boss: {
+        name: 'Command Vessel',
+        spriteKey: 'boss4',
+        hp: 400,
+        w: 200, h: 200,
+        speed: 50,
+        fireRate: 250,
+        bulletSpeed: 280,
+        specialAttackCooldown: 10000,
+      }
+    };
+  }
+
+  const LEVELS = [ makeLevel1(), makeLevel2(), makeLevel3(), makeLevel4() ];
 
   class Enemy {
     constructor(x, y, w, h, speed, sprite) {
@@ -201,6 +235,7 @@
       this.h = h;
       this.speed = speed;
       this.sprite = sprite;
+      this.hp = 1;
       this.isAsteroid = sprite.startsWith('asteroid');
       if (this.isAsteroid) {
         this.oscillateSpeed = (Math.random() * 0.5 + 0.5) * 1.5; // Random speedfactor for oscillation
@@ -222,6 +257,39 @@
     }
   }
 
+  class ShootingEnemy4 extends Enemy {
+    constructor(x, y, w, h, speed, sprite) {
+      super(x, y, w, h, speed, sprite);
+      this.hp = 5;
+      this.lastFire = 0;
+      this.fireRate = 2000; // ms
+      this.bulletSpeed = 150;
+    }
+
+    update(dt) {
+      super.update(dt); // Basic downward movement
+
+      // Lerp towards player's x position
+      const targetX = state.player.x + state.player.w / 2 - this.w / 2;
+      this.x += (targetX - this.x) * 0.005; // Very slow follow
+
+      // Fire bullets
+      const now = performance.now();
+      if (now - this.lastFire > this.fireRate) {
+        this.lastFire = now;
+                  const bw = 16, bh = 48;
+                  const bullet = {
+                    x: this.x + this.w / 2 - bw / 2,
+                    y: this.y + this.h,
+                    w: bw,
+                    h: bh,
+                    vy: this.bulletSpeed,
+                    sprite: 'enemyLaserSmall'
+                  };        state.enemyBullets.push(bullet);
+      }
+    }
+  }
+
 class Boss {
     constructor(config) {
       this.cfg = config;
@@ -237,11 +305,18 @@ class Boss {
       if (this.cfg.canDash) {
         this.isDashing = false;
         this.lastDash = performance.now();
-        this.dashCooldown = this.cfg.dashCooldown || 7000; // Use config cooldown or default
+        this.dashCooldown = this.cfg.dashCooldown || 7000;
         this.dashPhase = null;
         this.dashTargetX = 0;
         this.dashTargetY = 0;
-        this.hoverY = 80; // Normal Y position
+        this.hoverY = 80;
+      }
+
+      if (this.cfg.specialAttackCooldown) {
+        this.lastSpecialAttack = performance.now();
+        this.specialAttackActive = false;
+        this.specialAttackPhase = null;
+        this.spinAngle = 0;
       }
     }
 
@@ -250,22 +325,46 @@ class Boss {
 
       const now = performance.now();
 
-      // If dashing, execute dash logic and nothing else
+      // Special Attack Logic (Boss 4)
+      if (this.specialAttackActive) {
+        const specialAttackSpeed = this.cfg.speed * 2;
+        const centerX = canvas.width / DPR / 2 - this.w / 2;
+        const centerY = 150;
+
+        if (this.specialAttackPhase === 'moveToCenter') {
+          this.x += (centerX - this.x) * 0.05;
+          this.y += (centerY - this.y) * 0.05;
+          if (Math.abs(this.x - centerX) < 5 && Math.abs(this.y - centerY) < 5) {
+            this.specialAttackPhase = 'spinning';
+            this.spinAngle = 0;
+          }
+        } else if (this.specialAttackPhase === 'spinning') {
+          this.spinAngle += 60 * dt; // Degrees per second
+          if (this.spinAngle >= 360) {
+            this.specialAttackPhase = 'returnToPosition';
+          }
+        } else if (this.specialAttackPhase === 'returnToPosition') {
+          this.x += (this.initialX - this.x) * 0.05;
+          this.y += (this.hoverY - this.y) * 0.05;
+          if (Math.abs(this.x - this.initialX) < 5 && Math.abs(this.y - this.hoverY) < 5) {
+            this.specialAttackActive = false;
+            this.specialAttackPhase = null;
+            this.lastSpecialAttack = now;
+          }
+        }
+        return; // Don't do normal actions during special attack
+      }
+
+      // Dashing Logic
       if (this.isDashing) {
         const dashSpeed = this.cfg.speed * 4;
-
-        // Z-MOTION DASH (BOSS 3)
         if (this.cfg.dashType === 'z-motion') {
           if (this.dashPhase === 'z-down') {
             this.dashTimer += dt;
             const progress = Math.min(1, this.dashTimer / this.dashDuration);
             this.y = this.dashInitialY + (this.dashTargetY - this.dashInitialY) * progress;
-            // Zig-zag motion using a sine wave
             this.x = this.dashInitialX + Math.sin(progress * Math.PI * 4) * (canvas.width / DPR / 3);
-
-            if (progress >= 1) {
-              this.dashPhase = 'z-up';
-            }
+            if (progress >= 1) this.dashPhase = 'z-up';
           } else if (this.dashPhase === 'z-up') {
             this.y -= dashSpeed * dt;
             if (this.y <= this.hoverY) {
@@ -275,70 +374,59 @@ class Boss {
               this.lastDash = now;
             }
           }
-        }
-        // U-MOTION DASH (BOSS 2)
-        else {
+        } else {
           if (this.dashPhase === 'down') {
             this.y += dashSpeed * dt;
-            if (this.y >= this.dashTargetY) {
-              this.dashPhase = 'across';
-            }
+            if (this.y >= this.dashTargetY) this.dashPhase = 'across';
           } else if (this.dashPhase === 'across') {
             const targetX = this.dashTargetX - this.w / 2;
             this.x += (targetX - this.x) * 0.1;
-            if (Math.abs(this.x - targetX) < 10) {
-              this.dashPhase = 'up';
-            }
+            if (Math.abs(this.x - targetX) < 10) this.dashPhase = 'up';
           } else if (this.dashPhase === 'up') {
             this.y -= dashSpeed * dt;
             if (this.y <= this.hoverY) {
               this.y = this.hoverY;
               this.isDashing = false;
               this.dashPhase = null;
-              this.lastDash = now; // Reset cooldown AFTER dash
+              this.lastDash = now;
             }
           }
         }
-        return; // End update here if dashing
+        return;
       }
 
-      // --- If NOT dashing, perform normal behavior ---
-
-      // 1. Descend to hover position if not already there
+      // Normal Behavior
       const hoverY = this.cfg.canDash ? this.hoverY : 80;
       if (this.y < hoverY) {
         this.y += (this.cfg.speed / 2) * dt;
         if (this.y >= hoverY) {
           this.y = hoverY;
-          this.lastDash = now; // Start the timer once in position
+          this.lastDash = now;
+          this.lastSpecialAttack = now;
         }
-      }
-      // 2. Once in position, execute normal attacks and check for dash trigger
-      else {
-        // Track player
+      } else {
         const targetX = state.player.x + state.player.w / 2 - this.w / 2;
-        this.x += (targetX - this.x) * (Math.min(1, this.cfg.speed / 200) * dt * 2.2);
+        this.x += (targetX - this.x) * (Math.min(1, this.cfg.speed / 100) * dt);
 
-        // Fire
         if (now - this.lastFire > this.cfg.fireRate) {
           this.fire();
           this.lastFire = now;
         }
 
-        // Check if it's time to dash
-        if (this.cfg.canDash && now - this.lastDash > this.dashCooldown) {
+        if (this.cfg.specialAttackCooldown && now - this.lastSpecialAttack > this.cfg.specialAttackCooldown) {
+          this.specialAttackActive = true;
+          this.specialAttackPhase = 'moveToCenter';
+          this.initialX = this.x;
+        } else if (this.cfg.canDash && now - this.lastDash > this.dashCooldown) {
           this.isDashing = true;
-          // Z-MOTION DASH SETUP
           if (this.cfg.dashType === 'z-motion') {
             this.dashPhase = 'z-down';
             this.dashTimer = 0;
-            this.dashDuration = 1.5; // seconds for the downward part
+            this.dashDuration = 1.5;
             this.dashInitialY = this.y;
             this.dashTargetY = state.player.y;
             this.dashInitialX = this.x;
-          }
-          // U-MOTION DASH SETUP
-          else {
+          } else {
             this.dashPhase = 'down';
             this.dashTargetX = state.player.x;
             this.dashTargetY = state.player.y;
@@ -348,15 +436,26 @@ class Boss {
     }
 
     fire() {
-      const bw = 12, bh = 24;
+      const bw = 20, bh = 64;
       const x = this.x + this.w / 2 - bw / 2;
       const y = this.y + this.h / 2 + 8;
-      state.enemyBullets.push({ x, y, w: bw, h: bh, vy: this.cfg.bulletSpeed });
+      state.enemyBullets.push({ x, y, w: bw, h: bh, vy: this.cfg.bulletSpeed, sprite: 'enemyLaserSmall' });
     }
 
     render(ctx) {
       if (!this.isDefeated) {
         drawImageCentered(images[this.cfg.spriteKey] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
+        if (this.specialAttackActive) {
+          drawImageCentered(images.enemyShield1, this.x + this.w / 2, this.y + this.h / 2, this.w * 1.2, this.h * 1.2);
+          
+          ctx.save();
+          ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+          ctx.rotate(this.spinAngle * Math.PI / 180);
+          const laserW = canvas.width / DPR;
+          const laserH = 20;
+          drawImageCentered(images.enemyLaserBig, 0, 0, laserW, laserH);
+          ctx.restore();
+        }
       }
     }
   }
@@ -380,7 +479,7 @@ class Boss {
       const now = performance.now();
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-        const bw = 8, bh = 16;
+        const bw = 16, bh = 48;
         const bullet = {
           x: this.x + this.w / 2 - bw / 2,
           y: this.y + this.h,
@@ -427,8 +526,8 @@ class Boss {
       }
     }
 
-    takeDamage(amount = 1) {
-      if (this.shieldActive) return;
+    takeDamage(amount = 1, piercing = false) {
+      if (this.shieldActive && !piercing) return;
       this.hp -= amount;
       spawnParticles(this.x, this.y);
       playSfx('playerDamage');
@@ -580,13 +679,8 @@ class Boss {
     showScreen(STATE.PLAYING);
 
     // Show/hide buttons based on level
-    if (currentLevelIndex === 1 || currentLevelIndex === 2) { // Level 2 or 3
-      btnSecondary.style.display = 'none';
-      btnShield.style.display = 'flex';
-    } else { // Level 1
-      btnSecondary.style.display = 'flex';
-      btnShield.style.display = 'none';
-    }
+    btnSecondary.style.display = 'none';
+    btnShield.style.display = 'flex';
   }
 
   // Build level select buttons
@@ -636,6 +730,8 @@ class Boss {
     } else if (spriteKey === 'asteroid') {
       const asteroidSprite = `asteroid${Math.floor(Math.random() * NUM_ASTEROID_IMAGES) + 1}`;
       enemy = new Enemy(x, -h, w, h, speed, asteroidSprite);
+    } else if (spriteKey === 'enemySmall4') {
+      enemy = new ShootingEnemy4(x, -h, w, h, speed, spriteKey);
     } else {
       enemy = new Enemy(x, -h, w, h, speed, spriteKey);
     }
@@ -833,7 +929,7 @@ class Boss {
       state.boss.update(dt);
 
       // boss collision with player lasers
-      if (!state.boss.isDefeated) {
+      if (!state.boss.isDefeated && !state.boss.specialAttackActive) {
         for(let li=state.lasers.length-1; li>=0; li--){
           const L = state.lasers[li];
           const rectBoss = {x: state.boss.x, y: state.boss.y, w: state.boss.w, h: state.boss.h};
@@ -857,6 +953,8 @@ class Boss {
                   victoryDialogue = 'dialogueClear2';
                 } else if (currentLevelIndex === 2) {
                   victoryDialogue = 'dialogueClear3';
+                } else if (currentLevelIndex === 3) {
+                  victoryDialogue = 'dialogueClear4';
                 }
                 showDialogue(victoryDialogue, () => {
                   state.boss = null;
@@ -873,6 +971,24 @@ class Boss {
           }
         }
       }
+
+      // boss special attack collision
+      if (state.boss && state.boss.specialAttackActive && state.boss.specialAttackPhase === 'spinning') {
+        const playerRect = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
+        
+        // A simplified collision check for the spinning laser
+        const angle = state.boss.spinAngle * Math.PI / 180;
+        const dx = playerRect.x + playerRect.w/2 - (state.boss.x + state.boss.w/2);
+        const dy = playerRect.y + playerRect.h/2 - (state.boss.y + state.boss.h/2);
+        const dist = Math.hypot(dx, dy);
+        
+        const playerAngle = Math.atan2(dy, dx);
+        const angleDiff = Math.abs(playerAngle - angle);
+
+        if (dist < canvas.width/DPR/2 && (angleDiff < 0.1 || Math.abs(angleDiff - Math.PI) < 0.1)) {
+          state.player.takeDamage(3, true); // Insta-kill, piercing shield
+        }
+      }
     }
 
     // lasers hitting enemies
@@ -883,16 +999,17 @@ class Boss {
         const L = state.lasers[li];
         const rl = {x:L.x, y:L.y, w:L.w, h:L.h};
         if(rectIntersect(re, rl)){
-          // If it's an asteroid, remove the laser but not the asteroid
-          if (e.isAsteroid) {
-            state.lasers.splice(li,1);
-            playSfx('playerDamage', 0.5); // Play a lighter sound for laser hitting asteroid
+          state.lasers.splice(li,1);
+          if (!e.isAsteroid) {
+            e.hp--;
+            if (e.hp <= 0) {
+              spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
+              state.enemies.splice(ei,1);
+              state.score += 5;
+              playSfx('explosion');
+            }
           } else {
-            spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
-            state.enemies.splice(ei,1);
-            state.lasers.splice(li,1);
-            state.score += 5;
-            playSfx('explosion');
+            playSfx('playerDamage', 0.5);
           }
           break;
         }
@@ -977,7 +1094,11 @@ class Boss {
 
     // enemy bullets
     state.enemyBullets.forEach(bb => {
-      ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
+      if (bb.sprite && images[bb.sprite]) {
+        drawImageCentered(images[bb.sprite], bb.x + bb.w/2, bb.y + bb.h/2, bb.w, bb.h);
+      } else {
+        ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
+      }
     });
 
     // warning flash
