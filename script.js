@@ -481,17 +481,24 @@ class Boss {
     }
 
     fire() {
-      const bw = 24, bh = 68;
+      const isEarlyLevel = currentLevelIndex < 3;
+      const bw = isEarlyLevel ? 8 : 24;
+      const bh = isEarlyLevel ? 24 : 68;
       const x = this.x + this.w / 2 - bw / 2;
       const y = this.y + this.h / 2 + 8;
-      state.enemyBullets.push({
+      const bullet = {
         x, y, w: bw, h: bh,
         vy: this.cfg.bulletSpeed,
-        sprite: 'enemyLaserSmall',
         animationTimer: 0,
         scaleX: 1,
         animationSpeed: 0.2
-      });
+      };
+      if (isEarlyLevel) {
+        bullet.color = '#f00';
+      } else {
+        bullet.sprite = 'enemyLaserSmall';
+      }
+      state.enemyBullets.push(bullet);
     }
 
     render(ctx) {
@@ -523,17 +530,14 @@ class Boss {
       const now = performance.now();
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-        const bw = 20, bh = 52;
+        const bw = 8, bh = 24;
         const bullet = {
           x: this.x + this.w / 2 - bw / 2,
           y: this.y + this.h,
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
-          sprite: 'enemyLaserSmall',
-          animationTimer: 0,
-          scaleX: 1,
-          animationSpeed: 0.2
+          color: '#f00'
         };
         state.enemyBullets.push(bullet); // Using enemyBullets array for now
       }
@@ -728,7 +732,11 @@ class Boss {
 
     // Show/hide buttons based on level
     btnSecondary.style.display = 'none';
-    btnShield.style.display = 'flex';
+    if (currentLevelIndex === 0) {
+      btnShield.style.display = 'none';
+    } else {
+      btnShield.style.display = 'flex';
+    }
   }
 
   // Build level select buttons
@@ -1160,7 +1168,7 @@ class Boss {
       if (bb.sprite && images[bb.sprite]) {
         drawImageCentered(images[bb.sprite], 0, 0, bb.w, bb.h);
       } else {
-        ctx.fillStyle = '#ffb86b';
+        ctx.fillStyle = bb.color || '#ffb86b';
         ctx.fillRect(-bb.w / 2, -bb.h / 2, bb.w, bb.h);
       }
       ctx.restore();
