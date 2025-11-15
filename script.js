@@ -353,7 +353,8 @@ class Boss {
             const angle = this.spinAngle * Math.PI / 180;
             const bulletSpeed = 250;
             const bw = 60, bh = 60; // Large projectiles
-            
+
+            // Fire one projectile to the right
             state.enemyBullets.push({
               x: this.x + this.w / 2 - bw / 2,
               y: this.y + this.h / 2 - bh / 2,
@@ -362,6 +363,22 @@ class Boss {
               vy: Math.sin(angle) * bulletSpeed,
               sprite: 'enemyLaserBig',
               piercing: true,
+              rotation: angle,
+              animationTimer: 0,
+              scaleX: 1,
+              animationSpeed: 0.2
+            });
+
+            // Fire another projectile to the left
+            state.enemyBullets.push({
+              x: this.x + this.w / 2 - bw / 2,
+              y: this.y + this.h / 2 - bh / 2,
+              w: bw, h: bh,
+              vx: Math.cos(angle + Math.PI) * bulletSpeed,
+              vy: Math.sin(angle + Math.PI) * bulletSpeed,
+              sprite: 'enemyLaserBig',
+              piercing: true,
+              rotation: angle + Math.PI,
               animationTimer: 0,
               scaleX: 1,
               animationSpeed: 0.2
@@ -1015,19 +1032,15 @@ class Boss {
 
       // boss special attack collision
       if (state.boss && state.boss.specialAttackActive && state.boss.specialAttackPhase === 'spinning') {
-        const playerRect = {x: state.player.x - state.player.w/2, y: state.player.y - state.player.h/2, w: state.player.w, h: state.player.h};
-        
-        // A simplified collision check for the spinning laser
-        const angle = state.boss.spinAngle * Math.PI / 180;
-        const dx = playerRect.x + playerRect.w/2 - (state.boss.x + state.boss.w/2);
-        const dy = playerRect.y + playerRect.h/2 - (state.boss.y + state.boss.h/2);
-        const dist = Math.hypot(dx, dy);
-        
-        const playerAngle = Math.atan2(dy, dx);
-        const angleDiff = Math.abs(playerAngle - angle);
-
-        if (dist < canvas.width/DPR/2 && (angleDiff < 0.1 || Math.abs(angleDiff - Math.PI) < 0.1)) {
-          state.player.takeDamage(3, true); // Insta-kill, piercing shield
+        for (let bi = state.enemyBullets.length - 1; bi >= 0; bi--) {
+          const b = state.enemyBullets[bi];
+          if (!b.piercing) continue;
+          const rb = { x: b.x, y: b.y, w: b.w, h: b.h };
+          const rp = { x: state.player.x - state.player.w / 2, y: state.player.y - state.player.h / 2, w: state.player.w, h: state.player.h };
+          if (rectIntersect(rb, rp)) {
+            state.enemyBullets.splice(bi, 1);
+            state.player.takeDamage(1, true);
+          }
         }
       }
     }
@@ -1135,19 +1148,22 @@ class Boss {
 
     // enemy bullets
     state.enemyBullets.forEach(bb => {
-      if (bb.sprite && images[bb.sprite]) {
-        if (bb.scaleX && bb.scaleX !== 1) {
-          ctx.save();
-          ctx.translate(bb.x + bb.w / 2, bb.y + bb.h / 2);
-          ctx.scale(bb.scaleX, 1);
-          drawImageCentered(images[bb.sprite], 0, 0, bb.w, bb.h);
-          ctx.restore();
-        } else {
-          drawImageCentered(images[bb.sprite], bb.x + bb.w/2, bb.y + bb.h/2, bb.w, bb.h);
-        }
-      } else {
-        ctx.fillStyle = '#ffb86b'; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
+      ctx.save();
+      ctx.translate(bb.x + bb.w / 2, bb.y + bb.h / 2);
+      if (bb.rotation) {
+        ctx.rotate(bb.rotation + Math.PI / 2); // Add PI/2 because the laser image is vertical
       }
+      if (bb.scaleX && bb.scaleX !== 1) {
+        ctx.scale(bb.scaleX, 1);
+      }
+      
+      if (bb.sprite && images[bb.sprite]) {
+        drawImageCentered(images[bb.sprite], 0, 0, bb.w, bb.h);
+      } else {
+        ctx.fillStyle = '#ffb86b';
+        ctx.fillRect(-bb.w / 2, -bb.h / 2, bb.w, bb.h);
+      }
+      ctx.restore();
     });
 
     // warning flash
