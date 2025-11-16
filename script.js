@@ -837,6 +837,28 @@ class Boss {
     }
   }
 
+  function spawnBossParticles(x, y) {
+    const particleCount = 50;
+    const particleSize = 16;
+    const colors = ['#FFA500', '#FFFF00', '#FF0000']; // Orange, Yellow, Red
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 300 + 150;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      state.particles.push({
+        x,
+        y,
+        w: particleSize,
+        h: particleSize,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        gravity: 300,
+        color,
+      });
+    }
+  }
+
   // game update loop
   function update(dt){
     // Starfield update (always runs)
@@ -1009,7 +1031,7 @@ class Boss {
               bossBar.style.display = 'none';
               bossName.style.display = 'none';
               unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
-              spawnParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
+              spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
               playSfx('explosion');
               // show post-boss dialogue after a delay
               setTimeout(() => {

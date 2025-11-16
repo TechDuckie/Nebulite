@@ -219,7 +219,7 @@
 .bossName {
   position: fixed;
   left: 50%;
-  top: 50px;
+  top: 70px;
   transform: translateX(-50%);
   color: var(--ui);
   font-size: 14px;
