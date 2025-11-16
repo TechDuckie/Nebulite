@@ -36,6 +36,58 @@
   const masterVolume = document.getElementById('masterVolume');
   const sfxVolume = document.getElementById('sfxVolume');
   const vibration = document.getElementById('vibration');
+  const keyboardControlsToggle = document.getElementById('keyboardControlsToggle');
+  const currentControl = document.getElementById('currentControl');
+  const prevControl = document.getElementById('prevControl');
+  const nextControl = document.getElementById('nextControl');
+  const controlOptions = ['WASD', 'Arrow Keys'];
+  let currentControlIndex = 0;
+
+  prevControl.addEventListener('click', () => {
+    currentControlIndex = (currentControlIndex - 1 + controlOptions.length) % controlOptions.length;
+    currentControl.textContent = controlOptions[currentControlIndex];
+  });
+
+  nextControl.addEventListener('click', () => {
+    currentControlIndex = (currentControlIndex + 1) % controlOptions.length;
+    currentControl.textContent = controlOptions[currentControlIndex];
+  });
+
+  const keys = {};
+  window.addEventListener('keydown', e => keys[e.code] = true);
+  window.addEventListener('keyup', e => {
+    keys[e.code] = false;
+    updatePlayerVelocity();
+  });
+
+  function updatePlayerVelocity() {
+    state.player.vx = 0;
+    state.player.vy = 0;
+    const controlType = currentControl.textContent;
+    if (controlType === 'WASD') {
+      if (keys['KeyW']) state.player.vy = -state.player.speed;
+      if (keys['KeyS']) state.player.vy = state.player.speed;
+      if (keys['KeyA']) state.player.vx = -state.player.speed;
+      if (keys['KeyD']) state.player.vx = state.player.speed;
+    } else if (controlType === 'Arrow Keys') {
+      if (keys['ArrowUp']) state.player.vy = -state.player.speed;
+      if (keys['ArrowDown']) state.player.vy = state.player.speed;
+      if (keys['ArrowLeft']) state.player.vx = -state.player.speed;
+      if (keys['ArrowRight']) state.player.vx = state.player.speed;
+    }
+  }
+
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space') state.player.shoot();
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') state.player.activateShield();
+    updatePlayerVelocity();
+  });
+
+  const isDesktop = !('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  if (isDesktop) {
+    document.getElementById('joystick').style.display = 'none';
+    document.getElementById('right-buttons').style.display = 'none';
+  }
 
   const waveInfo = document.getElementById('waveInfo');
   const bossBar = document.getElementById('bossBar'), bossBarInner = document.getElementById('bossBarInner');

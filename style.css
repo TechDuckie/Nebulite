@@ -322,3 +322,23 @@ input[type="range"]::-moz-range-thumb {
 .setting input[type="checkbox"]:checked::after {
   transform: translate(-50%, -50%) scale(1);
 }
+
+.custom-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#currentControl {
+  font-family: "Dedicool", sans-serif;
+  font-size: 18px;
+  color: white;
+}
+
+.toggle-arrow {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
