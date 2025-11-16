@@ -1110,6 +1110,7 @@ class Boss {
 
     // debug
     dbg.textContent = `Score:${state.score} Enemies:${state.enemies.length} Lasers:${state.lasers.length} EnemyBullets:${state.enemyBullets.length} FPS:${state.fps.toFixed(0)}` ;
+    document.getElementById('scoreText').textContent = `Score: ${state.score}`;
   }
 
   // render
