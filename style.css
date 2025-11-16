@@ -12,6 +12,10 @@
     html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:'Dedicool', sans-serif}
     #gameWrap{position:fixed;top: 0; right: 0; bottom: 0; left: 0;overflow:hidden;z-index:2}
     canvas{display:block;width:100vw;height:100vh;background:transparent;}
+    img {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
     #starfield {
       position: fixed;
       top: 0;
