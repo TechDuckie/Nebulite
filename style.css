@@ -154,6 +154,15 @@
       color: var(--bg);
     }
 
+    .btn-danger {
+      background-color: #992222;
+      border-color: #cc4444;
+    }
+    .btn-danger:hover {
+      background-color: #cc4444;
+      border-color: #ff6666;
+    }
+
     #screenGameOver .panel .btn-ui {
       width: 180px; /* Adjust as needed to fit 'Level Select' */
       margin: 10px auto; /* Center block-level buttons */
@@ -321,6 +330,11 @@ input[type="range"]::-moz-range-thumb {
 
 .setting input[type="checkbox"]:checked::after {
   transform: translate(-50%, -50%) scale(1);
+}
+
+
+#resetConfirmationModal {
+  z-index: 99;
 }
 
 .custom-toggle {

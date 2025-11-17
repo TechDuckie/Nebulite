@@ -33,6 +33,10 @@
   const btnToLevels = document.getElementById('btnToLevels');
   const btnGameOverToMenu = document.getElementById('btnGameOverToMenu');
   const btnDialogueGo = document.getElementById('btnDialogueGo');
+  const btnResetProgress = document.getElementById('btnResetProgress');
+  const resetConfirmationModal = document.getElementById('resetConfirmationModal');
+  const btnConfirmReset = document.getElementById('btnConfirmReset');
+  const btnCancelReset = document.getElementById('btnCancelReset');
   const masterVolume = document.getElementById('masterVolume');
   const sfxVolume = document.getElementById('sfxVolume');
   const vibration = document.getElementById('vibration');
@@ -138,8 +142,37 @@
   let gameState = STATE.MENU;
 
   const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
-  const unlocked = [true, false, false, false]; // unlock array
+  let unlocked = [true, false, false, false]; // unlock array
   let currentLevelIndex = 0;
+  const PROGRESS_KEY = 'nebulite_progress';
+
+  function saveProgress() {
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify({ unlocked }));
+    } catch (e) {
+      console.error("Failed to save progress", e);
+    }
+  }
+
+  function loadProgress() {
+    try {
+      const saved = localStorage.getItem(PROGRESS_KEY);
+      if (saved) {
+        const progress = JSON.parse(saved);
+        if (progress.unlocked) {
+          unlocked = progress.unlocked;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load progress", e);
+    }
+  }
+
+  function resetProgress() {
+    unlocked = [true, false, false, false];
+    saveProgress();
+    rebuildLevelSelect();
+  }
 
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, currentMusic: null };
   function playMusic(key){
@@ -817,6 +850,7 @@ class Boss {
 
   // HUD hearts
   function updateHearts(){
+    if (!images.heart) return;
     heartsEl.innerHTML = '';
     for(let i=0;i<state.player.hp;i++){
       const img = document.createElement('img');
@@ -1083,7 +1117,10 @@ class Boss {
               state.boss.isDefeated = true;
               bossBar.style.display = 'none';
               bossName.style.display = 'none';
-              unlocked[currentLevelIndex+1] = true; // unlock next level (if exists)
+              if (unlocked[currentLevelIndex + 1] !== undefined) {
+                unlocked[currentLevelIndex + 1] = true;
+              }
+              saveProgress();
               spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
               playSfx('explosion');
               // show post-boss dialogue after a delay
@@ -1417,10 +1454,24 @@ class Boss {
   });
 
   // initialize UI
+  loadProgress();
   rebuildLevelSelect();
   initIntro(() => {
     showScreen(STATE.MENU);
   });
   updateHearts();
+
+  btnResetProgress.addEventListener('click', () => {
+    resetConfirmationModal.style.display = 'flex';
+  });
+
+  btnCancelReset.addEventListener('click', () => {
+    resetConfirmationModal.style.display = 'none';
+  });
+
+  btnConfirmReset.addEventListener('click', () => {
+    resetProgress();
+    resetConfirmationModal.style.display = 'none';
+  });
 
 })();

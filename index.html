@@ -144,6 +144,10 @@
           </div>
           <p class="small">Movement: WASD/Arrows, Laser: Space, Shield: Shift</p>
         </div>
+        <div class="setting">
+          <label for="resetProgress">Reset Progress</label>
+          <button class="btn-ui btn-danger" id="btnResetProgress">Reset</button>
+        </div>
       </div>
       <div style="margin-top:10px"><button class="btn-ui" id="btnSettingsBack">Back</button></div>
     </div>
@@ -163,6 +167,18 @@
       <button class="btn-ui" id="btnRetry">Retry Level</button>
       <div style="margin-top:8px"><button class="btn-ui" id="btnGameOverToMenu">Menu</button></div>
       <div style="margin-top:8px"><button class="btn-ui" id="btnToLevels">Level Select</button></div>
+    </div>
+  </div>
+
+  <div class="screen" id="resetConfirmationModal" style="display:none; background-color: rgba(0,0,0,0.7);">
+    <div class="panel">
+      <h2>Reset Progress</h2>
+      <p>Are you sure you want to reset all your progress?</p>
+      <p style="color: #ff6b6b; font-weight: bold;">This action cannot be undone.</p>
+      <div style="margin-top: 20px;">
+        <button class="btn-ui" id="btnConfirmReset">Yes, Reset</button>
+        <button class="btn-ui" id="btnCancelReset">Cancel</button>
+      </div>
     </div>
   </div>
 
