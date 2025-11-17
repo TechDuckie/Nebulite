@@ -703,6 +703,9 @@ class Boss {
       triggerVibration(100);
       updateHearts();
       if (this.hp <= 0) {
+        if (state.boss) {
+          state.diedToBoss = true;
+        }
         bossName.style.display = 'none';
         showScreen(STATE.GAMEOVER);
       }
@@ -789,7 +792,8 @@ class Boss {
     debug: false,
     debugTapCount: 0,
     lastDebugTap: 0,
-    fps: 0
+    fps: 0,
+    diedToBoss: false
   };
 
   // helpers
@@ -855,6 +859,29 @@ class Boss {
     } else {
       btnShield.style.display = 'flex';
     }
+  }
+
+  function restartFromBoss() {
+    const level = LEVELS[currentLevelIndex];
+    playMusic(level.bossMusic);
+
+    // Reset player and boss
+    state.player.reset();
+    state.boss = new Boss(level.boss); // Re-create the boss
+    state.diedToBoss = false; // Reset the flag
+
+    // Clear projectiles
+    state.lasers.length = 0;
+    state.enemyBullets.length = 0;
+
+    // Reset UI
+    updateHearts();
+    bossBar.style.display = 'block';
+    bossName.textContent = level.boss.name;
+    bossName.style.display = 'block';
+    bossBarInner.style.width = '100%';
+
+    showScreen(STATE.PLAYING);
   }
 
   // Build level select buttons
@@ -1418,7 +1445,13 @@ class Boss {
   btnBackToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
   btnSettingsBack.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
   btnVictoryContinue.addEventListener('click', ()=>{ showScreen(STATE.LEVEL_SELECT); rebuildLevelSelect(); });
-  btnRetry.addEventListener('click', ()=>{ startLevel(currentLevelIndex); });
+  btnRetry.addEventListener('click', ()=>{
+    if (state.diedToBoss) {
+      restartFromBoss();
+    } else {
+      startLevel(currentLevelIndex);
+    }
+  });
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
   btnGameOverToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
 
