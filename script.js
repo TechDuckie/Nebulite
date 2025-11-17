@@ -734,6 +734,7 @@ class Boss {
   // UI functions
   function showScreen(s){
     gameWrap.style.display = (s === STATE.PLAYING) ? 'block' : 'none';
+    starfield.style.display = (s === STATE.PLAYING) ? 'block' : 'none';
     screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
