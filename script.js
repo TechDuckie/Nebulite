@@ -32,6 +32,7 @@
   const btnRetry = document.getElementById('btnRetry');
   const btnToLevels = document.getElementById('btnToLevels');
   const btnGameOverToMenu = document.getElementById('btnGameOverToMenu');
+  const damageFlash = document.getElementById('damageFlash');
   const btnDialogueGo = document.getElementById('btnDialogueGo');
   const btnResetProgress = document.getElementById('btnResetProgress');
   const resetConfirmationModal = document.getElementById('resetConfirmationModal');
@@ -701,6 +702,10 @@ class Boss {
       spawnParticles(this.x, this.y);
       playSfx('playerDamage');
       triggerVibration(100);
+      damageFlash.style.opacity = 1;
+      setTimeout(() => {
+        damageFlash.style.opacity = 0;
+      }, 100);
       updateHearts();
       if (this.hp <= 0) {
         if (state.boss) {

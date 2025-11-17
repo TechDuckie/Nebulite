@@ -31,6 +31,20 @@
       background-repeat: no-repeat;
       animation: fadeIn 0.5s ease-out;
     }
+
+    #damageFlash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red */
+      z-index: 90; /* Above game elements, below modals */
+      opacity: 0; /* Hidden by default */
+      pointer-events: none; /* Allow clicks to pass through */
+      transition: opacity 0.1s ease-out; /* Smooth fade out */
+    }
+
     #motherShipImage {
       position: absolute;
       top: 30%;
