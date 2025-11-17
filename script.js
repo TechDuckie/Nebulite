@@ -237,7 +237,7 @@
       dialogue: 'dialogue2',
       dialogueBackgroundImage: 'motherShip',
       boss: {
-        name: 'Mecha-Drill',
+        name: 'Mech-Drill',
         spriteKey: 'boss2',
         hp: 50,
         w: 140, h: 140,
@@ -297,7 +297,7 @@
       dialogue: 'dialogue4',
       dialogueBackgroundImage: 'motherShip',
       boss: {
-        name: 'Command Vessel',
+        name: 'Mech-Volta',
         spriteKey: 'boss4',
         hp: 400,
         w: 180, h: 180,
