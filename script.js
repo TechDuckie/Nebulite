@@ -1178,9 +1178,8 @@ class Boss {
     // HUD updates
     waveInfo.textContent = (() => {
       const totalWaves = level ? level.waves.length : 0;
-      const current = Math.min(totalWaves, Math.max(0, state.waveIndex + (state.boss ? totalWaves : 0)));
-      const displayIndex = (state.boss ? totalWaves : (state.waveIndex + 1 <= totalWaves ? state.waveIndex + (state.waveSpawning || state.enemies.length>0 ? 1 : 0) : totalWaves)) ;
-      return `Wave ${Math.min(displayIndex, totalWaves)} / ${totalWaves}`;
+      const displayIndex = state.boss ? totalWaves : Math.min(state.waveIndex + 1, totalWaves);
+      return `Wave ${displayIndex} / ${totalWaves}`;
     })();
 
     // debug
