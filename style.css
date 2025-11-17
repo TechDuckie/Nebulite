@@ -133,7 +133,9 @@
       border: 2px solid white;
       width: 92%;
       max-width: 420px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
 
@@ -248,6 +250,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* Center content horizontally */
   gap: 10px;
 }
 
@@ -259,7 +262,7 @@
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  width: 80%;
+  width: 90%; /* Adjusted width */
   height: 8px;
   background: transparent;
   border: 2px solid white;
