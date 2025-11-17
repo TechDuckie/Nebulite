@@ -468,6 +468,38 @@ class Boss {
               scaleX: 1,
               animationSpeed: 0.2
             });
+
+            // If under 50% hp, fire in a + shape
+            if (this.hp / this.cfg.hp <= 0.5) {
+              // Fire projectile up
+              state.enemyBullets.push({
+                x: this.x + this.w / 2 - bw / 2,
+                y: this.y + this.h / 2 - bh / 2,
+                w: bw, h: bh,
+                vx: Math.cos(angle + Math.PI / 2) * bulletSpeed,
+                vy: Math.sin(angle + Math.PI / 2) * bulletSpeed,
+                sprite: 'enemyLaserBig',
+                piercing: true,
+                rotation: angle + Math.PI / 2,
+                animationTimer: 0,
+                scaleX: 1,
+                animationSpeed: 0.2
+              });
+              // Fire projectile down
+              state.enemyBullets.push({
+                x: this.x + this.w / 2 - bw / 2,
+                y: this.y + this.h / 2 - bh / 2,
+                w: bw, h: bh,
+                vx: Math.cos(angle - Math.PI / 2) * bulletSpeed,
+                vy: Math.sin(angle - Math.PI / 2) * bulletSpeed,
+                sprite: 'enemyLaserBig',
+                piercing: true,
+                rotation: angle - Math.PI / 2,
+                animationTimer: 0,
+                scaleX: 1,
+                animationSpeed: 0.2
+              });
+            }
           }
 
           if (this.spinAngle >= 360) {
