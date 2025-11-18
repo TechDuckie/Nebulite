@@ -102,7 +102,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -137,8 +137,9 @@
     images.pinkNebula = loadedAssets[25];
     images.violetRift = loadedAssets[26];
     images.ionGrove = loadedAssets[27];
+    images.greenNebula = loadedAssets[28];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[28+i];
+      images[`asteroid${i+1}`] = loadedAssets[29+i];
     }
     const STAR_ASSET_START_INDEX = 28 + NUM_ASTEROID_IMAGES;
     for (let i = 0; i < NUM_STAR_IMAGES; i++) {
@@ -1021,7 +1022,13 @@ class Boss {
   }
 
   function spawnNebula() {
-    if (!images.pinkNebula) return;
+    const currentSector = SECTORS[currentSectorIndex];
+    let nebulaImage = images.pinkNebula;
+    if (currentSectorIndex === 1) { // Ion Grove sector
+      nebulaImage = images.greenNebula;
+    }
+
+    if (!nebulaImage) return;
     const size = Math.random() * 400 + 200;
     const nebula = {
       x: Math.random() * (canvas.width / DPR),
@@ -1032,7 +1039,7 @@ class Boss {
       rotation: Math.random() * 360,
       scaleX: Math.random() > 0.5 ? 1 : -1,
       scaleY: Math.random() > 0.5 ? 1 : -1,
-      img: images.pinkNebula
+      img: nebulaImage
     };
     nebulas.push(nebula);
   }
