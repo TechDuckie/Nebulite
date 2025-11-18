@@ -7,8 +7,10 @@
 
   // Starfield
   const starfield = document.getElementById('starfield');
+  const nebulaefield = document.getElementById('nebulaefield');
   const gameWrap = document.getElementById('gameWrap');
   const stars = [];
+  const nebulas = [];
   const NUM_STAR_IMAGES = 20;
   const MAX_STARS = 150;
 
@@ -102,7 +104,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -131,8 +133,9 @@
     images.boss4 = loadedAssets[22];
     images.enemyShield1 = loadedAssets[23];
     images.enemyLaserBig = loadedAssets[24];
+    images.pinkNebula = loadedAssets[25];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[25+i];
+      images[`asteroid${i+1}`] = loadedAssets[26+i];
     }
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
@@ -951,6 +954,29 @@ class Boss {
     stars.push(star);
   }
 
+  function spawnNebula() {
+    if (!images.pinkNebula) return;
+    const nebula = document.createElement('div');
+    nebula.className = 'nebula';
+    nebula.style.backgroundImage = `url('${images.pinkNebula.src}')`;
+    const size = Math.random() * 400 + 200; // 200px to 600px
+    nebula.style.width = `${size}px`;
+    nebula.style.height = `${size}px`;
+    nebula.style.left = `${Math.random() * 100}vw`;
+    nebula.style.top = `-${size}px`;
+    nebula.style.opacity = Math.random() * 0.3 + 0.1; // 0.1 to 0.4
+    
+    let transforms = [];
+    if (Math.random() > 0.5) transforms.push('scaleX(-1)');
+    if (Math.random() > 0.5) transforms.push('scaleY(-1)');
+    transforms.push(`rotate(${Math.random() * 360}deg)`);
+    nebula.style.transform = transforms.join(' ');
+
+    nebula.dataset.speed = Math.random() * 0.5 + 0.2; // Slower than stars
+    nebulaefield.appendChild(nebula);
+    nebulas.push(nebula);
+  }
+
   function spawnParticles(x, y) {
     const particleCount = 15;
     const particleSize = 8;
@@ -1001,12 +1027,23 @@ class Boss {
     if (Math.random() > 0.95) {
       spawnStar();
     }
+    if (gameState === STATE.PLAYING && Math.random() > 0.992) {
+      spawnNebula();
+    }
     stars.forEach((star, index) => {
       const newTop = parseFloat(star.style.top) + parseFloat(star.dataset.speed);
       star.style.top = `${newTop}px`;
       if (newTop > window.innerHeight) {
         star.remove();
         stars.splice(index, 1);
+      }
+    });
+    nebulas.forEach((nebula, index) => {
+      const newTop = parseFloat(nebula.style.top) + parseFloat(nebula.dataset.speed);
+      nebula.style.top = `${newTop}px`;
+      if (newTop > window.innerHeight) {
+        nebula.remove();
+        nebulas.splice(index, 1);
       }
     });
 

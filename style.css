@@ -9,23 +9,53 @@
 }
 
 :root{--bg:#120b1b;--ui:#ddd}
-    html,body{height:100%;margin:0;background:var(--bg);-webkit-tap-highlight-color:transparent;touch-action:none;font-family:'Dedicool', sans-serif}
+    html,body{height:100%;margin:0;background:transparent;-webkit-tap-highlight-color:transparent;touch-action:none;font-family:'Dedicool', sans-serif}
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      z-index: -11;
+    }
     #gameWrap{position:fixed;top: 0; right: 0; bottom: 0; left: 0;overflow:hidden;z-index:2}
     canvas{display:block;width:100vw;height:100vh;background:transparent;}
     img {
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
-    #starfield {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      overflow: hidden;
-    }
-    .star {
+#starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -9;
+  pointer-events: none;
+}
+
+#nebulaefield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.nebula {
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
+}
+
+.star {
       position: absolute;
       background-size: contain;
       background-repeat: no-repeat;
