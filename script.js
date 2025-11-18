@@ -615,7 +615,7 @@ class Boss {
     }
 
     fire() {
-      const isEarlyLevel = currentSectorIndex === 0 && currentLevelIndexInSector < 2;
+      const isEarlyLevel = currentSectorIndex === 0 && currentLevelIndexInSector < 3;
       const bw = isEarlyLevel ? 8 : 8;
       const bh = isEarlyLevel ? 24 : 24;
       const x = this.x + this.w / 2 - bw / 2;
