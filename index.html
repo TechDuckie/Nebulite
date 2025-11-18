@@ -113,10 +113,17 @@
 
   <div class="screen" id="screenLevels" style="display:none">
     <div class="panel">
-      <h2>Select Level</h2>
-      <div class="levels-grid" id="levelsGrid"></div>
-      <div class="small">Defeat boss to unlock the next level.</div>
-      <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back</button></div>
+      <h2 id="levelSelectTitle">Select Sector</h2>
+      <div class="sectors-grid" id="sectorsGrid"></div>
+      
+      <div id="levelsPanel" style="display: none; width: 100%;">
+        <h3 id="sectorName"></h3>
+        <div class="levels-grid" id="levelsGrid"></div>
+        <div class="small">Defeat the boss to unlock the next level.</div>
+        <div style="margin-top:10px"><button class="btn-ui" id="btnBackToSectors">Back to Sectors</button></div>
+      </div>
+
+      <div style="margin-top:10px"><button class="btn-ui" id="btnBackToMenu">Back to Menu</button></div>
     </div>
   </div>
 

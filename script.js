@@ -102,7 +102,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -135,10 +135,12 @@
     images.enemyShield1 = loadedAssets[23];
     images.enemyLaserBig = loadedAssets[24];
     images.pinkNebula = loadedAssets[25];
+    images.violetRift = loadedAssets[26];
+    images.ionGrove = loadedAssets[27];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[26+i];
+      images[`asteroid${i+1}`] = loadedAssets[28+i];
     }
-    const STAR_ASSET_START_INDEX = 26 + NUM_ASTEROID_IMAGES;
+    const STAR_ASSET_START_INDEX = 28 + NUM_ASTEROID_IMAGES;
     for (let i = 0; i < NUM_STAR_IMAGES; i++) {
       images[`star${i+1}`] = loadedAssets[STAR_ASSET_START_INDEX + i];
     }
@@ -150,14 +152,17 @@
   const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6 };
   let gameState = STATE.MENU;
 
-  const LEVEL_COUNT = 4; // show 4 levels for selection (only 1 unlocked initially)
-  let unlocked = [true, false, false, false]; // unlock array
-  let currentLevelIndex = 0;
-  const PROGRESS_KEY = 'nebulite_progress';
+  let progress = {
+    unlockedSector: 0,
+    unlockedLevelInSector: 0
+  };
+  let currentSectorIndex = 0;
+  let currentLevelIndexInSector = 0;
+  const PROGRESS_KEY = 'nebulite_progress_sectors';
 
   function saveProgress() {
     try {
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify({ unlocked }));
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
     } catch (e) {
       console.error("Failed to save progress", e);
     }
@@ -167,9 +172,9 @@
     try {
       const saved = localStorage.getItem(PROGRESS_KEY);
       if (saved) {
-        const progress = JSON.parse(saved);
-        if (progress.unlocked) {
-          unlocked = progress.unlocked;
+        const savedProgress = JSON.parse(saved);
+        if (savedProgress.unlockedSector !== undefined && savedProgress.unlockedLevelInSector !== undefined) {
+          progress = savedProgress;
         }
       }
     } catch (e) {
@@ -178,7 +183,7 @@
   }
 
   function resetProgress() {
-    unlocked = [true, false, false, false];
+    progress = { unlockedSector: 0, unlockedLevelInSector: 0 };
     saveProgress();
     rebuildLevelSelect();
   }
@@ -318,7 +323,24 @@
     };
   }
 
-  const LEVELS = [ makeLevel1(), makeLevel2(), makeLevel3(), makeLevel4() ];
+  const SECTORS = [
+    {
+      name: 'Violet Rift',
+      imageKey: 'violetRift',
+      levels: [
+        makeLevel1(),
+        makeLevel2(),
+        makeLevel3()
+      ]
+    },
+    {
+      name: 'Ion Grove',
+      imageKey: 'ionGrove',
+      levels: [
+        makeLevel4()
+      ]
+    }
+  ];
 
   class Enemy {
     constructor(x, y, w, h, speed, sprite) {
@@ -592,7 +614,7 @@ class Boss {
     }
 
     fire() {
-      const isEarlyLevel = currentLevelIndex < 3;
+      const isEarlyLevel = currentSectorIndex === 0 && currentLevelIndexInSector < 2;
       const bw = isEarlyLevel ? 8 : 8;
       const bh = isEarlyLevel ? 24 : 24;
       const x = this.x + this.w / 2 - bw / 2;
@@ -833,7 +855,7 @@ class Boss {
   }
 
   function beginLevelGameplay() {
-    const lvl = LEVELS[currentLevelIndex];
+    const lvl = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
     playMusic(lvl.waveMusic);
     // reset state
     state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
@@ -844,7 +866,7 @@ class Boss {
     state.waveSpawning = true;
     state.waveSpawnTimer = 0;
     state.lastTime = performance.now();
-    waveInfo.textContent = `Wave 0 / ${LEVELS[currentLevelIndex].waves.length}`;
+    waveInfo.textContent = `Wave 0 / ${lvl.waves.length}`;
     bossBar.style.display = 'none';
     bossName.style.display = 'none';
     updateHearts();
@@ -852,7 +874,9 @@ class Boss {
 
     // Show/hide buttons based on level
     btnSecondary.style.display = 'none';
-    if (currentLevelIndex === 0) {
+    // A bit of a hack, we'll make this data-driven later
+    const isFirstLevelEver = currentSectorIndex === 0 && currentLevelIndexInSector === 0;
+    if (isFirstLevelEver) {
       btnShield.style.display = 'none';
     } else {
       btnShield.style.display = 'flex';
@@ -860,7 +884,7 @@ class Boss {
   }
 
   function restartFromBoss() {
-    const level = LEVELS[currentLevelIndex];
+    const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
     playMusic(level.bossMusic);
 
     // Reset player and boss
@@ -882,22 +906,63 @@ class Boss {
     showScreen(STATE.PLAYING);
   }
 
-  // Build level select buttons
-  function rebuildLevelSelect(){
-    levelsGrid.innerHTML = '';
-    for(let i=0;i<LEVEL_COUNT;i++){
-      const b = document.createElement('div');
-      b.className = 'level-btn' + (unlocked[i] ? '' : ' locked');
-      b.textContent = 'Level ' + (i+1);
-      b.addEventListener('click', ()=>{ if(unlocked[i]) startLevel(i); });
-      levelsGrid.appendChild(b);
+  const sectorsGrid = document.getElementById('sectorsGrid');
+  const levelsPanel = document.getElementById('levelsPanel');
+  const sectorNameEl = document.getElementById('sectorName');
+  const btnBackToSectors = document.getElementById('btnBackToSectors');
+
+  function rebuildLevelSelect(view = 'sectors') {
+    if (view === 'sectors') {
+      sectorsGrid.innerHTML = '';
+      SECTORS.forEach((sector, sectorIndex) => {
+        const isUnlocked = sectorIndex <= progress.unlockedSector;
+        const sectorEl = document.createElement('div');
+        sectorEl.className = 'sector-btn' + (isUnlocked ? '' : ' locked');
+        sectorEl.innerHTML = `
+          <img src="assets/${sector.imageKey}.png" class="sector-image">
+          <div class="sector-title">${sector.name}</div>
+        `;
+        if (isUnlocked) {
+          sectorEl.addEventListener('click', () => {
+            currentSectorIndex = sectorIndex;
+            rebuildLevelSelect('levels');
+          });
+        }
+        sectorsGrid.appendChild(sectorEl);
+      });
+      sectorsGrid.style.display = 'flex';
+      levelsPanel.style.display = 'none';
+      document.getElementById('levelSelectTitle').textContent = 'Select Sector';
+    } else if (view === 'levels') {
+      const sector = SECTORS[currentSectorIndex];
+      levelsGrid.innerHTML = '';
+      sector.levels.forEach((level, levelIndex) => {
+        const isUnlocked = currentSectorIndex < progress.unlockedSector ||
+                           (currentSectorIndex === progress.unlockedSector && levelIndex <= progress.unlockedLevelInSector);
+        const levelEl = document.createElement('div');
+        levelEl.className = 'level-btn' + (isUnlocked ? '' : ' locked');
+        levelEl.textContent = `Level ${levelIndex + 1}`;
+        if (isUnlocked) {
+          levelEl.addEventListener('click', () => startLevel(currentSectorIndex, levelIndex));
+        }
+        levelsGrid.appendChild(levelEl);
+      });
+      sectorNameEl.textContent = sector.name;
+      sectorsGrid.style.display = 'none';
+      levelsPanel.style.display = 'block';
+      document.getElementById('levelSelectTitle').textContent = 'Select Level';
     }
   }
 
+  btnBackToSectors.addEventListener('click', () => {
+    rebuildLevelSelect('sectors');
+  });
+
   // Start a level
-  function startLevel(index){
-    currentLevelIndex = index;
-    const lvl = LEVELS[index];
+  function startLevel(sectorIndex, levelIndexInSector) {
+    currentSectorIndex = sectorIndex;
+    currentLevelIndexInSector = levelIndexInSector;
+    const lvl = SECTORS[sectorIndex].levels[levelIndexInSector];
     if (lvl.dialogue) {
       showDialogue(lvl.dialogue, beginLevelGameplay, lvl.dialogueBackgroundImage);
     } else {
@@ -1106,7 +1171,7 @@ class Boss {
 
 
     // spawn waves
-    const level = LEVELS[currentLevelIndex];
+    const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
     if(level && !state.boss){
       const totalWaves = level.waves.length;
       if(state.waveIndex < totalWaves){
@@ -1196,21 +1261,35 @@ class Boss {
               state.boss.isDefeated = true;
               bossBar.style.display = 'none';
               bossName.style.display = 'none';
-              if (unlocked[currentLevelIndex + 1] !== undefined) {
-                unlocked[currentLevelIndex + 1] = true;
+
+              // Progression logic
+              const currentSector = SECTORS[currentSectorIndex];
+              if (currentLevelIndexInSector + 1 < currentSector.levels.length) {
+                // Unlock next level in the same sector
+                if (currentSectorIndex === progress.unlockedSector &&
+                    currentLevelIndexInSector === progress.unlockedLevelInSector) {
+                  progress.unlockedLevelInSector++;
+                }
+              } else if (currentSectorIndex + 1 < SECTORS.length) {
+                // Unlock first level of the next sector
+                if (currentSectorIndex === progress.unlockedSector) {
+                  progress.unlockedSector++;
+                  progress.unlockedLevelInSector = 0;
+                }
               }
               saveProgress();
+
               spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
               playSfx('explosion');
               // show post-boss dialogue after a delay
               setTimeout(() => {
                 let victoryDialogue = 'dialogueClear1';
-                let dialogueBg = LEVELS[currentLevelIndex].dialogueBackgroundImage;
-                if (currentLevelIndex === 1) {
+                let dialogueBg = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector].dialogueBackgroundImage;
+                if (currentSectorIndex === 0 && currentLevelIndexInSector === 1) {
                   victoryDialogue = 'dialogueClear2';
-                } else if (currentLevelIndex === 2) {
+                } else if (currentSectorIndex === 0 && currentLevelIndexInSector === 2) {
                   victoryDialogue = 'dialogueClear3';
-                } else if (currentLevelIndex === 3) {
+                } else if (currentSectorIndex === 1 && currentLevelIndexInSector === 0) {
                   victoryDialogue = 'dialogueClear4';
                 }
                 showDialogue(victoryDialogue, () => {
@@ -1293,6 +1372,7 @@ class Boss {
 
     // HUD updates
     waveInfo.textContent = (() => {
+      const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
       const totalWaves = level ? level.waves.length : 0;
       const displayIndex = state.boss ? totalWaves : Math.min(state.waveIndex + 1, totalWaves);
       return `Wave ${displayIndex} / ${totalWaves}`;
@@ -1464,13 +1544,15 @@ class Boss {
 
   // auto-fire toggle
   btnSecondary.addEventListener('click', ()=>{
-    LEVELS[currentLevelIndex].autoFire = !LEVELS[currentLevelIndex].autoFire;
-    btnSecondary.style.background = LEVELS[currentLevelIndex].autoFire ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)';
+    const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
+    level.autoFire = !level.autoFire;
+    btnSecondary.style.background = level.autoFire ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.04)';
     // simple auto-shot loop using timeout
-    if(LEVELS[currentLevelIndex].autoFire){
+    if(level.autoFire){
       (function af(){
         if(gameState !== STATE.PLAYING) return;
-        if(!LEVELS[currentLevelIndex].autoFire) return;
+        const currentLevel = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
+        if(!currentLevel.autoFire) return;
         state.player.shoot();
         setTimeout(af, 200);
       })();
@@ -1478,7 +1560,7 @@ class Boss {
   });
 
   // menu / level select UI wiring
-  btnPlay.addEventListener('click', ()=>{ startLevel(0); });
+  btnPlay.addEventListener('click', ()=>{ startLevel(0, 0); });
   btnLevelSelect.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
   btnSettings.addEventListener('click', ()=>{ showScreen(STATE.SETTINGS); });
   btnBackToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
@@ -1488,7 +1570,7 @@ class Boss {
     if (state.diedToBoss) {
       restartFromBoss();
     } else {
-      startLevel(currentLevelIndex);
+      startLevel(currentSectorIndex, currentLevelIndexInSector);
     }
   });
   btnToLevels.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
@@ -1549,9 +1631,9 @@ class Boss {
         // Apply debug settings
         if (state.debug) {
           dbg.style.display = 'block';
-          for (let i = 0; i < unlocked.length; i++) {
-            unlocked[i] = true;
-          }
+          // Unlock all levels in all sectors
+          progress.unlockedSector = SECTORS.length - 1;
+          progress.unlockedLevelInSector = SECTORS[progress.unlockedSector].levels.length - 1;
           rebuildLevelSelect();
         } else {
           dbg.style.display = 'none';
