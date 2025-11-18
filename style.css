@@ -25,44 +25,6 @@
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
-#starfield {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -9;
-  pointer-events: none;
-  display: none;
-}
-
-#nebulaefield {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -10;
-  pointer-events: none;
-  overflow: hidden;
-  display: none;
-}
-
-.nebula {
-  position: absolute;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
-}
-
-.star {
-      position: absolute;
-      background-size: contain;
-      background-repeat: no-repeat;
-      animation: fadeIn 0.5s ease-out;
-    }
 
     #damageFlash {
       position: fixed;

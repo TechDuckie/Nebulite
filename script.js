@@ -6,8 +6,6 @@
   addEventListener('resize', resize); resize();
 
   // Starfield
-  const starfield = document.getElementById('starfield');
-  const nebulaefield = document.getElementById('nebulaefield');
   const gameWrap = document.getElementById('gameWrap');
   const stars = [];
   const nebulas = [];
@@ -109,6 +107,9 @@
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
   }
+  for (let i = 1; i <= NUM_STAR_IMAGES; i++) {
+    assets[`star${i}`] = `assets/stars/star${i}.png`;
+  }
   const images = {};
   const audio = {};
   function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
@@ -136,6 +137,10 @@
     images.pinkNebula = loadedAssets[25];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
       images[`asteroid${i+1}`] = loadedAssets[26+i];
+    }
+    const STAR_ASSET_START_INDEX = 26 + NUM_ASTEROID_IMAGES;
+    for (let i = 0; i < NUM_STAR_IMAGES; i++) {
+      images[`star${i+1}`] = loadedAssets[STAR_ASSET_START_INDEX + i];
     }
     audio.music1.loop = true; audio.boss1.loop = true;
     audio.menu.loop = true;
@@ -797,8 +802,6 @@ class Boss {
   function showScreen(s){
     const isPlaying = s === STATE.PLAYING;
     gameWrap.style.display = isPlaying ? 'block' : 'none';
-    starfield.style.display = isPlaying ? 'block' : 'none';
-    nebulaefield.style.display = isPlaying ? 'block' : 'none';
     screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
@@ -942,40 +945,30 @@ class Boss {
 
   function spawnStar() {
     if (stars.length >= MAX_STARS) return;
-    const star = document.createElement('div');
-    star.className = 'star';
-    const starIndex = Math.floor(Math.random() * NUM_STAR_IMAGES) + 1;
-    star.style.backgroundImage = `url('assets/stars/star${starIndex}.png')`;
-    const size = Math.random() * 15 + 5;
-    star.style.width = `${size}px`;
-    star.style.height = `${size}px`;
-    star.style.left = `${Math.random() * 100}vw`;
-    star.style.top = '-20px';
-    star.dataset.speed = Math.random() * 2 + 1;
-    starfield.appendChild(star);
+    const star = {
+      x: Math.random() * (canvas.width / DPR),
+      y: -20,
+      size: Math.random() * 15 + 5,
+      speed: Math.random() * 2 + 1,
+      img: images[`star${Math.floor(Math.random() * NUM_STAR_IMAGES) + 1}`]
+    };
     stars.push(star);
   }
 
   function spawnNebula() {
     if (!images.pinkNebula) return;
-    const nebula = document.createElement('div');
-    nebula.className = 'nebula';
-    nebula.style.backgroundImage = `url('${images.pinkNebula.src}')`;
-    const size = Math.random() * 400 + 200; // 200px to 600px
-    nebula.style.width = `${size}px`;
-    nebula.style.height = `${size}px`;
-    nebula.style.left = `${Math.random() * 100}vw`;
-    nebula.style.top = `-${size}px`;
-    nebula.style.opacity = Math.random() * 0.3 + 0.1; // 0.1 to 0.4
-    
-    let transforms = [];
-    if (Math.random() > 0.5) transforms.push('scaleX(-1)');
-    if (Math.random() > 0.5) transforms.push('scaleY(-1)');
-    transforms.push(`rotate(${Math.random() * 360}deg)`);
-    nebula.style.transform = transforms.join(' ');
-
-    nebula.dataset.speed = Math.random() * 0.5 + 0.2; // Slower than stars
-    nebulaefield.appendChild(nebula);
+    const size = Math.random() * 400 + 200;
+    const nebula = {
+      x: Math.random() * (canvas.width / DPR),
+      y: -size,
+      size: size,
+      speed: Math.random() * 0.5 + 0.2,
+      opacity: Math.random() * 0.3 + 0.1,
+      rotation: Math.random() * 360,
+      scaleX: Math.random() > 0.5 ? 1 : -1,
+      scaleY: Math.random() > 0.5 ? 1 : -1,
+      img: images.pinkNebula
+    };
     nebulas.push(nebula);
   }
 
@@ -1034,19 +1027,15 @@ class Boss {
     }
     for (let i = stars.length - 1; i >= 0; i--) {
       const star = stars[i];
-      const newTop = parseFloat(star.style.top) + parseFloat(star.dataset.speed);
-      star.style.top = `${newTop}px`;
-      if (newTop > window.innerHeight) {
-        star.remove();
+      star.y += star.speed;
+      if (star.y > (canvas.height / DPR)) {
         stars.splice(i, 1);
       }
     }
     for (let i = nebulas.length - 1; i >= 0; i--) {
       const nebula = nebulas[i];
-      const newTop = parseFloat(nebula.style.top) + parseFloat(nebula.dataset.speed);
-      nebula.style.top = `${newTop}px`;
-      if (newTop > window.innerHeight) {
-        nebula.remove();
+      nebula.y += nebula.speed;
+      if (nebula.y > (canvas.height / DPR)) {
         nebulas.splice(i, 1);
       }
     }
@@ -1317,6 +1306,25 @@ class Boss {
   // render
   function render(){
     ctx.clearRect(0,0,canvas.width/DPR,canvas.height/DPR);
+
+    // Render stars and nebulas
+    ctx.save();
+    stars.forEach(star => {
+      if (star.img) {
+        drawImageCentered(star.img, star.x, star.y, star.size, star.size);
+      }
+    });
+    nebulas.forEach(nebula => {
+      if (nebula.img) {
+        ctx.save();
+        ctx.globalAlpha = nebula.opacity;
+        ctx.translate(nebula.x, nebula.y);
+        ctx.rotate(nebula.rotation * Math.PI / 180);
+        ctx.scale(nebula.scaleX, nebula.scaleY);
+        drawImageCentered(nebula.img, 0, 0, nebula.size, nebula.size);
+        ctx.restore();
+      }
+    });
 
     // thruster particles
     ctx.save();
