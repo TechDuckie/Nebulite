@@ -859,6 +859,7 @@ class Boss {
     const lvl = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
     playMusic(lvl.waveMusic);
     // reset state
+    nebulas.length = 0;
     state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
     state.player.reset();
     state.score = 0;
