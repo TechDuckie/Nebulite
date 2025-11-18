@@ -178,7 +178,7 @@
     rebuildLevelSelect();
   }
 
-  const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, currentMusic: null };
+  const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, effectsEnabled: true, currentMusic: null };
   function playMusic(key){
     if(audioState.currentMusic) audioState.currentMusic.pause();
     const a = audio[key];
@@ -795,8 +795,10 @@ class Boss {
 
   // UI functions
   function showScreen(s){
-    gameWrap.style.display = (s === STATE.PLAYING) ? 'block' : 'none';
-    starfield.style.display = (s === STATE.PLAYING) ? 'block' : 'none';
+    const isPlaying = s === STATE.PLAYING;
+    gameWrap.style.display = isPlaying ? 'block' : 'none';
+    starfield.style.display = isPlaying ? 'block' : 'none';
+    nebulaefield.style.display = isPlaying ? 'block' : 'none';
     screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
@@ -1027,25 +1029,27 @@ class Boss {
     if (Math.random() > 0.95) {
       spawnStar();
     }
-    if (gameState === STATE.PLAYING && Math.random() > 0.992) {
+    if (gameState === STATE.PLAYING && audioState.effectsEnabled && Math.random() > 0.992) {
       spawnNebula();
     }
-    stars.forEach((star, index) => {
+    for (let i = stars.length - 1; i >= 0; i--) {
+      const star = stars[i];
       const newTop = parseFloat(star.style.top) + parseFloat(star.dataset.speed);
       star.style.top = `${newTop}px`;
       if (newTop > window.innerHeight) {
         star.remove();
-        stars.splice(index, 1);
+        stars.splice(i, 1);
       }
-    });
-    nebulas.forEach((nebula, index) => {
+    }
+    for (let i = nebulas.length - 1; i >= 0; i--) {
+      const nebula = nebulas[i];
       const newTop = parseFloat(nebula.style.top) + parseFloat(nebula.dataset.speed);
       nebula.style.top = `${newTop}px`;
       if (newTop > window.innerHeight) {
         nebula.remove();
-        nebulas.splice(index, 1);
+        nebulas.splice(i, 1);
       }
-    });
+    }
 
     // Dialogue typewriter effect
     if (gameState === STATE.DIALOGUE && state.dialogue.active) {
@@ -1505,6 +1509,15 @@ class Boss {
 
   vibration.addEventListener('change', (e) => {
     audioState.vibration = e.target.checked;
+  });
+
+  const effectsToggle = document.getElementById('effects');
+  effectsToggle.addEventListener('change', (e) => {
+    audioState.effectsEnabled = e.target.checked;
+    if (!audioState.effectsEnabled) {
+      nebulas.forEach(n => n.remove());
+      nebulas.length = 0;
+    }
   });
 
   const settingsTitle = document.getElementById('settingsTitle');

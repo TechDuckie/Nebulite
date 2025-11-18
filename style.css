@@ -33,6 +33,7 @@
   height: 100vh;
   z-index: -9;
   pointer-events: none;
+  display: none;
 }
 
 #nebulaefield {
@@ -44,6 +45,7 @@
   z-index: -10;
   pointer-events: none;
   overflow: hidden;
+  display: none;
 }
 
 .nebula {
