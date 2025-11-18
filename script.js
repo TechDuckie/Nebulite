@@ -363,17 +363,14 @@
       const now = performance.now();
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-                          const bw = 20, bh = 52;
+                          const bw = 8, bh = 24;
                           const bullet = {
                             x: this.x + this.w / 2 - bw / 2,
                             y: this.y + this.h,
                             w: bw,
                             h: bh,
                             vy: this.bulletSpeed,
-                            sprite: 'enemyLaserSmall',
-                            animationTimer: 0,
-                            scaleX: 1,
-                            animationSpeed: 0.2 // flip every 0.2 seconds
+                            color: '#90de8a'
                           };
                           state.enemyBullets.push(bullet);
       }
@@ -438,7 +435,7 @@ class Boss {
             this.lastSpecialFire = now;
             const angle = this.spinAngle * Math.PI / 180;
             const bulletSpeed = 250;
-            const bw = 60, bh = 60; // Large projectiles
+            const bw = 8, bh = 24; // Smaller projectiles
 
             // Fire one projectile to the right
             state.enemyBullets.push({
@@ -447,12 +444,9 @@ class Boss {
               w: bw, h: bh,
               vx: Math.cos(angle) * bulletSpeed,
               vy: Math.sin(angle) * bulletSpeed,
-              sprite: 'enemyLaserBig',
+              color: '#90de8a',
               piercing: true,
-              rotation: angle,
-              animationTimer: 0,
-              scaleX: 1,
-              animationSpeed: 0.2
+              rotation: angle
             });
 
             // Fire another projectile to the left
@@ -462,12 +456,9 @@ class Boss {
               w: bw, h: bh,
               vx: Math.cos(angle + Math.PI) * bulletSpeed,
               vy: Math.sin(angle + Math.PI) * bulletSpeed,
-              sprite: 'enemyLaserBig',
+              color: '#90de8a',
               piercing: true,
-              rotation: angle + Math.PI,
-              animationTimer: 0,
-              scaleX: 1,
-              animationSpeed: 0.2
+              rotation: angle + Math.PI
             });
 
             // If under 50% hp, fire in a + shape
@@ -479,12 +470,9 @@ class Boss {
                 w: bw, h: bh,
                 vx: Math.cos(angle + Math.PI / 2) * bulletSpeed,
                 vy: Math.sin(angle + Math.PI / 2) * bulletSpeed,
-                sprite: 'enemyLaserBig',
+                color: '#90de8a',
                 piercing: true,
-                rotation: angle + Math.PI / 2,
-                animationTimer: 0,
-                scaleX: 1,
-                animationSpeed: 0.2
+                rotation: angle + Math.PI / 2
               });
               // Fire projectile down
               state.enemyBullets.push({
@@ -493,12 +481,9 @@ class Boss {
                 w: bw, h: bh,
                 vx: Math.cos(angle - Math.PI / 2) * bulletSpeed,
                 vy: Math.sin(angle - Math.PI / 2) * bulletSpeed,
-                sprite: 'enemyLaserBig',
+                color: '#90de8a',
                 piercing: true,
-                rotation: angle - Math.PI / 2,
-                animationTimer: 0,
-                scaleX: 1,
-                animationSpeed: 0.2
+                rotation: angle - Math.PI / 2
               });
             }
           }
@@ -600,8 +585,8 @@ class Boss {
 
     fire() {
       const isEarlyLevel = currentLevelIndex < 3;
-      const bw = isEarlyLevel ? 8 : 24;
-      const bh = isEarlyLevel ? 24 : 68;
+      const bw = isEarlyLevel ? 8 : 8;
+      const bh = isEarlyLevel ? 24 : 24;
       const x = this.x + this.w / 2 - bw / 2;
       const y = this.y + this.h / 2 + 8;
       const bullet = {
@@ -614,7 +599,7 @@ class Boss {
       if (isEarlyLevel) {
         bullet.color = '#f00';
       } else {
-        bullet.sprite = 'enemyLaserSmall';
+        bullet.color = '#90de8a';
       }
       state.enemyBullets.push(bullet);
     }
