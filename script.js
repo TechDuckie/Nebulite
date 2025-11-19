@@ -411,37 +411,80 @@
       this.lastFire = 0;
       this.fireRate = 2500; // ms
       this.bulletSpeed = 160;
+
+      this.movementPhase = 'entering'; // 'entering', 'descending', 'ascending'
+      this.hoverY = 80 + Math.random() * 80; // Upper Y limit for movement
+      this.dashDepthY = canvas.height / DPR * (0.6 + Math.random() * 0.2); // How far down to dash (60-80% of screen height)
+      this.horizontalOffset = (Math.random() - 0.5) * 200; // -100 to 100 px offset
+      this.currentLerpX = x; // For smoother horizontal movement
     }
 
     update(dt) {
-      super.update(dt); // Basic downward movement
+      const screenWidth = canvas.width / DPR;
+      const margin = this.w / 2;
 
-      // Lerp towards player's x position
-      const targetX = state.player.x + state.player.w / 2 - this.w / 2;
-      this.x += (targetX - this.x) * 0.008; // moderate follow
+      let targetX = state.player.x + state.player.w / 2 - this.w / 2 + this.horizontalOffset;
 
-      // Fire bullets
+      // Clamp targetX to ensure it's within sensible bounds, even with offset
+      targetX = clamp(targetX, margin, screenWidth - margin - this.w);
+
+
+      if (this.movementPhase === 'entering') {
+        this.y += this.speed * dt;
+        // Smoothly move towards initial targetX while entering
+        this.currentLerpX += (targetX - this.currentLerpX) * 0.05;
+        this.x = this.currentLerpX;
+
+        if (this.y >= this.hoverY) {
+          this.y = this.hoverY;
+          this.movementPhase = 'descending';
+        }
+      } else if (this.movementPhase === 'descending') {
+        this.y += this.speed * 2.5 * dt; // Fast descent
+        this.currentLerpX += (targetX - this.currentLerpX) * 0.1; // More aggressive horizontal tracking
+        this.x = this.currentLerpX;
+
+        if (this.y >= this.dashDepthY) {
+          this.y = this.dashDepthY;
+          this.movementPhase = 'ascending';
+        }
+      } else if (this.movementPhase === 'ascending') {
+        this.y -= this.speed * 1.5 * dt; // Ascend slower than descent
+        this.currentLerpX += (targetX - this.currentLerpX) * 0.05; // Less aggressive horizontal tracking
+        this.x = this.currentLerpX;
+
+        if (this.y <= this.hoverY) {
+          this.y = this.hoverY;
+          this.movementPhase = 'descending'; // Loop back to descending
+        }
+      }
+
+      // Ensure X position is always clamped to screen bounds after movement
+      this.x = clamp(this.x, margin, screenWidth - margin - this.w);
+
+
+      // Fire bullets - always firing when not entering
       const now = performance.now();
-      if (now - this.lastFire > this.fireRate) {
+      if (this.movementPhase !== 'entering' && now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-        const bw = 8, bh = 24;
-        const bullet1 = {
+        const bw = 8,
+          bh = 24;
+        state.enemyBullets.push({
           x: this.x + this.w / 2 - bw / 2 - 10,
           y: this.y + this.h,
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
           color: '#de8a90'
-        };
-        const bullet2 = {
+        });
+        state.enemyBullets.push({
           x: this.x + this.w / 2 - bw / 2 + 10,
           y: this.y + this.h,
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
           color: '#de8a90'
-        };
-        state.enemyBullets.push(bullet1, bullet2);
+        });
       }
     }
   }
