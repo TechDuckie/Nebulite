@@ -102,7 +102,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -118,30 +118,30 @@
     if(src.endsWith('.png')) return loadImg(src);
     if(src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
   })).then(loadedAssets=>{
-    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.laser=loadedAssets[3]; images.boss=loadedAssets[4]; images.boss2=loadedAssets[5]; images.boss3=loadedAssets[6];
-    audio.music1 = loadedAssets[7]; audio.boss1 = loadedAssets[8];
-    images.warn = loadedAssets[9];
-    audio.laserShoot = loadedAssets[10]; audio.playerDamage = loadedAssets[11]; audio.explosion = loadedAssets[12];
-    images.lyra = loadedAssets[13];
-    audio.typewriter = loadedAssets[14];
-    images.motherShip = loadedAssets[15];
-    audio.menu = loadedAssets[16];
-    images.heart = loadedAssets[17];
-    images.shield = loadedAssets[18];
-    images.falcon = loadedAssets[19];
-    images.enemySmall4 = loadedAssets[20];
-    images.enemyLaserSmall = loadedAssets[21];
-    images.boss4 = loadedAssets[22];
-    images.enemyShield1 = loadedAssets[23];
-    images.enemyLaserBig = loadedAssets[24];
-    images.pinkNebula = loadedAssets[25];
-    images.violetRift = loadedAssets[26];
-    images.ionGrove = loadedAssets[27];
-    images.greenNebula = loadedAssets[28];
+    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.enemySmall3=loadedAssets[3]; images.laser=loadedAssets[4]; images.boss=loadedAssets[5]; images.boss2=loadedAssets[6]; images.boss3=loadedAssets[7]; images.boss5=loadedAssets[8];
+    audio.music1 = loadedAssets[9]; audio.boss1 = loadedAssets[10];
+    images.warn = loadedAssets[11];
+    audio.laserShoot = loadedAssets[12]; audio.playerDamage = loadedAssets[13]; audio.explosion = loadedAssets[14];
+    images.lyra = loadedAssets[15];
+    audio.typewriter = loadedAssets[16];
+    images.motherShip = loadedAssets[17];
+    audio.menu = loadedAssets[18];
+    images.heart = loadedAssets[19];
+    images.shield = loadedAssets[20];
+    images.falcon = loadedAssets[21];
+    images.enemySmall4 = loadedAssets[22];
+    images.enemyLaserSmall = loadedAssets[23];
+    images.boss4 = loadedAssets[24];
+    images.enemyShield1 = loadedAssets[25];
+    images.enemyLaserBig = loadedAssets[26];
+    images.pinkNebula = loadedAssets[27];
+    images.violetRift = loadedAssets[28];
+    images.ionGrove = loadedAssets[29];
+    images.greenNebula = loadedAssets[30];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[29+i];
+      images[`asteroid${i+1}`] = loadedAssets[31+i];
     }
-    const STAR_ASSET_START_INDEX = 28 + NUM_ASTEROID_IMAGES;
+    const STAR_ASSET_START_INDEX = 31 + NUM_ASTEROID_IMAGES;
     for (let i = 0; i < NUM_STAR_IMAGES; i++) {
       images[`star${i+1}`] = loadedAssets[STAR_ASSET_START_INDEX + i];
     }
@@ -324,6 +324,35 @@
     };
   }
 
+  function makeLevel5() {
+    const waves = [];
+    for (let w = 0; w < 15; w++) {
+      waves.push({
+        enemyCount: 6 + w,
+        enemySpeed: 110 + w * 8,
+        spawnRate: 180,
+        enemySprite: 'enemySmall3'
+      });
+    }
+    return {
+      waves,
+      waveMusic: 'music1',
+      bossMusic: 'boss1',
+      dialogue: 'dialogue5',
+      dialogueBackgroundImage: 'motherShip',
+      boss: {
+        name: 'Dual-Mech',
+        spriteKey: 'boss5',
+        hp: 150,
+        w: 160, h: 160,
+        speed: 70,
+        fireRate: 600,
+        bulletSpeed: 270,
+        canDash: true,
+      }
+    };
+  }
+
   const SECTORS = [
     {
       name: 'Violet Rift',
@@ -331,7 +360,8 @@
       levels: [
         makeLevel1(),
         makeLevel2(),
-        makeLevel3()
+        makeLevel3(),
+        makeLevel5()
       ]
     },
     {
@@ -371,6 +401,48 @@
 
     render(ctx) {
       drawImageCentered(images[this.sprite] || images.enemy, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
+    }
+  }
+
+  class ShootingEnemy3 extends Enemy {
+    constructor(x, y, w, h, speed, sprite) {
+      super(x, y, w, h, speed, sprite);
+      this.hp = 3;
+      this.lastFire = 0;
+      this.fireRate = 2500; // ms
+      this.bulletSpeed = 160;
+    }
+
+    update(dt) {
+      super.update(dt); // Basic downward movement
+
+      // Lerp towards player's x position
+      const targetX = state.player.x + state.player.w / 2 - this.w / 2;
+      this.x += (targetX - this.x) * 0.008; // moderate follow
+
+      // Fire bullets
+      const now = performance.now();
+      if (now - this.lastFire > this.fireRate) {
+        this.lastFire = now;
+        const bw = 8, bh = 24;
+        const bullet1 = {
+          x: this.x + this.w / 2 - bw / 2 - 10,
+          y: this.y + this.h,
+          w: bw,
+          h: bh,
+          vy: this.bulletSpeed,
+          color: '#de8a90'
+        };
+        const bullet2 = {
+          x: this.x + this.w / 2 - bw / 2 + 10,
+          y: this.y + this.h,
+          w: bw,
+          h: bh,
+          vy: this.bulletSpeed,
+          color: '#de8a90'
+        };
+        state.enemyBullets.push(bullet1, bullet2);
+      }
     }
   }
 
@@ -616,8 +688,7 @@ class Boss {
 
     fire() {
       const isEarlyLevel = currentSectorIndex === 0 && currentLevelIndexInSector < 3;
-      const bw = isEarlyLevel ? 8 : 8;
-      const bh = isEarlyLevel ? 24 : 24;
+      const bw = 8, bh = 24;
       const x = this.x + this.w / 2 - bw / 2;
       const y = this.y + this.h / 2 + 8;
       const bullet = {
@@ -632,7 +703,14 @@ class Boss {
       } else {
         bullet.color = '#90de8a';
       }
-      state.enemyBullets.push(bullet);
+
+      if (this.cfg.spriteKey === 'boss5') {
+        const bullet1 = { ...bullet, x: x - 20, color: '#de8a90' };
+        const bullet2 = { ...bullet, x: x + 20, color: '#de8a90' };
+        state.enemyBullets.push(bullet1, bullet2);
+      } else {
+        state.enemyBullets.push(bullet);
+      }
     }
 
     render(ctx) {
@@ -997,6 +1075,8 @@ class Boss {
     } else if (spriteKey === 'asteroid') {
       const asteroidSprite = `asteroid${Math.floor(Math.random() * NUM_ASTEROID_IMAGES) + 1}`;
       enemy = new Enemy(x, -h, w, h, speed, asteroidSprite);
+    } else if (spriteKey === 'enemySmall3') {
+      enemy = new ShootingEnemy3(x, -h, w, h, speed, spriteKey);
     } else if (spriteKey === 'enemySmall4') {
       enemy = new ShootingEnemy4(x, -h, w, h, speed, spriteKey);
     } else {
@@ -1297,6 +1377,8 @@ class Boss {
                   victoryDialogue = 'dialogueClear2';
                 } else if (currentSectorIndex === 0 && currentLevelIndexInSector === 2) {
                   victoryDialogue = 'dialogueClear3';
+                } else if (currentSectorIndex === 0 && currentLevelIndexInSector === 3) {
+                  victoryDialogue = 'dialogueClear5';
                 } else if (currentSectorIndex === 1 && currentLevelIndexInSector === 0) {
                   victoryDialogue = 'dialogueClear4';
                 }
