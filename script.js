@@ -452,7 +452,7 @@
       this.hp = 5;
       this.lastFire = 0;
       this.fireRate = 2000; // ms
-      this.bulletSpeed = 150;
+      this.bulletSpeed = 200;
     }
 
     update(dt) {
