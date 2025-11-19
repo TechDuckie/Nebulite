@@ -473,8 +473,20 @@
           this.phaseTimer = 0;
         }
       } else if (this.movementPhase === 'waiting') {
-        const targetX = state.player.x + state.player.w / 2 - this.w / 2 + this.horizontalOffset;
+        const screenWidth = canvas.width / DPR;
+        const margin = this.w / 2;
+        let targetX;
+
+        // If enemy is off-screen, target the center to bring it back
+        if (this.x < margin || this.x > screenWidth - margin) {
+          targetX = screenWidth / 2;
+        } else {
+          // Otherwise, target the player with the usual offset
+          targetX = state.player.x + state.player.w / 2 - this.w / 2 + this.horizontalOffset;
+        }
+
         this.x += (targetX - this.x) * 0.05;
+
         if (this.phaseTimer > this.waitTime) {
           this.movementPhase = 'diving';
           this.diveTargetX = state.player.x;
