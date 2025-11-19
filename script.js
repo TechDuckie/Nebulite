@@ -299,7 +299,7 @@
     const waves = [];
     for (let w = 0; w < 10; w++) {
       waves.push({
-        enemyCount: 3 + w,
+        enemyCount: 2 + Math.floor(w / 2),
         enemySpeed: 60 + w * 5,
         spawnRate: 400,
         enemySprite: 'enemySmall4'
@@ -453,29 +453,66 @@
       this.lastFire = 0;
       this.fireRate = 2000; // ms
       this.bulletSpeed = 200;
+      this.movementPhase = 'entering'; // entering, diving, ascending, waiting
+      this.targetY = 100 + Math.random() * 100; // Hover position
+      this.diveTargetX = 0;
+      this.diveTargetY = 0;
+      this.phaseTimer = 0;
+      this.waitTime = 0.5 + Math.random() * 1; // wait 0.5-1.5 seconds
+      this.horizontalOffset = (Math.random() - 0.5) * 200; // -100 to 100 px offset
     }
 
     update(dt) {
-      super.update(dt); // Basic downward movement
+      this.phaseTimer += dt;
 
-      // Lerp towards player's x position
-      const targetX = state.player.x + state.player.w / 2 - this.w / 2;
-      this.x += (targetX - this.x) * 0.005; // Very slow follow
+      if (this.movementPhase === 'entering') {
+        this.y += this.speed * 2 * dt;
+        if (this.y >= this.targetY) {
+          this.y = this.targetY;
+          this.movementPhase = 'waiting';
+          this.phaseTimer = 0;
+        }
+      } else if (this.movementPhase === 'waiting') {
+        const targetX = state.player.x + state.player.w / 2 - this.w / 2 + this.horizontalOffset;
+        this.x += (targetX - this.x) * 0.05;
+        if (this.phaseTimer > this.waitTime) {
+          this.movementPhase = 'diving';
+          this.diveTargetX = state.player.x;
+          this.diveTargetY = canvas.height / DPR * 0.75;
+          this.initialDiveY = this.y;
+          this.initialDiveX = this.x;
+        }
+      } else if (this.movementPhase === 'diving') {
+        const progress = (this.y - this.initialDiveY) / (this.diveTargetY - this.initialDiveY);
+        this.y += this.speed * 4 * dt;
+        this.x = this.initialDiveX + (this.diveTargetX - this.initialDiveX) * Math.sin(progress * Math.PI);
+        if (this.y >= this.diveTargetY) {
+          this.movementPhase = 'ascending';
+        }
+      } else if (this.movementPhase === 'ascending') {
+        this.y -= this.speed * 3 * dt;
+        if (this.y <= this.targetY) {
+          this.y = this.targetY;
+          this.movementPhase = 'waiting';
+          this.phaseTimer = 0;
+        }
+      }
 
       // Fire bullets
       const now = performance.now();
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
-                          const bw = 8, bh = 24;
-                          const bullet = {
-                            x: this.x + this.w / 2 - bw / 2,
-                            y: this.y + this.h,
-                            w: bw,
-                            h: bh,
-                            vy: this.bulletSpeed,
-                            color: '#90de8a'
-                          };
-                          state.enemyBullets.push(bullet);
+        const bw = 8,
+          bh = 24;
+        const bullet = {
+          x: this.x + this.w / 2 - bw / 2,
+          y: this.y + this.h,
+          w: bw,
+          h: bh,
+          vy: this.bulletSpeed,
+          color: '#90de8a'
+        };
+        state.enemyBullets.push(bullet);
       }
     }
   }
