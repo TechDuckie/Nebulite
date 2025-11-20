@@ -1299,7 +1299,7 @@ class Boss {
         state.dialogue.goButtonTimerSet = true; // Ensure timer is only set once
         setTimeout(() => {
           btnDialogueGo.style.display = 'block';
-        }, 5000);
+        }, 1000);
       }
       return; // Don't update the rest of the game while in dialogue
     }
