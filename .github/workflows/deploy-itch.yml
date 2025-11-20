@@ -23,7 +23,7 @@ jobs:
       # Step 3: Download and install Butler (correct Linux binary URL)
       - name: Install butler
         run: |
-          curl -L -o $HOME/butler https://broth.itch.ovh/butler/linux-amd64/LATEST/download/default/butler
+          curl -L -o $HOME/butler https://broth.itch.ovh/butler/linux-amd64/LATEST/download/linux/amd64/butler
           chmod +x $HOME/butler
           sudo mv $HOME/butler /usr/local/bin
 
