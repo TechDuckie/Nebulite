@@ -1,33 +1,31 @@
-name: Upload Nebulite to itch.io
+name: Deploy to itch.io
 
 on:
   release:
     types: [published]
 
 jobs:
-  build-and-upload:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      # Zip everything in the repository root EXCEPT hidden files and GitHub folders
-      - name: Create nebulite.zip
-        run: |
-          zip -r nebulite.zip . \
-          -x ".git/*" \
-          -x ".github/*"
+      - name: Install bsdtar
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools
 
-      - name: Install butler
+      - name: Download Butler
         run: |
           curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default \
-          | bsdtar xvf- \
-          && chmod +x butler \
-          && sudo mv butler /usr/local/bin
+          | bsdtar -xvf- -C $HOME
 
-      - name: Login to itch.io
-        run: butler login <<< "${{ secrets.ITCH_IO_API_KEY }}"
+      - name: Make Butler executable
+        run: chmod +x $HOME/butler
+
+      - name: Zip game files
+        run: zip -r nebulite.zip .
 
       - name: Upload to itch.io
-        run: butler push nebulite.zip Badankan/nebulite:web
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCH_IO_API_KEY }}
+        run: $HOME/butler push nebulite.zip Badankan/nebulite:web
