@@ -1134,6 +1134,7 @@ class Boss {
     }
 
     takeDamage(amount = 1, piercing = false) {
+      if (state.debug) return; // Player does not lose health in debug mode
       if (this.shieldActive && !piercing) return;
       this.hp -= amount;
       spawnParticles(this.x, this.y);
