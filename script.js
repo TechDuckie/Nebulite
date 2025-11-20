@@ -102,7 +102,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', music2: 'assets/music2.mp3', boss2Music: 'assets/boss2.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', enemySmall5: 'assets/enemySmall5.png', boss6: 'assets/boss6.png', greenCrosshair: 'assets/greenCrosshair.png', seeker1: 'assets/seeker1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', music2: 'assets/music2.mp3', boss2Music: 'assets/boss2.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -118,30 +118,30 @@
     if(src.endsWith('.png')) return loadImg(src);
     if(src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
   })).then(loadedAssets=>{
-    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.enemySmall3=loadedAssets[3]; images.laser=loadedAssets[4]; images.boss=loadedAssets[5]; images.boss2=loadedAssets[6]; images.boss3=loadedAssets[7]; images.boss5=loadedAssets[8];
-    audio.music1 = loadedAssets[9]; audio.boss1 = loadedAssets[10]; audio.music2 = loadedAssets[11]; audio.boss2Music = loadedAssets[12];
-    images.warn = loadedAssets[13];
-    audio.laserShoot = loadedAssets[14]; audio.playerDamage = loadedAssets[15]; audio.explosion = loadedAssets[16];
-    images.lyra = loadedAssets[17];
-    audio.typewriter = loadedAssets[18];
-    images.motherShip = loadedAssets[19];
-    audio.menu = loadedAssets[20];
-    images.heart = loadedAssets[21];
-    images.shield = loadedAssets[22];
-    images.falcon = loadedAssets[23];
-    images.enemySmall4 = loadedAssets[24];
-    images.enemyLaserSmall = loadedAssets[25];
-    images.boss4 = loadedAssets[26];
-    images.enemyShield1 = loadedAssets[27];
-    images.enemyLaserBig = loadedAssets[28];
-    images.pinkNebula = loadedAssets[29];
-    images.violetRift = loadedAssets[30];
-    images.ionGrove = loadedAssets[31];
-    images.greenNebula = loadedAssets[32];
+    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.enemySmall3=loadedAssets[3]; images.laser=loadedAssets[4]; images.boss=loadedAssets[5]; images.boss2=loadedAssets[6]; images.boss3=loadedAssets[7]; images.boss5=loadedAssets[8]; images.enemySmall5=loadedAssets[9]; images.boss6=loadedAssets[10]; images.greenCrosshair=loadedAssets[11]; images.seeker1=loadedAssets[12];
+    audio.music1 = loadedAssets[13]; audio.boss1 = loadedAssets[14]; audio.music2 = loadedAssets[15]; audio.boss2Music = loadedAssets[16];
+    images.warn = loadedAssets[17];
+    audio.laserShoot = loadedAssets[18]; audio.playerDamage = loadedAssets[19]; audio.explosion = loadedAssets[20];
+    images.lyra = loadedAssets[21];
+    audio.typewriter = loadedAssets[22];
+    images.motherShip = loadedAssets[23];
+    audio.menu = loadedAssets[24];
+    images.heart = loadedAssets[25];
+    images.shield = loadedAssets[26];
+    images.falcon = loadedAssets[27];
+    images.enemySmall4 = loadedAssets[28];
+    images.enemyLaserSmall = loadedAssets[29];
+    images.boss4 = loadedAssets[30];
+    images.enemyShield1 = loadedAssets[31];
+    images.enemyLaserBig = loadedAssets[32];
+    images.pinkNebula = loadedAssets[33];
+    images.violetRift = loadedAssets[34];
+    images.ionGrove = loadedAssets[35];
+    images.greenNebula = loadedAssets[36];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[33+i];
+      images[`asteroid${i+1}`] = loadedAssets[37+i];
     }
-    const STAR_ASSET_START_INDEX = 33 + NUM_ASTEROID_IMAGES;
+    const STAR_ASSET_START_INDEX = 37 + NUM_ASTEROID_IMAGES;
     for (let i = 0; i < NUM_STAR_IMAGES; i++) {
       images[`star${i+1}`] = loadedAssets[STAR_ASSET_START_INDEX + i];
     }
@@ -367,6 +367,36 @@
     };
   }
 
+  function makeLevel6() {
+    const waves = [];
+    for (let w = 0; w < 15; w++) {
+      waves.push({
+        enemyCount: 3 + w,
+        enemySpeed: 100 + w * 7,
+        spawnRate: 200,
+        enemySprite: 'enemySmall5'
+      });
+    }
+    return {
+      waves,
+      waveMusic: 'music2',
+      bossMusic: 'boss2Music',
+      dialogue: 'dialogue7',
+      dialogueBackgroundImage: 'motherShip',
+      boss: {
+        name: 'Serpent-X',
+        spriteKey: 'boss6',
+        hp: 600,
+        w: 180, h: 180,
+        speed: 60,
+        fireRate: 900,
+        bulletSpeed: 240,
+        specialAttackCooldown: 10000,
+        specialAttacks: ['cone', 'seeker'],
+      }
+    };
+  }
+
   const SECTORS = [
     {
       name: 'Violet Rift',
@@ -382,7 +412,8 @@
       name: 'Ion Grove',
       imageKey: 'ionGrove',
       levels: [
-        makeLevel4()
+        makeLevel4(),
+        makeLevel6()
       ]
     }
   ];
@@ -586,6 +617,63 @@
     }
   }
 
+class ShootingEnemy5 extends Enemy {
+    constructor(x, y, w, h, speed, sprite) {
+        super(x, y, w, h, speed, sprite);
+        this.hp = 5;
+        this.lastFire = 0;
+        this.fireRate = 1800; // ms
+        this.bulletSpeed = 220;
+        this.movementPhase = 'diving'; // diving, ascending
+        this.diveTargetY = canvas.height / DPR * (0.6 + Math.random() * 0.3);
+        this.ascendTargetY = 50 + Math.random() * 100;
+        this.horizontalOffset = (Math.random() - 0.5) * 250;
+    }
+
+    update(dt) {
+        const screenWidth = canvas.width / DPR;
+        const margin = this.w / 2;
+        let targetX;
+
+        if (this.x < margin || this.x > screenWidth - this.w - margin) {
+            targetX = screenWidth / 2 - this.w / 2;
+        } else {
+            targetX = state.player.x + state.player.w / 2 - this.w / 2 + this.horizontalOffset;
+        }
+
+        this.x += (targetX - this.x) * 0.04;
+
+        if (this.movementPhase === 'diving') {
+            this.y += this.speed * 1.5 * dt;
+            if (this.y >= this.diveTargetY) {
+                this.movementPhase = 'ascending';
+            }
+        } else if (this.movementPhase === 'ascending') {
+            this.y -= this.speed * 1.5 * dt;
+            if (this.y <= this.ascendTargetY) {
+                this.movementPhase = 'diving';
+            }
+        }
+
+        // Fire bullets
+        const now = performance.now();
+        if (now - this.lastFire > this.fireRate) {
+            this.lastFire = now;
+            const bw = 8,
+                bh = 24;
+            const bullet = {
+                x: this.x + this.w / 2 - bw / 2,
+                y: this.y + this.h,
+                w: bw,
+                h: bh,
+                vy: this.bulletSpeed,
+                color: '#8ade8a'
+            };
+            state.enemyBullets.push(bullet);
+        }
+    }
+}
+
 class Boss {
     constructor(config) {
       this.cfg = config;
@@ -614,6 +702,12 @@ class Boss {
         this.specialAttackPhase = null;
         this.spinAngle = 0;
         this.lastSpecialFire = 0;
+
+        if (this.cfg.specialAttacks) {
+          this.specialAttackAlternate = 0;
+          this.coneAttackState = { angle: 0, lastShift: 0, startTime: 0 };
+          this.seekerAttackState = { crosshair: null, seekersFired: 0, lastSeekerFire: 0 };
+        }
       }
     }
 
@@ -621,11 +715,75 @@ class Boss {
       if (this.isDefeated || state.warningFlash.active) return;
 
       const now = performance.now();
+      const centerX = canvas.width / DPR / 2 - this.w / 2;
+
+      // Special Attacks for Boss 6
+      if (this.cfg.specialAttacks) {
+        if (this.specialAttackActive) {
+          if (this.specialAttackPhase === 'moveToCenter') {
+            this.x += (centerX - this.x) * 0.08;
+            this.y += (canvas.height / DPR / 4 - this.y) * 0.08;
+            if (Math.abs(this.x - centerX) < 5) {
+              const nextAttack = this.cfg.specialAttacks[this.specialAttackAlternate];
+              this.specialAttackPhase = nextAttack;
+              if (nextAttack === 'cone') {
+                this.coneAttackState.startTime = now;
+                this.coneAttackState.lastShift = now;
+                this.coneAttackState.angle = 0;
+              } else if (nextAttack === 'seeker') {
+                this.seekerAttackState.seekersFired = 0;
+                this.seekerAttackState.crosshair = new Crosshair();
+                state.crosshairs.push(this.seekerAttackState.crosshair);
+              }
+            }
+          } else if (this.specialAttackPhase === 'cone') {
+            if (now - this.coneAttackState.startTime > 10000) {
+              this.specialAttackPhase = 'returnToPosition';
+            }
+            if (now - this.coneAttackState.lastShift > 2000) {
+              this.coneAttackState.angle = (Math.random() - 0.5) * 0.4;
+              this.coneAttackState.lastShift = now;
+            }
+            if (now - this.lastSpecialFire > 200) {
+              this.lastSpecialFire = now;
+              for (let i = -2; i <= 2; i++) {
+                const angle = this.coneAttackState.angle + i * Math.PI / 16;
+                const bulletSpeed = 300;
+                const bw = 8, bh = 24;
+                state.enemyBullets.push({
+                  x: this.x + this.w / 2 - bw / 2,
+                  y: this.y + this.h / 2, w: bw, h: bh,
+                  vx: Math.sin(angle) * bulletSpeed,
+                  vy: Math.cos(angle) * bulletSpeed,
+                  color: '#90de8a'
+                });
+              }
+            }
+          } else if (this.specialAttackPhase === 'seeker') {
+            if (this.seekerAttackState.seekersFired >= 3) {
+              this.specialAttackPhase = 'returnToPosition';
+              if (this.seekerAttackState.crosshair) {
+                this.seekerAttackState.crosshair.remove = true;
+                this.seekerAttackState.crosshair = null;
+              }
+            }
+          } else if (this.specialAttackPhase === 'returnToPosition') {
+            this.x += (this.initialX - this.x) * 0.08;
+            this.y += (this.hoverY - this.y) * 0.08;
+            if (Math.abs(this.x - this.initialX) < 5 && Math.abs(this.y - this.hoverY) < 5) {
+              this.specialAttackActive = false;
+              this.specialAttackPhase = null;
+              this.lastSpecialAttack = now;
+              this.specialAttackAlternate = (this.specialAttackAlternate + 1) % this.cfg.specialAttacks.length;
+            }
+          }
+          return;
+        }
+      }
 
       // Special Attack Logic (Boss 4)
       if (this.specialAttackActive) {
         const specialAttackSpeed = this.cfg.speed * 2;
-        const centerX = canvas.width / DPR / 2 - this.w / 2;
         const centerY = canvas.height / DPR / 2;
 
         if (this.specialAttackPhase === 'moveToCenter') {
@@ -802,14 +960,10 @@ class Boss {
         vy: this.cfg.bulletSpeed,
         animationTimer: 0,
         scaleX: 1,
-        animationSpeed: 0.2
+        animationSpeed: 0.2,
+        color: '#90de8a'
       };
-      if (isEarlyLevel) {
-        bullet.color = '#f00';
-      } else {
-        bullet.color = '#90de8a';
-      }
-
+      
       if (this.cfg.spriteKey === 'boss5') {
         const bullet1 = { ...bullet, x: x - 20, color: '#de8a90' };
         const bullet2 = { ...bullet, x: x + 20, color: '#de8a90' };
@@ -823,9 +977,92 @@ class Boss {
       if (!this.isDefeated) {
         drawImageCentered(images[this.cfg.spriteKey] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
         if (this.specialAttackActive) {
-          drawImageCentered(images.enemyShield1, this.x + this.w / 2, this.y + this.h / 2, this.w * 1.2, this.h * 1.2);
+          drawImageCentered(images.shield, this.x + this.w / 2, this.y + this.h / 2, this.w * 1.2, this.h * 1.2);
         }
       }
+    }
+  }
+
+  class Crosshair {
+    constructor() {
+      this.x = canvas.width / DPR / 2;
+      this.y = canvas.height / DPR / 2;
+      this.w = 64;
+      this.h = 64;
+      this.speed = 400;
+      this.snapDistance = 80;
+      this.lastSnap = 0;
+      this.snapCooldown = 2000;
+      this.remove = false;
+    }
+
+    update(dt) {
+      const p = state.player;
+      const dx = p.x - this.x;
+      const dy = p.y - this.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 1) {
+        this.x += (dx / dist) * this.speed * dt;
+        this.y += (dy / dist) * this.speed * dt;
+      }
+      
+      const now = performance.now();
+      if (dist < this.snapDistance && now - this.lastSnap > this.snapCooldown) {
+        this.lastSnap = now;
+        state.seekers.push(new Seeker(this.x, this.y, p));
+        state.boss.seekerAttackState.seekersFired++;
+        if (state.boss.seekerAttackState.seekersFired < 3) {
+            this.x = canvas.width / DPR / 2;
+            this.y = canvas.height / DPR / 2;
+        } else {
+            this.remove = true;
+        }
+      }
+    }
+
+    render(ctx) {
+      drawImageCentered(images.greenCrosshair, this.x, this.y, this.w, this.h);
+    }
+  }
+
+  class Seeker {
+    constructor(x, y, target) {
+      this.x = x;
+      this.y = y;
+      this.w = 32;
+      this.h = 32;
+      this.speed = 250;
+      this.life = 5; // 5 seconds
+      this.target = target;
+      this.angle = 0;
+    }
+
+    update(dt) {
+      this.life -= dt;
+      if (this.life <= 0) {
+        this.remove = true;
+        return;
+      }
+
+      const dx = this.target.x - this.x;
+      const dy = this.target.y - this.y;
+      const dist = Math.hypot(dx, dy);
+
+      this.angle = Math.atan2(dy, dx);
+
+      if (dist > 1) {
+        this.x += (dx / dist) * this.speed * dt;
+        this.y += (dy / dist) * this.speed * dt;
+      }
+    }
+
+    render(ctx) {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle + Math.PI / 2);
+      drawImageCentered(images.seeker1, 0, 0, this.w, this.h);
+      ctx.restore();
     }
   }
 
@@ -984,6 +1221,8 @@ class Boss {
     particles: [],
     thrusterParticles: [],
     enemyBullets: [],
+    crosshairs: [],
+    seekers: [],
     boss: null,
     score: 0,
     waveIndex: 0,
@@ -1185,6 +1424,8 @@ class Boss {
       enemy = new ShootingEnemy3(x, -h, w, h, speed, spriteKey);
     } else if (spriteKey === 'enemySmall4') {
       enemy = new ShootingEnemy4(x, -h, w, h, speed, spriteKey);
+    } else if (spriteKey === 'enemySmall5') {
+      enemy = new ShootingEnemy5(x, -h, w, h, speed, spriteKey);
     } else {
       enemy = new Enemy(x, -h, w, h, speed, spriteKey);
     }
@@ -1437,6 +1678,24 @@ class Boss {
       if(b.y > canvas.height/DPR + 40 || b.y < -40 || b.x < -40 || b.x > canvas.width/DPR + 40) state.enemyBullets.splice(i,1);
     }
 
+    // update crosshairs
+    for (let i = state.crosshairs.length - 1; i >= 0; i--) {
+        const c = state.crosshairs[i];
+        c.update(dt);
+        if (c.remove) {
+            state.crosshairs.splice(i, 1);
+        }
+    }
+
+    // update seekers
+    for (let i = state.seekers.length - 1; i >= 0; i--) {
+        const s = state.seekers[i];
+        s.update(dt);
+        if (s.remove) {
+            state.seekers.splice(i, 1);
+        }
+    }
+
     // boss behavior
     if(state.boss){
       state.boss.update(dt);
@@ -1487,6 +1746,8 @@ class Boss {
                   victoryDialogue = 'dialogueClear5';
                 } else if (currentSectorIndex === 1 && currentLevelIndexInSector === 0) {
                   victoryDialogue = 'dialogueClear4';
+                } else if (currentSectorIndex === 1 && currentLevelIndexInSector === 1) {
+                  victoryDialogue = 'dialogueClear7';
                 }
                 showDialogue(victoryDialogue, () => {
                   state.boss = null;
@@ -1542,6 +1803,17 @@ class Boss {
           break;
         }
       }
+    }
+
+    // seekers hitting player
+    for (let i = state.seekers.length - 1; i >= 0; i--) {
+        const s = state.seekers[i];
+        const rs = { x: s.x - s.w / 2, y: s.y - s.h / 2, w: s.w, h: s.h };
+        const rp = { x: state.player.x - state.player.w / 2, y: state.player.y - state.player.h / 2, w: state.player.w, h: state.player.h };
+        if (rectIntersect(rs, rp)) {
+            state.seekers.splice(i, 1);
+            state.player.takeDamage(1);
+        }
     }
 
     // enemy bullets hitting player
@@ -1639,6 +1911,12 @@ class Boss {
     if(state.boss){
       state.boss.render(ctx);
     }
+
+    // render crosshairs
+    state.crosshairs.forEach(c => c.render(ctx));
+
+    // render seekers
+    state.seekers.forEach(s => s.render(ctx));
 
     // enemy bullets
     state.enemyBullets.forEach(bb => {
