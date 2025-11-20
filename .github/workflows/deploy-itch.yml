@@ -1,0 +1,33 @@
+name: Upload Nebulite to itch.io
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Zip everything in the repository root EXCEPT hidden files and GitHub folders
+      - name: Create nebulite.zip
+        run: |
+          zip -r nebulite.zip . \
+          -x ".git/*" \
+          -x ".github/*"
+
+      - name: Install butler
+        run: |
+          curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default \
+          | bsdtar xvf- \
+          && chmod +x butler \
+          && sudo mv butler /usr/local/bin
+
+      - name: Login to itch.io
+        run: butler login <<< "${{ secrets.ITCH_IO_API_KEY }}"
+
+      - name: Upload to itch.io
+        run: butler push nebulite.zip Badankan/nebulite:web
