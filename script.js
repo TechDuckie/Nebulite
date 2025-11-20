@@ -190,7 +190,21 @@
   }
 
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, effectsEnabled: true, currentMusic: null };
+  let audioContextUnlocked = false;
+  function initAudio() {
+    if (audioContextUnlocked) return;
+    audioContextUnlocked = true;
+    if (gameState === STATE.MENU) {
+      playMusic('menu');
+    }
+    document.removeEventListener('pointerdown', initAudio);
+    document.removeEventListener('keydown', initAudio);
+  }
+  document.addEventListener('pointerdown', initAudio);
+  document.addEventListener('keydown', initAudio);
+
   function playMusic(key){
+    if (!audioContextUnlocked) return;
     if(audioState.currentMusic) audioState.currentMusic.pause();
     const a = audio[key];
     if(a){ a.currentTime = 0; a.volume = audioState.masterVolume; a.play(); audioState.currentMusic = a; }
