@@ -102,7 +102,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
+  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', music2: 'assets/music2.mp3', boss2Music: 'assets/boss2.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -119,33 +119,33 @@
     if(src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
   })).then(loadedAssets=>{
     images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.enemySmall3=loadedAssets[3]; images.laser=loadedAssets[4]; images.boss=loadedAssets[5]; images.boss2=loadedAssets[6]; images.boss3=loadedAssets[7]; images.boss5=loadedAssets[8];
-    audio.music1 = loadedAssets[9]; audio.boss1 = loadedAssets[10];
-    images.warn = loadedAssets[11];
-    audio.laserShoot = loadedAssets[12]; audio.playerDamage = loadedAssets[13]; audio.explosion = loadedAssets[14];
-    images.lyra = loadedAssets[15];
-    audio.typewriter = loadedAssets[16];
-    images.motherShip = loadedAssets[17];
-    audio.menu = loadedAssets[18];
-    images.heart = loadedAssets[19];
-    images.shield = loadedAssets[20];
-    images.falcon = loadedAssets[21];
-    images.enemySmall4 = loadedAssets[22];
-    images.enemyLaserSmall = loadedAssets[23];
-    images.boss4 = loadedAssets[24];
-    images.enemyShield1 = loadedAssets[25];
-    images.enemyLaserBig = loadedAssets[26];
-    images.pinkNebula = loadedAssets[27];
-    images.violetRift = loadedAssets[28];
-    images.ionGrove = loadedAssets[29];
-    images.greenNebula = loadedAssets[30];
+    audio.music1 = loadedAssets[9]; audio.boss1 = loadedAssets[10]; audio.music2 = loadedAssets[11]; audio.boss2Music = loadedAssets[12];
+    images.warn = loadedAssets[13];
+    audio.laserShoot = loadedAssets[14]; audio.playerDamage = loadedAssets[15]; audio.explosion = loadedAssets[16];
+    images.lyra = loadedAssets[17];
+    audio.typewriter = loadedAssets[18];
+    images.motherShip = loadedAssets[19];
+    audio.menu = loadedAssets[20];
+    images.heart = loadedAssets[21];
+    images.shield = loadedAssets[22];
+    images.falcon = loadedAssets[23];
+    images.enemySmall4 = loadedAssets[24];
+    images.enemyLaserSmall = loadedAssets[25];
+    images.boss4 = loadedAssets[26];
+    images.enemyShield1 = loadedAssets[27];
+    images.enemyLaserBig = loadedAssets[28];
+    images.pinkNebula = loadedAssets[29];
+    images.violetRift = loadedAssets[30];
+    images.ionGrove = loadedAssets[31];
+    images.greenNebula = loadedAssets[32];
     for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[31+i];
+      images[`asteroid${i+1}`] = loadedAssets[33+i];
     }
-    const STAR_ASSET_START_INDEX = 31 + NUM_ASTEROID_IMAGES;
+    const STAR_ASSET_START_INDEX = 33 + NUM_ASTEROID_IMAGES;
     for (let i = 0; i < NUM_STAR_IMAGES; i++) {
       images[`star${i+1}`] = loadedAssets[STAR_ASSET_START_INDEX + i];
     }
-    audio.music1.loop = true; audio.boss1.loop = true;
+    audio.music1.loop = true; audio.boss1.loop = true; audio.music2.loop = true; audio.boss2Music.loop = true;
     audio.menu.loop = true;
   });
 
@@ -307,8 +307,8 @@
     }
     return {
       waves,
-      waveMusic: 'music1',
-      bossMusic: 'boss1',
+      waveMusic: 'music2',
+      bossMusic: 'boss2Music',
       dialogue: 'dialogue4',
       dialogueBackgroundImage: 'motherShip',
       boss: {
