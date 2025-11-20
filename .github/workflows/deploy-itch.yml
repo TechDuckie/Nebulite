@@ -11,20 +11,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Download Butler binary directly (no bsdtar needed)
+      # Download Butler binary directly
       - name: Download Butler
         run: |
           curl -L -o $HOME/butler https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default/butler
           chmod +x $HOME/butler
 
-      # Zip the game files
-      - name: Create ZIP of game
+      # Zip game files
+      - name: Create ZIP
         run: zip -r nebulite.zip . -x ".git/*" -x ".github/*"
 
       # Login to itch.io
-      - name: Login to itch.io
+      - name: Login
         run: $HOME/butler login <<< "${{ secrets.ITCH_IO_API_KEY }}"
 
-      # Upload ZIP to itch.io web channel
-      - name: Upload to itch.io
+      # Upload to itch.io web channel
+      - name: Upload
         run: $HOME/butler push nebulite.zip Badankan/nebulite:web
