@@ -9,29 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Step 2: Install bsdtar (required to extract Butler)
-      - name: Install bsdtar
-        run: sudo apt-get update && sudo apt-get install -y libarchive-tools
-
-      # Step 3: Download and extract Butler
-      - name: Download and install Butler
+      # Download Butler binary directly (no bsdtar needed)
+      - name: Download Butler
         run: |
-          curl -L https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default \
-          | bsdtar -xvf- -C $HOME
+          curl -L -o $HOME/butler https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default/butler
           chmod +x $HOME/butler
 
-      # Step 4: Zip the game files (everything in repo root)
+      # Zip the game files
       - name: Create ZIP of game
         run: zip -r nebulite.zip . -x ".git/*" -x ".github/*"
 
-      # Step 5: Login to itch.io using API key
+      # Login to itch.io
       - name: Login to itch.io
         run: $HOME/butler login <<< "${{ secrets.ITCH_IO_API_KEY }}"
 
-      # Step 6: Upload ZIP to itch.io web channel
+      # Upload ZIP to itch.io web channel
       - name: Upload to itch.io
         run: $HOME/butler push nebulite.zip Badankan/nebulite:web
