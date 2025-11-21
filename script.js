@@ -706,7 +706,7 @@ class Boss {
         if (this.cfg.specialAttacks) {
           this.specialAttackAlternate = 0;
           this.coneAttackState = { angle: 0, lastShift: 0, startTime: 0 };
-          this.seekerAttackState = { crosshair: null, seekersFired: 0, lastSeekerFire: 0 };
+          this.seekerAttackState = { crosshair: null, seekersFired: 0, lastSeekerFire: 0, activeSeeker: null };
         }
       }
     }
@@ -763,12 +763,30 @@ class Boss {
               }
             }
           } else if (this.specialAttackPhase === 'seeker') {
-            if (this.seekerAttackState.seekersFired >= 3) {
+            const seekerState = this.seekerAttackState;
+
+            // Sync crosshair state
+            if (seekerState.crosshair && seekerState.crosshair.remove) {
+              seekerState.crosshair = null;
+            }
+
+            // If the active seeker has been destroyed, clear it
+            if (seekerState.activeSeeker && seekerState.activeSeeker.remove) {
+              seekerState.activeSeeker = null;
+            }
+            
+            // If we've fired 3 seekers, end the attack
+            if (seekerState.seekersFired >= 3 && !seekerState.activeSeeker) {
               this.specialAttackPhase = 'returnToPosition';
-              if (this.seekerAttackState.crosshair) {
-                this.seekerAttackState.crosshair.remove = true;
-                this.seekerAttackState.crosshair = null;
+              if (seekerState.crosshair) {
+                seekerState.crosshair.remove = true;
+                seekerState.crosshair = null;
               }
+            } 
+            // If there's no crosshair and no active seeker, create a new crosshair
+            else if (!seekerState.crosshair && !seekerState.activeSeeker) {
+              seekerState.crosshair = new Crosshair();
+              state.crosshairs.push(seekerState.crosshair);
             }
           } else if (this.specialAttackPhase === 'returnToPosition') {
             this.x += (this.initialX - this.x) * 0.08;
@@ -977,7 +995,9 @@ class Boss {
     }
 
     fireSeeker(targetPlayer) {
-      state.seekers.push(new Seeker(this.x + this.w / 2, this.y + this.h / 2, targetPlayer));
+      const seeker = new Seeker(this.x + this.w / 2, this.y + this.h, targetPlayer);
+      state.seekers.push(seeker);
+      this.seekerAttackState.activeSeeker = seeker;
     }
 
     render(ctx) {
@@ -1017,15 +1037,9 @@ class Boss {
       const now = performance.now();
       if (dist < this.snapDistance && now - this.lastSnap > this.snapCooldown) {
         this.lastSnap = now;
-        // Signal the boss to fire a seeker from its position towards the player
-        state.boss.fireSeeker(p); 
+        state.boss.fireSeeker(p);
         state.boss.seekerAttackState.seekersFired++;
-        if (state.boss.seekerAttackState.seekersFired < 3) {
-            this.x = canvas.width / DPR / 2;
-            this.y = canvas.height / DPR / 2;
-        } else {
-            this.remove = true;
-        }
+        this.remove = true; // Mark for removal, the boss will handle the rest
       }
     }
 
@@ -1045,6 +1059,15 @@ class Boss {
       this.target = target;
       this.angle = 0;
       this.sprite = 'seeker1';
+      this.hp = 1;
+    }
+
+    takeDamage() {
+      this.hp--;
+      if (this.hp <= 0) {
+        this.remove = true;
+        spawnParticles(this.x, this.y);
+      }
     }
 
 
@@ -1816,13 +1839,28 @@ class Boss {
       }
     }
 
+    // lasers hitting seekers
+    for (let si = state.seekers.length - 1; si >= 0; si--) {
+      const s = state.seekers[si];
+      const rs = { x: s.x - s.w / 2, y: s.y - s.h / 2, w: s.w, h: s.h };
+      for (let li = state.lasers.length - 1; li >= 0; li--) {
+        const L = state.lasers[li];
+        const rl = { x: L.x, y: L.y, w: L.w, h: L.h };
+        if (rectIntersect(rs, rl)) {
+          state.lasers.splice(li, 1);
+          s.takeDamage();
+          break; // a laser can only hit one seeker
+        }
+      }
+    }
+
     // seekers hitting player
     for (let i = state.seekers.length - 1; i >= 0; i--) {
         const s = state.seekers[i];
         const rs = { x: s.x - s.w / 2, y: s.y - s.h / 2, w: s.w, h: s.h };
         const rp = { x: state.player.x - state.player.w / 2, y: state.player.y - state.player.h / 2, w: state.player.w, h: state.player.h };
         if (rectIntersect(rs, rp)) {
-            state.seekers.splice(i, 1);
+            s.takeDamage(); // This will handle removal and particle effects
             state.player.takeDamage(1);
         }
     }
