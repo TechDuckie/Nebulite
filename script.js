@@ -722,9 +722,12 @@ class Boss {
         if (this.specialAttackActive) {
           if (this.specialAttackPhase === 'moveToCenter') {
             this.x += (centerX - this.x) * 0.08;
-            this.y += (canvas.height / DPR / 4 - this.y) * 0.08;
-            if (Math.abs(this.x - centerX) < 5) {
-              const nextAttack = this.cfg.specialAttacks[this.specialAttackAlternate];
+            
+            const nextAttack = this.cfg.specialAttacks[this.specialAttackAlternate];
+            let targetY = (nextAttack === 'cone') ? this.hoverY : canvas.height / DPR / 4;
+            this.y += (targetY - this.y) * 0.08;
+
+            if (Math.abs(this.x - centerX) < 5 && Math.abs(this.y - targetY) < 5) {
               this.specialAttackPhase = nextAttack;
               if (nextAttack === 'cone') {
                 this.coneAttackState.startTime = now;
@@ -973,6 +976,10 @@ class Boss {
       }
     }
 
+    fireSeeker(targetPlayer) {
+      state.seekers.push(new Seeker(this.x + this.w / 2, this.y + this.h / 2, targetPlayer));
+    }
+
     render(ctx) {
       if (!this.isDefeated) {
         drawImageCentered(images[this.cfg.spriteKey] || images.boss, this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
@@ -1010,7 +1017,8 @@ class Boss {
       const now = performance.now();
       if (dist < this.snapDistance && now - this.lastSnap > this.snapCooldown) {
         this.lastSnap = now;
-        state.seekers.push(new Seeker(this.x, this.y, p));
+        // Signal the boss to fire a seeker from its position towards the player
+        state.boss.fireSeeker(p); 
         state.boss.seekerAttackState.seekersFired++;
         if (state.boss.seekerAttackState.seekersFired < 3) {
             this.x = canvas.width / DPR / 2;
@@ -1032,11 +1040,13 @@ class Boss {
       this.y = y;
       this.w = 32;
       this.h = 32;
-      this.speed = 250;
+      this.speed = 150;
       this.life = 5; // 5 seconds
       this.target = target;
       this.angle = 0;
+      this.sprite = 'seeker1';
     }
+
 
     update(dt) {
       this.life -= dt;
