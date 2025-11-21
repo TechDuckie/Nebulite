@@ -518,13 +518,14 @@
         this.lastFire = now;
         const bw = 8,
           bh = 24;
+        const bulletColor = currentSectorIndex === 0 ? '#de8a90' : '#90de8a';
         state.enemyBullets.push({
           x: this.x + this.w / 2 - bw / 2 - 10,
           y: this.y + this.h,
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
-          color: '#de8a90'
+          color: bulletColor
         });
         state.enemyBullets.push({
           x: this.x + this.w / 2 - bw / 2 + 10,
@@ -532,7 +533,7 @@
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
-          color: '#de8a90'
+          color: bulletColor
         });
       }
     }
@@ -608,13 +609,14 @@
         this.lastFire = now;
         const bw = 8,
           bh = 24;
+        const bulletColor = currentSectorIndex === 0 ? '#de8a90' : '#90de8a';
         const bullet = {
           x: this.x + this.w / 2 - bw / 2,
           y: this.y + this.h,
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
-          color: '#90de8a'
+          color: bulletColor
         };
         state.enemyBullets.push(bullet);
       }
@@ -665,13 +667,14 @@ class ShootingEnemy5 extends Enemy {
             this.lastFire = now;
             const bw = 8,
                 bh = 24;
+            const bulletColor = currentSectorIndex === 0 ? '#de8a90' : '#8ade8a';
             const bullet = {
                 x: this.x + this.w / 2 - bw / 2,
                 y: this.y + this.h,
                 w: bw,
                 h: bh,
                 vy: this.bulletSpeed,
-                color: '#8ade8a'
+                color: bulletColor
             };
             state.enemyBullets.push(bullet);
         }
@@ -757,12 +760,13 @@ class Boss {
                 const angle = this.coneAttackState.angle + i * Math.PI / 16;
                 const bulletSpeed = 300;
                 const bw = 8, bh = 24;
+                const bulletColor = currentSectorIndex === 0 ? '#de8a90' : '#90de8a';
                 state.enemyBullets.push({
                   x: this.x + this.w / 2 - bw / 2,
                   y: this.y + this.h / 2, w: bw, h: bh,
                   vx: Math.sin(angle) * bulletSpeed,
                   vy: Math.cos(angle) * bulletSpeed,
-                  color: '#90de8a'
+                  color: bulletColor
                 });
               }
             }
@@ -829,6 +833,7 @@ class Boss {
             const bulletSpeed = 250;
             const bw = 8, bh = 24; // Smaller projectiles
 
+            const bulletColor = currentSectorIndex === 0 ? '#de8a90' : '#90de8a';
             // Fire one projectile to the right
             state.enemyBullets.push({
               x: this.x + this.w / 2 - bw / 2,
@@ -836,7 +841,7 @@ class Boss {
               w: bw, h: bh,
               vx: Math.cos(angle) * bulletSpeed,
               vy: Math.sin(angle) * bulletSpeed,
-              color: '#90de8a',
+              color: bulletColor,
               piercing: true,
               rotation: angle
             });
@@ -848,7 +853,7 @@ class Boss {
               w: bw, h: bh,
               vx: Math.cos(angle + Math.PI) * bulletSpeed,
               vy: Math.sin(angle + Math.PI) * bulletSpeed,
-              color: '#90de8a',
+              color: bulletColor,
               piercing: true,
               rotation: angle + Math.PI
             });
@@ -862,7 +867,7 @@ class Boss {
                 w: bw, h: bh,
                 vx: Math.cos(angle + Math.PI / 2) * bulletSpeed,
                 vy: Math.sin(angle + Math.PI / 2) * bulletSpeed,
-                color: '#90de8a',
+                color: bulletColor,
                 piercing: true,
                 rotation: angle + Math.PI / 2
               });
@@ -873,7 +878,7 @@ class Boss {
                 w: bw, h: bh,
                 vx: Math.cos(angle - Math.PI / 2) * bulletSpeed,
                 vy: Math.sin(angle - Math.PI / 2) * bulletSpeed,
-                color: '#90de8a',
+                color: bulletColor,
                 piercing: true,
                 rotation: angle - Math.PI / 2
               });
@@ -980,18 +985,19 @@ class Boss {
       const bw = 8, bh = 24;
       const x = this.x + this.w / 2 - bw / 2;
       const y = this.y + this.h / 2 + 8;
+      const bulletColor = currentSectorIndex === 0 ? '#de8a90' : '#90de8a';
       const bullet = {
         x, y, w: bw, h: bh,
         vy: this.cfg.bulletSpeed,
         animationTimer: 0,
         scaleX: 1,
         animationSpeed: 0.2,
-        color: '#90de8a'
+        color: bulletColor
       };
       
       if (this.cfg.spriteKey === 'boss5') {
-        const bullet1 = { ...bullet, x: x - 20, color: '#de8a90' };
-        const bullet2 = { ...bullet, x: x + 20, color: '#de8a90' };
+        const bullet1 = { ...bullet, x: x - 20, color: bulletColor };
+        const bullet2 = { ...bullet, x: x + 20, color: bulletColor };
         state.enemyBullets.push(bullet1, bullet2);
       } else {
         state.enemyBullets.push(bullet);
@@ -1147,13 +1153,14 @@ class Boss {
       if (now - this.lastFire > this.fireRate) {
         this.lastFire = now;
         const bw = 8, bh = 24;
+        const bulletColor = currentSectorIndex === 0 ? '#f00' : '#90de8a';
         const bullet = {
           x: this.x + this.w / 2 - bw / 2,
           y: this.y + this.h,
           w: bw,
           h: bh,
           vy: this.bulletSpeed,
-          color: '#f00'
+          color: bulletColor
         };
         state.enemyBullets.push(bullet); // Using enemyBullets array for now
       }
