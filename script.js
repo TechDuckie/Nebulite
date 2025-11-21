@@ -1336,6 +1336,20 @@ class Boss {
       });
   }
 
+  function completeDialogueAndShowButton() {
+    if (gameState === STATE.DIALOGUE && state.dialogue.active) {
+      if (state.dialogue.letterIndex < state.dialogue.fullText.length) {
+        state.dialogue.letterIndex = state.dialogue.fullText.length;
+        state.dialogue.text = state.dialogue.fullText;
+        dialogueText.textContent = state.dialogue.text;
+      }
+      if (!state.dialogue.goButtonTimerSet) {
+        state.dialogue.goButtonTimerSet = true;
+        btnDialogueGo.style.display = 'block';
+      }
+    }
+  }
+
   function beginLevelGameplay() {
     const lvl = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
     playMusic(lvl.waveMusic);
@@ -2060,6 +2074,16 @@ class Boss {
   });
   window.addEventListener('pointermove', e=>{
     if(e.pointerId !== joystickPointer) return;
+
+// Double-tap on dialogue to skip
+let lastDialogueTap = 0;
+screenDialogue.addEventListener('pointerdown', () => {
+    const now = performance.now();
+    if (now - lastDialogueTap < 300) { // 300ms threshold for double tap
+        completeDialogueAndShowButton();
+    }
+    lastDialogueTap = now;
+});
     const dx = e.clientX - joyBase.x;
     const dy = e.clientY - joyBase.y;
     const dist = Math.hypot(dx, dy);
