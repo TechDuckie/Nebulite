@@ -19,6 +19,7 @@
   const screenVictory = document.getElementById('screenVictory');
   const screenGameOver = document.getElementById('screenGameOver');
   const screenDialogue = document.getElementById('screenDialogue');
+  const screenPause = document.getElementById('screenPause');
   const dialogueImage = document.getElementById('dialogueImage');
   const motherShipImage = document.getElementById('motherShipImage');
   const dialogueText = document.getElementById('dialogueText');
@@ -45,6 +46,9 @@
   const currentControl = document.getElementById('currentControl');
   const prevControl = document.getElementById('prevControl');
   const nextControl = document.getElementById('nextControl');
+  const btnPause = document.getElementById('btnPause');
+  const btnResume = document.getElementById('btnResume');
+  const btnPauseToMenu = document.getElementById('btnPauseToMenu');
   const controlOptions = ['WASD', 'Arrow Keys'];
   let currentControlIndex = 0;
 
@@ -150,7 +154,7 @@
   });
 
   // Game state and constants
-  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6 };
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7 };
   let gameState = STATE.MENU;
 
   let progress = {
@@ -1317,6 +1321,7 @@ class Boss {
     screenVictory.style.display = (s===STATE.VICTORY)?'flex':'none';
     screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
     screenDialogue.style.display = (s===STATE.DIALOGUE)?'flex':'none';
+    screenPause.style.display = (s===STATE.PAUSED)?'flex':'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     if(s === STATE.MENU) playMusic('menu');
     gameState = s;
@@ -1636,6 +1641,7 @@ class Boss {
       return; // Don't update the rest of the game while in dialogue
     }
 
+    if(gameState === STATE.PAUSED) return;
     if(gameState !== STATE.PLAYING) return;
 
     // Shield cooldown visual
@@ -2244,5 +2250,8 @@ screenDialogue.addEventListener('pointerdown', () => {
     resetProgress();
     resetConfirmationModal.style.display = 'none';
   });
+  btnPause.addEventListener('click', () => showScreen(STATE.PAUSED));
+  btnResume.addEventListener('click', () => showScreen(STATE.PLAYING));
+  btnPauseToMenu.addEventListener('click', () => showScreen(STATE.MENU));
 
 })();

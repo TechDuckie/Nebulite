@@ -406,3 +406,19 @@ input[type="range"]::-moz-range-thumb {
   font-size: 24px;
   cursor: pointer;
 }
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+.btn-icon img {
+    width: 24px;
+    height: 24px;
+}

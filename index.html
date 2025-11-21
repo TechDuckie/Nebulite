@@ -66,10 +66,10 @@
         <div id="hearts"></div>
         <div id="waveInfo">Wave 0 / 0</div>
         <div id="scoreText">Score: 0</div>
+        <button id="btnPause" class="btn-icon"><img src="assets/btnPause.png" alt="Pause"></button>
       </div>
       <div class="bossBar" id="bossBar"><div class="bossBarInner" id="bossBarInner"></div></div>
       <div class="bossName" id="bossName"></div>
-
       <div class="left-joystick" id="joystick" aria-hidden>
         <div class="joystick-base">
           <div class="joystick-knob" id="knob"></div>
@@ -81,13 +81,18 @@
         <div class="btn" id="btn-shield" title="Shield"><img src="assets/shield.png" alt="shield" onerror="this.style.display='none'"/></div>
         <div class="btn" id="btn-fire" title="Shoot (laser)"><img src="assets/laser1.png" alt="shoot" onerror="this.style.display='none'"/></div>
       </div>
-
       <div class="debug" id="dbg">DEBUG</div>
     </div>
-
   </div>
-
-  <!-- Dialogue Screen -->
+  
+  <div class="screen" id="screenPause" style="display:none">
+    <div class="panel">
+      <h2>Paused</h2>
+      <button class="btn-ui" id="btnResume">Resume</button>
+      <div style="margin-top:8px"><button class="btn-ui" id="btnPauseToMenu">Menu</button></div>
+    </div>
+  </div>
+  
   <div class="screen" id="screenDialogue" style="display:none; justify-content: flex-end;">
     <img id="motherShipImage" src="assets/motherShip.png" alt="Mother Ship"/>
     <div class="panel dialogue-panel">
