@@ -1598,6 +1598,24 @@ class Boss {
     }
   }
 
+  function spawnHitParticles(x, y) {
+    const particleCount = 4;
+    const particleSize = 6;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 60 + 30;
+      state.particles.push({
+        x, y,
+        w: particleSize, h: particleSize,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.3,
+        gravity: 0,
+        color: '#FFFFFF',
+      });
+    }
+  }
+
   // game update loop
   function update(dt){
     // Starfield update (always runs)
@@ -1873,6 +1891,9 @@ class Boss {
         if(rectIntersect(re, rl)){
           state.lasers.splice(li,1);
           if (!e.isAsteroid) {
+            if (e.hp > 1) {
+              spawnHitParticles(L.x + L.w / 2, L.y);
+            }
             e.hp--;
             if (e.hp <= 0) {
               spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
