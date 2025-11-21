@@ -1809,6 +1809,9 @@ class Boss {
           const rectLaser = {x: L.x, y: L.y, w: L.w, h: L.h};
           if(state.boss.y >= 80 && rectIntersect(rectBoss, rectLaser)){
             state.lasers.splice(li,1);
+            if (state.boss.hp > 1) {
+              spawnHitParticles(state.boss.x + state.boss.w / 2, L.y); // Spawn particles at laser's y, boss's x
+            }
             state.boss.hp--;
             state.score += 15;
             if(state.boss.hp <= 0){
