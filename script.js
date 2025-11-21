@@ -1060,6 +1060,7 @@ class Boss {
       this.angle = 0;
       this.sprite = 'seeker1';
       this.hp = 1;
+      this.lastParticleSpawn = 0; // For particle stream
     }
 
     takeDamage() {
@@ -1076,6 +1077,29 @@ class Boss {
       if (this.life <= 0) {
         this.remove = true;
         return;
+      }
+
+      const now = performance.now();
+      if (now - this.lastParticleSpawn > 50) { // Spawn particle every 50ms
+        this.lastParticleSpawn = now;
+        const particleSize = 4;
+        const spread = 8;
+
+        // Calculate particle velocity in the opposite direction of seeker's movement
+        // Since seeker is moving towards target, particles should move away from target
+        const particleSpeed = 80 + Math.random() * 30;
+        const particleAngle = this.angle + Math.PI; // Opposite direction of seeker
+
+        state.thrusterParticles.push({
+          x: this.x + Math.cos(this.angle) * -spread, // Offset slightly behind seeker
+          y: this.y + Math.sin(this.angle) * -spread,
+          w: particleSize,
+          h: particleSize,
+          vx: Math.cos(particleAngle) * particleSpeed,
+          vy: Math.sin(particleAngle) * particleSpeed,
+          life: 0.3 + Math.random() * 0.2,
+          color: '#8aff8a', // Slightly green hue
+        });
       }
 
       const dx = this.target.x - this.x;
