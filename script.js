@@ -1170,6 +1170,9 @@ class Boss {
       this.shieldCooldown = 0;
       this.shieldDuration = 3000; // 3 seconds
       this.shieldCooldownTime = 5000; // 5 seconds
+      this.floatTimer = Math.random() * Math.PI * 2;
+      this.floatAmplitude = 4; // pixels
+      this.floatFrequency = 2;
     }
 
     shoot() {
@@ -1212,6 +1215,7 @@ class Boss {
     }
 
     update(dt) {
+      this.floatTimer += dt;
       this.x += this.vx * dt;
       this.y += this.vy * dt;
 
@@ -1256,9 +1260,10 @@ class Boss {
     }
 
     render(ctx) {
-      drawImageCentered(images.player, this.x, this.y, this.w, this.h);
+      const floatOffsetY = Math.sin(this.floatTimer * this.floatFrequency) * this.floatAmplitude;
+      drawImageCentered(images.player, this.x, this.y + floatOffsetY, this.w, this.h);
       if (this.shieldActive) {
-        drawImageCentered(images.shield, this.x, this.y, this.w * 1.2, this.h * 1.2);
+        drawImageCentered(images.shield, this.x, this.y + floatOffsetY, this.w * 1.2, this.h * 1.2);
       }
     }
 
