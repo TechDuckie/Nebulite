@@ -26,6 +26,10 @@
   const btnPlay = document.getElementById('btnPlay');
   const btnLevelSelect = document.getElementById('btnLevelSelect');
   const btnSettings = document.getElementById('btnSettings');
+  const btnAchievements = document.getElementById('btnAchievements');
+  const screenAchievements = document.getElementById('screenAchievements');
+  const btnAchievementsBack = document.getElementById('btnAchievementsBack');
+  const achievementsList = document.getElementById('achievements-list');
   const btnBackToMenu = document.getElementById('btnBackToMenu');
   const btnSettingsBack = document.getElementById('btnSettingsBack');
   const levelsGrid = document.getElementById('levelsGrid');
@@ -154,7 +158,7 @@
   });
 
   // Game state and constants
-  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7 };
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7, ACHIEVEMENTS: 8 };
   let gameState = STATE.MENU;
 
   let progress = {
@@ -1329,6 +1333,7 @@ class Boss {
     screenGameOver.style.display = (s===STATE.GAMEOVER)?'flex':'none';
     screenDialogue.style.display = (s===STATE.DIALOGUE)?'flex':'none';
     screenPause.style.display = (s===STATE.PAUSED)?'flex':'none';
+    screenAchievements.style.display = (s === STATE.ACHIEVEMENTS) ? 'flex' : 'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     if(s === STATE.MENU) playMusic('menu');
     gameState = s;
@@ -1842,6 +1847,7 @@ class Boss {
                 }
               }
               saveProgress();
+              checkAchievements();
 
               spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
               playSfx('explosion');
@@ -2175,9 +2181,65 @@ screenDialogue.addEventListener('pointerdown', () => {
   // menu / level select UI wiring
   btnPlay.addEventListener('click', ()=>{ startLevel(0, 0); });
   btnLevelSelect.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
-  btnSettings.addEventListener('click', ()=>{ showScreen(STATE.SETTINGS); });
-  btnBackToMenu.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
-  btnSettingsBack.addEventListener('click', ()=>{ showScreen(STATE.MENU); });
+  btnSettings.addEventListener('click', () => showScreen(STATE.SETTINGS));
+  btnBackToMenu.addEventListener('click', () => showScreen(STATE.MENU));
+  btnSettingsBack.addEventListener('click', () => showScreen(STATE.MENU));
+  btnAchievements.addEventListener('click', () => {
+    loadAchievements().then(renderAchievements);
+    showScreen(STATE.ACHIEVEMENTS);
+  });
+  btnAchievementsBack.addEventListener('click', () => showScreen(STATE.MENU));
+
+  let achievements = [];
+
+  function loadAchievements() {
+    const savedAchievements = localStorage.getItem('nebulite_achievements');
+    if (savedAchievements) {
+      achievements = JSON.parse(savedAchievements);
+      return Promise.resolve(achievements);
+    } else {
+      return fetch('achievements.json')
+        .then(res => res.json())
+        .then(data => {
+          achievements = data;
+          localStorage.setItem('nebulite_achievements', JSON.stringify(achievements));
+          return achievements;
+        });
+    }
+  }
+
+  function renderAchievements() {
+    achievementsList.innerHTML = '';
+    achievements.forEach(achievement => {
+      const item = document.createElement('div');
+      item.className = 'achievement-item' + (achievement.unlocked ? '' : ' locked');
+      item.innerHTML = `
+        <h3 class="achievement-title">${achievement.title}</h3>
+        <p class="achievement-description">${achievement.description}</p>
+      `;
+      achievementsList.appendChild(item);
+    });
+  }
+
+  function saveAchievements() {
+    localStorage.setItem('nebulite_achievements', JSON.stringify(achievements));
+  }
+
+  function checkAchievements() {
+    const lastSector = SECTORS[SECTORS.length - 1];
+    const lastLevelIndexInSector = lastSector.levels.length - 1;
+    const allLevelsUnlocked = progress.unlockedSector >= SECTORS.length - 1 &&
+                              progress.unlockedLevelInSector >= lastLevelIndexInSector;
+
+    if (allLevelsUnlocked) {
+      const achievement = achievements.find(a => a.id === 1);
+      if (achievement && !achievement.unlocked) {
+        achievement.unlocked = true;
+        saveAchievements();
+        console.log('Achievement unlocked: You did it!');
+      }
+    }
+  }
   btnVictoryContinue.addEventListener('click', ()=>{ showScreen(STATE.LEVEL_SELECT); rebuildLevelSelect(); });
   btnRetry.addEventListener('click', ()=>{
     if (state.diedToBoss) {
