@@ -194,6 +194,8 @@
   function resetProgress() {
     progress = { unlockedSector: 0, unlockedLevelInSector: 0 };
     saveProgress();
+    localStorage.removeItem('nebulite_achievements'); // Clear achievements
+    achievements = []; // Reset in-memory achievements array
     rebuildLevelSelect();
   }
 
