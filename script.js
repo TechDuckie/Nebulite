@@ -198,6 +198,17 @@
     achievements = []; // Reset in-memory achievements array
     rebuildLevelSelect();
   }
+  
+  function unlockAudio() {
+    const s = new Audio();
+    s.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="; 
+    s.play().catch(()=>{});
+
+    window.removeEventListener("touchstart", unlockAudio);
+    window.removeEventListener("click", unlockAudio);
+}
+window.addEventListener("touchstart", unlockAudio, { once: true });
+window.addEventListener("click", unlockAudio, { once: true });
 
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, effectsEnabled: true, currentMusic: null };
   let audioContextUnlocked = false;
@@ -213,12 +224,28 @@
   document.addEventListener('pointerdown', initAudio);
   document.addEventListener('keydown', initAudio);
 
-  function playMusic(key){
+  function playMusic(key) {
     if (!audioContextUnlocked) return;
-    if(audioState.currentMusic) audioState.currentMusic.pause();
+
+    if (audioState.currentMusic) {
+        try { audioState.currentMusic.pause(); } catch(e){}
+    }
+
     const a = audio[key];
-    if(a){ a.currentTime = 0; a.volume = audioState.masterVolume; a.play(); audioState.currentMusic = a; }
-  }
+    if (!a) return;
+
+    a.currentTime = 0;
+    a.volume = audioState.masterVolume;
+
+    try {
+        const p = a.play();
+        if (p && p.catch) p.catch(() => {}); // <- prevent iOS autoplay rejection freeze
+    } catch(e) {
+        // iOS may throw synchronously
+    }
+
+    audioState.currentMusic = a;
+}
   function stopMusic(){
     if(audioState.currentMusic) audioState.currentMusic.pause();
     audioState.currentMusic = null;
