@@ -198,31 +198,22 @@
     achievements = []; // Reset in-memory achievements array
     rebuildLevelSelect();
   }
-  
-  function unlockAudio() {
-    const s = new Audio();
-    s.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="; 
-    s.play().catch(()=>{});
-
-    window.removeEventListener("touchstart", unlockAudio);
-    window.removeEventListener("click", unlockAudio);
-}
-window.addEventListener("touchstart", unlockAudio, { once: true });
-window.addEventListener("click", unlockAudio, { once: true });
-
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, effectsEnabled: true, currentMusic: null };
   let audioContextUnlocked = false;
   function initAudio() {
     if (audioContextUnlocked) return;
+    const allAudio = Object.values(audio);
+    let loadedCount = 0;
+    allAudio.forEach(a => {
+      const p = a.play();
+      if(p && p.catch) p.catch(()=>{});
+      a.pause();
+    });
     audioContextUnlocked = true;
     if (gameState === STATE.MENU) {
       playMusic('menu');
     }
-    document.removeEventListener('pointerdown', initAudio);
-    document.removeEventListener('keydown', initAudio);
   }
-  document.addEventListener('pointerdown', initAudio);
-  document.addEventListener('keydown', initAudio);
 
   function playMusic(key) {
     if (!audioContextUnlocked) return;
@@ -2208,7 +2199,7 @@ screenDialogue.addEventListener('pointerdown', () => {
   });
 
   // menu / level select UI wiring
-  btnPlay.addEventListener('click', ()=>{ startLevel(0, 0); });
+  btnPlay.addEventListener('click', ()=>{ initAudio(); startLevel(0, 0); });
   btnLevelSelect.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
   btnSettings.addEventListener('click', () => showScreen(STATE.SETTINGS));
   btnBackToMenu.addEventListener('click', () => showScreen(STATE.MENU));
