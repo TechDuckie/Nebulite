@@ -433,22 +433,24 @@ input[type="range"]::-moz-range-thumb {
   font-size: 24px;
   cursor: pointer;
 }
+#btnPlayer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Space between text and icon */
+}
+
+.btn-player-icon {
+  width: 24px;
+  height: 24px;
+  animation: wiggle 2s ease-in-out infinite;
+}
+
     @keyframes wiggle {
       0%, 100% { transform: rotate(-5deg); }
       50% { transform: rotate(5deg); }
     }
-.btn-icon.btn-player {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 64px;
-    height: 64px;
-    animation: wiggle 2s ease-in-out infinite;
-}
-.btn-icon.btn-player img {
-    width: 100%;
-    height: 100%;
-}
+
 .btn-icon {
     background: transparent;
     border: none;
