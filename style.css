@@ -178,6 +178,12 @@
       margin: 10px auto; /* Center block-level buttons */
       display: block;
     }
+
+    .player-area-btn {
+      width: 220px; /* Increased width to accommodate longer text */
+      margin: 10px auto; /* Center buttons */
+      display: block;
+    }
     .dialogue-panel {
       width: 100%;
       max-width: 100%;

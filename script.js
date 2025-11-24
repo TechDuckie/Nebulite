@@ -26,6 +26,9 @@
   const screenPlayerArea = document.getElementById('screenPlayerArea');
   const btnPlayer = document.getElementById('btnPlayer');
   const btnPlayerAreaBack = document.getElementById('btnPlayerAreaBack');
+  const screenScore = document.getElementById('screenScore');
+  const btnScore = document.getElementById('btnScore');
+  const btnScoreBack = document.getElementById('btnScoreBack');
   const btnPlay = document.getElementById('btnPlay');
   const btnLevelSelect = document.getElementById('btnLevelSelect');
   const btnSettings = document.getElementById('btnSettings');
@@ -161,13 +164,34 @@
   });
 
   // Game state and constants
-  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7, ACHIEVEMENTS: 8, PLAYER_AREA: 9 };
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7, ACHIEVEMENTS: 8, PLAYER_AREA: 9, SCORE: 10 };
   let gameState = STATE.MENU;
 
   let progress = {
     unlockedSector: 0,
     unlockedLevelInSector: 0
   };
+  let scores = {};
+  const SCORES_KEY = 'nebulite_scores';
+
+  function saveScores() {
+    try {
+      localStorage.setItem(SCORES_KEY, JSON.stringify(scores));
+    } catch (e) {
+      console.error("Failed to save scores", e);
+    }
+  }
+
+  function loadScores() {
+    try {
+      const saved = localStorage.getItem(SCORES_KEY);
+      if (saved) {
+        scores = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("Failed to load scores", e);
+    }
+  }
   let currentSectorIndex = 0;
   let currentLevelIndexInSector = 0;
   const PROGRESS_KEY = 'nebulite_progress_sectors';
@@ -199,6 +223,8 @@
     saveProgress();
     localStorage.removeItem('nebulite_achievements'); // Clear achievements
     achievements = []; // Reset in-memory achievements array
+    localStorage.removeItem(SCORES_KEY); // Clear scores
+    scores = {}; // Reset in-memory scores object
     rebuildLevelSelect();
   }
   const audioState = { masterVolume: 1, sfxVolume: 1, vibration: true, effectsEnabled: true, currentMusic: null };
@@ -1358,6 +1384,7 @@ class Boss {
     screenPause.style.display = (s===STATE.PAUSED)?'flex':'none';
     screenAchievements.style.display = (s === STATE.ACHIEVEMENTS) ? 'flex' : 'none';
     screenPlayerArea.style.display = (s === STATE.PLAYER_AREA) ? 'flex' : 'none';
+    screenScore.style.display = (s === STATE.SCORE) ? 'flex' : 'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     if(s === STATE.MENU) playMusic('menu');
     gameState = s;
@@ -1871,6 +1898,12 @@ class Boss {
                 }
               }
               saveProgress();
+              // Save score for the completed level
+              const levelKey = `sector${currentSectorIndex}_level${currentLevelIndexInSector}`;
+              if (scores[levelKey] === undefined || state.score > scores[levelKey]) {
+                scores[levelKey] = state.score;
+                saveScores();
+              }
               checkAchievements();
 
               spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
@@ -2212,9 +2245,14 @@ screenDialogue.addEventListener('pointerdown', () => {
     loadAchievements().then(renderAchievements);
     showScreen(STATE.ACHIEVEMENTS);
   });
-  btnAchievementsBack.addEventListener('click', () => showScreen(STATE.MENU));
+  btnAchievementsBack.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
   btnPlayer.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
   btnPlayerAreaBack.addEventListener('click', () => showScreen(STATE.MENU));
+  btnScore.addEventListener('click', () => {
+    displayScores();
+    showScreen(STATE.SCORE);
+  });
+  btnScoreBack.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
 
   let achievements = [];
 
@@ -2349,8 +2387,28 @@ screenDialogue.addEventListener('pointerdown', () => {
     state.lastDebugTap = now;
   });
 
-  // initialize UI
+  function displayScores() {
+    const scoresList = document.getElementById('scores-list');
+    scoresList.innerHTML = '';
+    let totalScore = 0;
+
+    SECTORS.forEach((sector, sectorIndex) => {
+      scoresList.innerHTML += `<p><strong>${sector.name}</strong></p>`;
+      sector.levels.forEach((level, levelIndex) => {
+        const levelKey = `sector${sectorIndex}_level${levelIndex}`;
+        const highScore = scores[levelKey] !== undefined ? scores[levelKey] : 'N/A';
+        scoresList.innerHTML += `<p>&nbsp;&nbsp;Level ${levelIndex + 1}: ${highScore}</p>`;
+        if (typeof scores[levelKey] === 'number') {
+          totalScore += scores[levelKey];
+        }
+      });
+    });
+    scoresList.innerHTML += `<p><strong>Total Score: ${totalScore}</strong></p>`;
+  }
+
+  // Initial setup
   loadProgress();
+  loadScores();
   rebuildLevelSelect();
   initIntro(() => {
     showScreen(STATE.MENU);
