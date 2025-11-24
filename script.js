@@ -1244,6 +1244,7 @@ class Boss {
       state.lasers.push({ x: this.x - w / 2, y: this.y - this.h / 2 - h, w, h, speed: 520 });
       playSfx('laserShoot');
       triggerVibration(20);
+      state.shotsFired++;
     }
 
     activateShield() {
@@ -1364,7 +1365,9 @@ class Boss {
     debugTapCount: 0,
     lastDebugTap: 0,
     fps: 0,
-    diedToBoss: false
+    diedToBoss: false,
+    shotsFired: 0,
+    shotsHit: 0
   };
 
   // helpers
@@ -1431,6 +1434,8 @@ class Boss {
     state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
     state.player.reset();
     state.score = 0;
+    state.shotsFired = 0;
+    state.shotsHit = 0;
     state.waveIndex = 0;
     state.waveProgress = 0; // enemies spawned in current wave
     state.waveSpawning = true;
@@ -1875,6 +1880,7 @@ class Boss {
             if (state.boss.hp > 1) {
               spawnHitParticles(state.boss.x + state.boss.w / 2, L.y); // Spawn particles at laser's y, boss's x
             }
+            state.shotsHit++;
             state.boss.hp--;
             state.score += 15;
             if(state.boss.hp <= 0){
@@ -1900,8 +1906,12 @@ class Boss {
               saveProgress();
               // Save score for the completed level
               const levelKey = `sector${currentSectorIndex}_level${currentLevelIndexInSector}`;
-              if (scores[levelKey] === undefined || state.score > scores[levelKey]) {
-                scores[levelKey] = state.score;
+              if (!scores[levelKey] || state.score > scores[levelKey].score) {
+                scores[levelKey] = {
+                  score: state.score,
+                  shotsFired: state.shotsFired,
+                  shotsHit: state.shotsHit
+                };
                 saveScores();
               }
               checkAchievements();
@@ -1963,6 +1973,7 @@ class Boss {
         const rl = {x:L.x, y:L.y, w:L.w, h:L.h};
         if(rectIntersect(re, rl)){
           state.lasers.splice(li,1);
+          state.shotsHit++;
           if (!e.isAsteroid) {
             if (e.hp > 1) {
               spawnHitParticles(L.x + L.w / 2, L.y);
@@ -2248,8 +2259,47 @@ screenDialogue.addEventListener('pointerdown', () => {
   btnAchievementsBack.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
   btnPlayer.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
   btnPlayerAreaBack.addEventListener('click', () => showScreen(STATE.MENU));
+  function buildScoresScreen() {
+    const scoresList = document.getElementById('scores-list');
+    scoresList.innerHTML = ''; 
+
+    SECTORS.forEach((sector, sectorIndex) => {
+      const sectorHeader = document.createElement('h3');
+      sectorHeader.textContent = sector.name;
+      scoresList.appendChild(sectorHeader);
+
+      sector.levels.forEach((level, levelIndex) => {
+        const levelKey = `sector${sectorIndex}_level${levelIndex}`;
+        const scoreData = scores[levelKey];
+
+        const levelRow = document.createElement('div');
+        levelRow.className = 'level-score-row';
+
+        const levelName = document.createElement('span');
+        levelName.textContent = `Level ${levelIndex + 1}`;
+        levelRow.appendChild(levelName);
+
+        if (scoreData) {
+          const score = document.createElement('span');
+          score.textContent = `Score: ${scoreData.score}`;
+          levelRow.appendChild(score);
+
+          const accuracy = document.createElement('span');
+          const accuracyPercentage = scoreData.shotsFired > 0 ? ((scoreData.shotsHit / scoreData.shotsFired) * 100).toFixed(0) : 0;
+          accuracy.textContent = `Accuracy: ${accuracyPercentage}%`;
+          levelRow.appendChild(accuracy);
+        } else {
+          const noScore = document.createElement('span');
+          noScore.textContent = 'Not Played';
+          levelRow.appendChild(noScore);
+        }
+        scoresList.appendChild(levelRow);
+      });
+    });
+  }
+
   btnScore.addEventListener('click', () => {
-    displayScores();
+    buildScoresScreen();
     showScreen(STATE.SCORE);
   });
   btnScoreBack.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
