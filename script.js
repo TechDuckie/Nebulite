@@ -23,6 +23,9 @@
   const dialogueImage = document.getElementById('dialogueImage');
   const motherShipImage = document.getElementById('motherShipImage');
   const dialogueText = document.getElementById('dialogueText');
+  const screenPlayerArea = document.getElementById('screenPlayerArea');
+  const btnPlayer = document.getElementById('btnPlayer');
+  const btnPlayerAreaBack = document.getElementById('btnPlayerAreaBack');
   const btnPlay = document.getElementById('btnPlay');
   const btnLevelSelect = document.getElementById('btnLevelSelect');
   const btnSettings = document.getElementById('btnSettings');
@@ -158,7 +161,7 @@
   });
 
   // Game state and constants
-  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7, ACHIEVEMENTS: 8 };
+  const STATE = { MENU:0, LEVEL_SELECT:1, PLAYING:2, VICTORY:3, GAMEOVER:4, SETTINGS: 5, DIALOGUE: 6, PAUSED: 7, ACHIEVEMENTS: 8, PLAYER_AREA: 9 };
   let gameState = STATE.MENU;
 
   let progress = {
@@ -1354,6 +1357,7 @@ class Boss {
     screenDialogue.style.display = (s===STATE.DIALOGUE)?'flex':'none';
     screenPause.style.display = (s===STATE.PAUSED)?'flex':'none';
     screenAchievements.style.display = (s === STATE.ACHIEVEMENTS) ? 'flex' : 'none';
+    screenPlayerArea.style.display = (s === STATE.PLAYER_AREA) ? 'flex' : 'none';
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) stopMusic();
     if(s === STATE.MENU) playMusic('menu');
     gameState = s;
@@ -2209,6 +2213,8 @@ screenDialogue.addEventListener('pointerdown', () => {
     showScreen(STATE.ACHIEVEMENTS);
   });
   btnAchievementsBack.addEventListener('click', () => showScreen(STATE.MENU));
+  btnPlayer.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
+  btnPlayerAreaBack.addEventListener('click', () => showScreen(STATE.MENU));
 
   let achievements = [];
 
