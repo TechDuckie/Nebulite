@@ -1429,10 +1429,15 @@ class Boss {
   function beginLevelGameplay() {
     const lvl = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
     playMusic(lvl.waveMusic);
+
+    showScreen(STATE.PLAYING);
+    state.player.reset();
+    updateHearts();
+    
     // reset state
     nebulas.length = 0;
     state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
-    state.player.reset();
+    
     state.score = 0;
     state.shotsFired = 0;
     state.shotsHit = 0;
@@ -1444,8 +1449,7 @@ class Boss {
     waveInfo.textContent = `Wave 0 / ${lvl.waves.length}`;
     bossBar.style.display = 'none';
     bossName.style.display = 'none';
-    updateHearts();
-    showScreen(STATE.PLAYING);
+    
 
     // Show/hide buttons based on level
     btnSecondary.style.display = 'none';
