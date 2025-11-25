@@ -1287,6 +1287,10 @@ class Boss {
           const particleSize = 4;
           const spread = 15;
 
+          const isSkin3 = equippedSkin === 'assets/player3.png';
+          const particleColor = isSkin3 ? '#32CD32' : '#d7feff';
+          const particleLife = isSkin3 ? 1.0 : 0.5;
+
           // Left engine
           const angleLeft = Math.PI / 2 + (Math.random() - 0.5) * 0.5;
           const speedLeft = 150 + Math.random() * 50;
@@ -1297,8 +1301,8 @@ class Boss {
             h: particleSize,
             vx: Math.cos(angleLeft) * speedLeft,
             vy: Math.sin(angleLeft) * speedLeft,
-            life: 0.5,
-            color: '#d7feff',
+            life: particleLife,
+            color: particleColor,
           });
 
           // Right engine
@@ -1311,8 +1315,8 @@ class Boss {
             h: particleSize,
             vx: Math.cos(angleRight) * speedRight,
             vy: Math.sin(angleRight) * speedRight,
-            life: 0.5,
-            color: '#d7feff',
+            life: particleLife,
+            color: particleColor,
           });
         }
       }
