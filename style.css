@@ -527,3 +527,39 @@ input[type="range"]::-moz-range-thumb {
   filter: grayscale(1);
   animation: none;
 }
+
+.skin-selector-container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.skin-selector {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.skin-nav-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.skin-nav-btn img {
+  width: 32px;
+  height: 32px;
+}
+
+#prevSkinBtn img {
+  transform: scaleX(-1);
+}
+
+#playerSkin {
+  width: 64px;
+  height: 64px;
+  border: 2px solid white;
+  padding: 5px;
+}

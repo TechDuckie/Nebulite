@@ -116,7 +116,7 @@
   dbg.style.display = 'none';
 
   // Assets (graceful fallback)
-  const assets = { player: 'assets/player.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', enemySmall5: 'assets/enemySmall5.png', boss6: 'assets/boss6.png', greenCrosshair: 'assets/greenCrosshair.png', seeker1: 'assets/seeker1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', music2: 'assets/music2.mp3', boss2Music: 'assets/boss2.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
+  const assets = { player: 'assets/player.png', player2: 'assets/player2.png', player3: 'assets/player3.png', enemy: 'assets/enemySmall.png', enemySmall2: 'assets/enemySmall2.png', enemySmall3: 'assets/enemySmall3.png', laser: 'assets/laser1.png', boss: 'assets/boss1.png', boss2: 'assets/boss2.png', boss3: 'assets/boss3.png', boss5: 'assets/boss5.png', enemySmall5: 'assets/enemySmall5.png', boss6: 'assets/boss6.png', greenCrosshair: 'assets/greenCrosshair.png', seeker1: 'assets/seeker1.png', music1: 'assets/music1.mp3', boss1: 'assets/boss1.mp3', music2: 'assets/music2.mp3', boss2Music: 'assets/boss2.mp3', warn: 'assets/warn.png', laserShoot: 'assets/laserShoot.wav', playerDamage: 'assets/playerDamage.wav', explosion: 'assets/explosion.wav', lyra: 'assets/lyraStarblade.png', typewriter: 'assets/typewriter.wav', motherShip: 'assets/motherShip.png', menu: 'assets/menu.mp3', heart: 'assets/heart.png', shield: 'assets/shield.png', falcon: 'assets/falcoln.png', enemySmall4: 'assets/enemySmall4.png', enemyLaserSmall: 'assets/enemyLaserSmall.png', boss4: 'assets/boss4.png', enemyShield1: 'assets/enemyShield1.png', enemyLaserBig: 'assets/enemyLaserBig.png', pinkNebula: 'assets/pinkNebula.png', violetRift: 'assets/violetRift.png', ionGrove: 'assets/ionGrove.png', greenNebula: 'assets/greenNebula.png' };
   const NUM_ASTEROID_IMAGES = 28;
   for (let i = 1; i <= NUM_ASTEROID_IMAGES; i++) {
     assets[`asteroid${i}`] = `assets/asteroids/asteroid${i}.png`;
@@ -126,41 +126,35 @@
   }
   const images = {};
   const audio = {};
-  function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('d'); g.fillStyle='#777'; g.fillRect(0,0,64,64); const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
+  function loadImg(src){ return new Promise(res => { const i = new Image(); i.src = src; i.onload = ()=>res(i); i.onerror = ()=>{ const c=document.createElement('canvas'); c.width=64; c.height=64; const g=c.getContext('2d'); if(g){ g.fillStyle='#777'; g.fillRect(0,0,64,64); } const f=new Image(); f.src=c.toDataURL(); f.onload=()=>res(f); } }); }
   function loadAudio(src){ return new Promise(res => { const a = new Audio(); a.src = src; a.oncanplaythrough = ()=>res(a); a.onerror = ()=>res(new Audio()); }); }
-  Promise.all(Object.values(assets).map(src => {
-    if(src.endsWith('.png')) return loadImg(src);
-    if(src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
-  })).then(loadedAssets=>{
-    images.player=loadedAssets[0]; images.enemy=loadedAssets[1]; images.enemySmall2=loadedAssets[2]; images.enemySmall3=loadedAssets[3]; images.laser=loadedAssets[4]; images.boss=loadedAssets[5]; images.boss2=loadedAssets[6]; images.boss3=loadedAssets[7]; images.boss5=loadedAssets[8]; images.enemySmall5=loadedAssets[9]; images.boss6=loadedAssets[10]; images.greenCrosshair=loadedAssets[11]; images.seeker1=loadedAssets[12];
-    audio.music1 = loadedAssets[13]; audio.boss1 = loadedAssets[14]; audio.music2 = loadedAssets[15]; audio.boss2Music = loadedAssets[16];
-    images.warn = loadedAssets[17];
-    audio.laserShoot = loadedAssets[18]; audio.playerDamage = loadedAssets[19]; audio.explosion = loadedAssets[20];
-    images.lyra = loadedAssets[21];
-    audio.typewriter = loadedAssets[22];
-    images.motherShip = loadedAssets[23];
-    audio.menu = loadedAssets[24];
-    images.heart = loadedAssets[25];
-    images.shield = loadedAssets[26];
-    images.falcon = loadedAssets[27];
-    images.enemySmall4 = loadedAssets[28];
-    images.enemyLaserSmall = loadedAssets[29];
-    images.boss4 = loadedAssets[30];
-    images.enemyShield1 = loadedAssets[31];
-    images.enemyLaserBig = loadedAssets[32];
-    images.pinkNebula = loadedAssets[33];
-    images.violetRift = loadedAssets[34];
-    images.ionGrove = loadedAssets[35];
-    images.greenNebula = loadedAssets[36];
-    for (let i = 0; i < NUM_ASTEROID_IMAGES; i++) {
-      images[`asteroid${i+1}`] = loadedAssets[37+i];
-    }
-    const STAR_ASSET_START_INDEX = 37 + NUM_ASTEROID_IMAGES;
-    for (let i = 0; i < NUM_STAR_IMAGES; i++) {
-      images[`star${i+1}`] = loadedAssets[STAR_ASSET_START_INDEX + i];
-    }
-    audio.music1.loop = true; audio.boss1.loop = true; audio.music2.loop = true; audio.boss2Music.loop = true;
-    audio.menu.loop = true;
+  
+  const assetKeys = Object.keys(assets);
+  const assetPromises = assetKeys.map(key => {
+      const src = assets[key];
+      if (src.endsWith('.png')) return loadImg(src);
+      if (src.endsWith('.mp3') || src.endsWith('.wav')) return loadAudio(src);
+      return Promise.resolve(null);
+  });
+
+  Promise.all(assetPromises).then(loadedAssets => {
+    assetKeys.forEach((key, index) => {
+      const asset = loadedAssets[index];
+      if (!asset) return;
+
+      if (assets[key].endsWith('.png')) {
+        images[key] = asset;
+      } else if (assets[key].endsWith('.mp3') || assets[key].endsWith('.wav')) {
+        audio[key] = asset;
+      }
+    });
+
+    // Set loop properties for specific audio files
+    if (audio.music1) audio.music1.loop = true;
+    if (audio.boss1) audio.boss1.loop = true;
+    if (audio.music2) audio.music2.loop = true;
+    if (audio.boss2Music) audio.boss2Music.loop = true;
+    if (audio.menu) audio.menu.loop = true;
   });
 
   // Game state and constants
@@ -1326,7 +1320,8 @@ class Boss {
 
     render(ctx) {
       const floatOffsetY = Math.sin(this.floatTimer * this.floatFrequency) * this.floatAmplitude;
-      drawImageCentered(images.player, this.x, this.y + floatOffsetY, this.w, this.h);
+      const skinImg = images[equippedSkin.replace('assets/', '').replace('.png', '')] || images.player;
+      drawImageCentered(skinImg, this.x, this.y + floatOffsetY, this.w, this.h);
       if (this.shieldActive) {
         drawImageCentered(images.shield, this.x, this.y + floatOffsetY, this.w * 1.2, this.h * 1.2);
       }
@@ -2257,7 +2252,55 @@ screenDialogue.addEventListener('pointerdown', () => {
     showScreen(STATE.ACHIEVEMENTS);
   });
   btnAchievementsBack.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
-  btnPlayer.addEventListener('click', () => showScreen(STATE.PLAYER_AREA));
+  btnPlayer.addEventListener('click', () => {
+    buildSkinSelector();
+    showScreen(STATE.PLAYER_AREA);
+  });
+
+  const availableSkins = ['assets/player.png'];
+  let currentSkinIndex = 0;
+  let equippedSkin = 'assets/player.png';
+
+  const playerSkinImage = document.getElementById('playerSkin');
+  const prevSkinBtn = document.getElementById('prevSkinBtn');
+  const nextSkinBtn = document.getElementById('nextSkinBtn');
+  const setSkinBtn = document.getElementById('setSkinBtn');
+
+  function buildSkinSelector() {
+    availableSkins.length = 1; // Reset to just the default skin
+    if (achievements.find(a => a.id === 1 && a.unlocked)) {
+      availableSkins.push('assets/player2.png');
+    }
+    if (achievements.find(a => a.id === 2 && a.unlocked)) {
+      availableSkins.push('assets/player3.png');
+    }
+    updateSkinSelector();
+  }
+
+  function updateSkinSelector() {
+    playerSkinImage.src = availableSkins[currentSkinIndex];
+  }
+
+  prevSkinBtn.addEventListener('click', () => {
+    currentSkinIndex = (currentSkinIndex - 1 + availableSkins.length) % availableSkins.length;
+    updateSkinSelector();
+  });
+
+  nextSkinBtn.addEventListener('click', () => {
+    currentSkinIndex = (currentSkinIndex + 1) % availableSkins.length;
+    updateSkinSelector();
+  });
+
+  setSkinBtn.addEventListener('click', () => {
+    equippedSkin = availableSkins[currentSkinIndex];
+    localStorage.setItem('nebulite_player_skin', equippedSkin);
+    // Optionally, provide feedback to the user, e.g., change button text
+    setSkinBtn.textContent = 'Skin Set!';
+    setTimeout(() => {
+      setSkinBtn.textContent = 'Set Skin';
+    }, 1000);
+  });
+
   btnPlayerAreaBack.addEventListener('click', () => showScreen(STATE.MENU));
   function buildScoresScreen() {
     const scoresList = document.getElementById('scores-list');
@@ -2511,7 +2554,15 @@ screenDialogue.addEventListener('pointerdown', () => {
     scoresList.innerHTML += `<p><strong>Total Score: ${totalScore}</strong></p>`;
   }
 
+  function loadPlayerSkin() {
+    const savedSkin = localStorage.getItem('nebulite_player_skin');
+    if (savedSkin) {
+      equippedSkin = savedSkin;
+    }
+  }
+
   // Initial setup
+  loadPlayerSkin();
   loadProgress();
   loadScores();
   rebuildLevelSelect();
