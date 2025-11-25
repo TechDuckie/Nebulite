@@ -2307,19 +2307,23 @@ screenDialogue.addEventListener('pointerdown', () => {
   let achievements = [];
 
   function loadAchievements() {
-    const savedAchievements = localStorage.getItem('nebulite_achievements');
-    if (savedAchievements) {
-      achievements = JSON.parse(savedAchievements);
-      return Promise.resolve(achievements);
-    } else {
-      return fetch('achievements.json')
-        .then(res => res.json())
-        .then(data => {
-          achievements = data;
-          localStorage.setItem('nebulite_achievements', JSON.stringify(achievements));
-          return achievements;
-        });
-    }
+    return fetch('achievements.json')
+      .then(res => res.json())
+      .then(masterList => {
+        const saved = localStorage.getItem('nebulite_achievements');
+        if (saved) {
+          const savedList = JSON.parse(saved);
+          const unlockedMap = new Map(savedList.map(a => [a.id, a.unlocked]));
+          achievements = masterList.map(ach => ({
+            ...ach,
+            unlocked: unlockedMap.get(ach.id) || false
+          }));
+        } else {
+          achievements = masterList;
+        }
+        saveAchievements();
+        return achievements;
+      });
   }
 
   function renderAchievements() {
@@ -2327,10 +2331,25 @@ screenDialogue.addEventListener('pointerdown', () => {
     achievements.forEach(achievement => {
       const item = document.createElement('div');
       item.className = 'achievement-item' + (achievement.unlocked ? '' : ' locked');
-      item.innerHTML = `
-        <h3 class="achievement-title">${achievement.title}</h3>
-        <p class="achievement-description">${achievement.description}</p>
-      `;
+      
+      const title = document.createElement('h3');
+      title.className = 'achievement-title';
+      title.textContent = achievement.title;
+      
+      if (achievement.unlocked) {
+        if (achievement.id === 1) {
+          title.classList.add('unlocked-blue');
+        } else if (achievement.id === 2) {
+          title.classList.add('unlocked-orange');
+        }
+      }
+      
+      const description = document.createElement('p');
+      description.className = 'achievement-description';
+      description.textContent = achievement.description;
+      
+      item.appendChild(title);
+      item.appendChild(description);
       achievementsList.appendChild(item);
     });
   }
@@ -2340,18 +2359,39 @@ screenDialogue.addEventListener('pointerdown', () => {
   }
 
   function checkAchievements() {
-    const lastSector = SECTORS[SECTORS.length - 1];
-    const lastLevelIndexInSector = lastSector.levels.length - 1;
-    const allLevelsUnlocked = progress.unlockedSector >= SECTORS.length - 1 &&
-                              progress.unlockedLevelInSector >= lastLevelIndexInSector;
+    const lastUnlockedSector = SECTORS.length - 1;
+    const lastUnlockedLevel = SECTORS[lastUnlockedSector].levels.length - 1;
 
-    if (allLevelsUnlocked) {
-      const achievement = achievements.find(a => a.id === 1);
-      if (achievement && !achievement.unlocked) {
-        achievement.unlocked = true;
-        saveAchievements();
-        console.log('Achievement unlocked: You did it!');
+    if (progress.unlockedSector >= lastUnlockedSector && progress.unlockedLevelInSector > lastUnlockedLevel) {
+      unlockAchievement(1);
+    }
+
+    // Check for "Perfect Accuracy" achievement
+    let allPerfect = true;
+    if (achievements.find(a => a.id === 2 && !a.unlocked)) { // Only check if not already unlocked
+      for (let i = 0; i < SECTORS.length; i++) {
+        for (let j = 0; j < SECTORS[i].levels.length; j++) {
+          const levelKey = `sector${i}_level${j}`;
+          const scoreData = scores[levelKey];
+          if (!scoreData || scoreData.shotsFired === 0 || scoreData.shotsHit !== scoreData.shotsFired) {
+            allPerfect = false;
+            break;
+          }
+        }
+        if (!allPerfect) break;
       }
+
+      if (allPerfect) {
+        unlockAchievement(2);
+      }
+    }
+  }
+
+  function unlockAchievement(id) {
+    const achievement = achievements.find(a => a.id === id);
+    if (achievement && !achievement.unlocked) {
+      achievement.unlocked = true;
+      saveAchievements();
     }
   }
   btnVictoryContinue.addEventListener('click', ()=>{ showScreen(STATE.LEVEL_SELECT); rebuildLevelSelect(); });
@@ -2423,6 +2463,9 @@ screenDialogue.addEventListener('pointerdown', () => {
           // Unlock all levels in all sectors
           progress.unlockedSector = SECTORS.length - 1;
           progress.unlockedLevelInSector = SECTORS[progress.unlockedSector].levels.length - 1;
+          // Unlock all achievements
+          achievements.forEach(a => a.unlocked = true);
+          saveAchievements();
           rebuildLevelSelect();
         } else {
           dbg.style.display = 'none';

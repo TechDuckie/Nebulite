@@ -4,5 +4,11 @@
     "title": "You did it!",
     "description": "Complete all levels.",
     "unlocked": false
+  },
+  {
+    "id": 2,
+    "title": "You did it.. Perfectly!",
+    "description": "Complete all levels with 100% accuracy.",
+    "unlocked": false
   }
 ]

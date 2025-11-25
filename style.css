@@ -495,6 +495,14 @@ input[type="range"]::-moz-range-thumb {
   margin: 0;
 }
 
+.achievement-title.unlocked-blue {
+  color: #4b8bcf;
+}
+
+.achievement-title.unlocked-orange {
+  color: #ffa500;
+}
+
 .achievement-description {
   font-size: 14px;
   margin: 5px 0 0 0;
