@@ -2332,9 +2332,17 @@ screenDialogue.addEventListener('pointerdown', () => {
       const item = document.createElement('div');
       item.className = 'achievement-item' + (achievement.unlocked ? '' : ' locked');
       
+      
+      const titleContainer = document.createElement('div');
+      titleContainer.className = 'achievement-title-container';
+
       const title = document.createElement('h3');
       title.className = 'achievement-title';
       title.textContent = achievement.title;
+
+      const presentIcon = document.createElement('img');
+      presentIcon.src = 'assets/presentIcon.png';
+      presentIcon.className = 'present-icon';
       
       if (achievement.unlocked) {
         if (achievement.id === 1) {
@@ -2342,13 +2350,17 @@ screenDialogue.addEventListener('pointerdown', () => {
         } else if (achievement.id === 2) {
           title.classList.add('unlocked-orange');
         }
+      } else {
+        presentIcon.classList.add('locked');
       }
       
       const description = document.createElement('p');
       description.className = 'achievement-description';
       description.textContent = achievement.description;
       
-      item.appendChild(title);
+      titleContainer.appendChild(title);
+      titleContainer.appendChild(presentIcon);
+      item.appendChild(titleContainer);
       item.appendChild(description);
       achievementsList.appendChild(item);
     });
