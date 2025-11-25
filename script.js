@@ -2,11 +2,11 @@
   // Canvas setup
   const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
   const DPR = Math.max(1, window.devicePixelRatio || 1);
-  function resize(){ canvas.width = Math.floor(innerWidth * DPR); canvas.height = Math.floor(innerHeight * DPR); canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  const gameWrap = document.getElementById('gameWrap');
+  function resize(){ const rect = gameWrap.getBoundingClientRect(); canvas.width = Math.floor(rect.width * DPR); canvas.height = Math.floor(rect.height * DPR); canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
   addEventListener('resize', resize); resize();
 
   // Starfield
-  const gameWrap = document.getElementById('gameWrap');
   const stars = [];
   const nebulas = [];
   const NUM_STAR_IMAGES = 20;
@@ -1377,6 +1377,7 @@ class Boss {
   function showScreen(s){
     const isPlaying = s === STATE.PLAYING;
     gameWrap.style.display = isPlaying ? 'block' : 'none';
+    if (isPlaying) resize();
     screenMenu.style.display = (s===STATE.MENU)?'flex':'none';
     screenLevels.style.display = (s===STATE.LEVEL_SELECT)?'flex':'none';
     screenSettings.style.display = (s===STATE.SETTINGS)?'flex':'none';
