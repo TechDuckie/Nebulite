@@ -231,6 +231,7 @@
       const p = a.play();
       if(p && p.catch) p.catch(()=>{});
       a.pause();
+      a.load(); // <- Force load
     });
     audioContextUnlocked = true;
     if (gameState === STATE.MENU) {
@@ -2252,7 +2253,11 @@ screenDialogue.addEventListener('pointerdown', () => {
 
   // menu / level select UI wiring
   btnPlay.addEventListener('click', ()=>{ initAudio(); startLevel(0, 0); });
-  btnLevelSelect.addEventListener('click', ()=>{ rebuildLevelSelect(); showScreen(STATE.LEVEL_SELECT); });
+    btnLevelSelect.addEventListener('click', () => {
+      initAudio();
+      rebuildLevelSelect();
+      showScreen(STATE.LEVEL_SELECT);
+    });
   btnSettings.addEventListener('click', () => showScreen(STATE.SETTINGS));
   btnBackToMenu.addEventListener('click', () => showScreen(STATE.MENU));
   btnSettingsBack.addEventListener('click', () => showScreen(STATE.MENU));
@@ -2480,6 +2485,8 @@ screenDialogue.addEventListener('pointerdown', () => {
       }
     }
   });
+
+  document.getElementById('intro-screen').addEventListener('touchstart', initAudio, { once: true });
 
   masterVolume.addEventListener('input', (e) => {
     audioState.masterVolume = e.target.value / 100;
