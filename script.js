@@ -1,4 +1,37 @@
 (function(){
+  // Prevent pinch zoom (but allow single-touch controls)
+  document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+  });
+  document.addEventListener('gesturechange', function(e) {
+    e.preventDefault();
+  });
+  document.addEventListener('gestureend', function(e) {
+    e.preventDefault();
+  });
+  
+  // Prevent pinch zoom via wheel with ctrl key
+  document.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  // Prevent pinch zoom on multi-touch
+  let touchCount = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchCount = e.touches.length;
+    if (touchCount > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+  
+  document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
   // Canvas setup
   const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
   const DPR = Math.max(1, window.devicePixelRatio || 1);
