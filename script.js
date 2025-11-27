@@ -2499,8 +2499,6 @@ screenDialogue.addEventListener('pointerdown', () => {
     }
   });
 
-  document.getElementById('intro-screen').addEventListener('touchstart', initAudio, { once: true });
-
   masterVolume.addEventListener('input', (e) => {
     audioState.masterVolume = e.target.value / 100;
     if(audioState.currentMusic) audioState.currentMusic.volume = audioState.masterVolume;
@@ -2597,7 +2595,7 @@ screenDialogue.addEventListener('pointerdown', () => {
   rebuildLevelSelect();
   initIntro(() => {
     showScreen(STATE.MENU);
-  });
+  }, initAudio);
   updateHearts();
 
   btnResetProgress.addEventListener('click', () => {

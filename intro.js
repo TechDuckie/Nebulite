@@ -1,7 +1,8 @@
 
-function initIntro(onComplete) {
+function initIntro(onComplete, onUnlockAudio) {
     const introScreen = document.getElementById('intro-screen');
     const skipBtn = document.getElementById('skip-intro');
+    const continueBtn = document.getElementById('continue-intro');
     let introEnded = false;
 
     function endIntro() {
@@ -17,9 +18,20 @@ function initIntro(onComplete) {
         }, 1000);
     }
 
+    function onInteraction() {
+        if (onUnlockAudio) {
+            onUnlockAudio();
+        }
+        endIntro();
+    }
+
     // Automatic end of scroll
-    setTimeout(endIntro, 51000); // Corresponds to the animation durations
+    setTimeout(() => {
+        skipBtn.style.display = 'none';
+        continueBtn.style.display = 'block';
+    }, 51000); // Corresponds to the animation durations
 
     // Skip intro functionality
-    skipBtn.addEventListener('click', endIntro);
+    skipBtn.addEventListener('click', onInteraction);
+    continueBtn.addEventListener('click', onInteraction);
 }
