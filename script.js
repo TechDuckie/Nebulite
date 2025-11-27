@@ -105,7 +105,7 @@
   const isDesktop = !('ontouchstart' in window || navigator.maxTouchPoints > 0);
   if (isDesktop) {
     document.getElementById('joystick').style.display = 'none';
-    document.getElementById('right-buttons').style.display = 'none';
+    // document.getElementById('right-buttons').style.display = 'none';
   }
 
   const waveInfo = document.getElementById('waveInfo');

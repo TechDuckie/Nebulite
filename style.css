@@ -96,6 +96,13 @@
       background-color: rgba(255, 0, 0, 0.5);
     }
     .btn img{width:36px;height:36px;object-fit:contain}
+    .btn-text {
+      display: none;
+      color: white;
+      font-family: 'Dedicool', sans-serif;
+      font-size: 12px;
+      margin-top: 4px;
+    }
     .joystick-base {
       width: 100%;
       height: 100%;
@@ -565,6 +572,14 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @media (min-width: 600px) and (orientation: landscape), (min-width: 600px) and (min-aspect-ratio: 1/1) {
+  .btn {
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 4px;
+  }
+  .btn-text {
+    display: block;
+  }
   body {
     background-color: black;
   }
