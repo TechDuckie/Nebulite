@@ -63,3 +63,23 @@
 #skip-intro:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+#continue-intro {
+    position: fixed;
+    bottom: 40px; /* Adjust as needed for spacing from bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ddd;
+    border: 1px solid #ddd;
+    padding: 10px 20px; /* Increased padding for better tap target */
+    font-family: "Dedicool", sans-serif;
+    font-size: 1.2rem; /* Slightly larger for prominence */
+    cursor: pointer;
+    transition: background 0.2s;
+    z-index: 1001;
+}
+
+#continue-intro:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
