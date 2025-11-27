@@ -95,6 +95,9 @@
     .btn.cooldown {
       background-color: rgba(255, 0, 0, 0.5);
     }
+    .btn.firing {
+      background-color: rgba(255, 0, 0, 0.5);
+    }
     .btn img{width:36px;height:36px;object-fit:contain}
     .btn-text {
       display: none;

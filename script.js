@@ -97,7 +97,7 @@
   }
 
   window.addEventListener('keydown', e => {
-    if (e.code === 'Space') state.player.shoot();
+    if (e.code === 'Space' && !e.repeat) state.player.shoot();
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') state.player.activateShield();
     updatePlayerVelocity();
   });
@@ -1232,14 +1232,27 @@ class Boss {
       this.floatTimer = Math.random() * Math.PI * 2;
       this.floatAmplitude = 4; // pixels
       this.floatFrequency = 2;
+      this.lastShotTime = 0;
+      this.shootCooldown = 150; // 150ms cooldown
     }
 
     shoot() {
+      const now = performance.now();
+      if (now - this.lastShotTime < this.shootCooldown) return;
+      this.lastShotTime = now;
+
       const w = 16, h = 32;
       state.lasers.push({ x: this.x - w / 2, y: this.y - this.h / 2 - h, w, h, speed: 520 });
       playSfx('laserShoot');
       triggerVibration(20);
       state.shotsFired++;
+
+      // Visual feedback
+      const btnFire = document.getElementById('btn-fire');
+      btnFire.classList.add('firing');
+      setTimeout(() => {
+        btnFire.classList.remove('firing');
+      }, 100);
     }
 
     activateShield() {
