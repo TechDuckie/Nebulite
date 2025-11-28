@@ -1531,7 +1531,7 @@ function beginWaveModeGameplay() {
   bossBar.style.display = 'none';
   bossName.style.display = 'none';
 
-  btnSecondary.style.display = 'flex';
+  btnSecondary.style.display = 'none';
   btnShield.style.display = 'flex';
 }
 
@@ -1886,45 +1886,47 @@ function beginWaveModeGameplay() {
     }
 
     if (gameState === STATE.WAVE_MODE) {
-      if (state.waveSpawning) {
-        const enemyCount = 3 + Math.floor(state.waveIndex / 3);
-        const spawnRate = Math.max(100, 300 - state.waveIndex * 5);
-        state.waveSpawnTimer += dt * 1000;
-        if (state.waveSpawnTimer >= spawnRate && state.waveProgress < enemyCount) {
-          const enemyTypes = ['enemy', 'enemySmall2', 'enemySmall3', 'enemySmall4', 'enemySmall5', 'asteroid'];
-          const randomEnemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-          spawnEnemy(80 + state.waveIndex * 2, randomEnemy);
-          state.waveProgress++;
-          state.waveSpawnTimer = 0;
-        }
-        if (state.waveProgress >= enemyCount) {
-          state.waveSpawning = false;
-        }
-      } else {
-        if (state.enemies.length === 0 && state.lasers.length === 0 && !state.boss) {
-          state.waveIndex++;
-          state.waveProgress = 0;
-          state.waveSpawning = true;
-          state.waveSpawnTimer = 0;
-          waveInfo.textContent = `Wave ${state.waveIndex + 1}`;
-          if (state.waveIndex % 10 === 9) {
-            const bossTypes = ['boss', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6'];
-            const randomBoss = bossTypes[Math.floor(Math.random() * bossTypes.length)];
-            const bossConfig = {
-              name: 'Random Boss',
-              spriteKey: randomBoss,
-              hp: 100 + state.waveIndex * 10,
-              w: 120, h: 120,
-              speed: 40 + state.waveIndex,
-              fireRate: Math.max(200, 1100 - state.waveIndex * 10),
-              bulletSpeed: 180 + state.waveIndex * 2
-            };
-            state.boss = new Boss(bossConfig);
-            playMusic('boss1');
-            bossBar.style.display = 'block';
-            bossName.textContent = bossConfig.name;
-            bossName.style.display = 'block';
-            bossBarInner.style.width = '100%';
+      if (!state.boss) {
+        if (state.waveSpawning) {
+          const enemyCount = 3 + Math.floor(state.waveIndex / 3);
+          const spawnRate = Math.max(100, 300 - state.waveIndex * 5);
+          state.waveSpawnTimer += dt * 1000;
+          if (state.waveSpawnTimer >= spawnRate && state.waveProgress < enemyCount) {
+            const enemyTypes = ['enemy', 'enemySmall2', 'enemySmall3', 'enemySmall4', 'enemySmall5', 'asteroid'];
+            const randomEnemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            spawnEnemy(80 + state.waveIndex * 2, randomEnemy);
+            state.waveProgress++;
+            state.waveSpawnTimer = 0;
+          }
+          if (state.waveProgress >= enemyCount) {
+            state.waveSpawning = false;
+          }
+        } else {
+          if (state.enemies.length === 0 && state.lasers.length === 0) {
+            state.waveIndex++;
+            state.waveProgress = 0;
+            state.waveSpawning = true;
+            state.waveSpawnTimer = 0;
+            waveInfo.textContent = `Wave ${state.waveIndex + 1}`;
+            if (state.waveIndex > 0 && state.waveIndex % 10 === 0) {
+              const bossTypes = ['boss', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6'];
+              const randomBoss = bossTypes[Math.floor(Math.random() * bossTypes.length)];
+              const bossConfig = {
+                name: 'Random Boss',
+                spriteKey: randomBoss,
+                hp: 100 + state.waveIndex * 10,
+                w: 120, h: 120,
+                speed: 40 + state.waveIndex,
+                fireRate: Math.max(200, 1100 - state.waveIndex * 10),
+                bulletSpeed: 180 + state.waveIndex * 2
+              };
+              spawnBoss({ boss: bossConfig });
+              playMusic('boss1');
+              bossBar.style.display = 'block';
+              bossName.textContent = bossConfig.name;
+              bossName.style.display = 'block';
+              bossBarInner.style.width = '100%';
+            }
           }
         }
       }
