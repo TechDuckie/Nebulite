@@ -466,7 +466,7 @@
       waves,
       waveMusic: 'music2',
       bossMusic: 'boss2Music',
-      dialogue: 'dialogue7',
+      dialogue: 'dialogue6',
       dialogueBackgroundImage: 'motherShip',
       boss: {
         name: 'Serpent-X',
@@ -1982,7 +1982,7 @@ class Boss {
                 } else if (currentSectorIndex === 1 && currentLevelIndexInSector === 0) {
                   victoryDialogue = 'dialogueClear4';
                 } else if (currentSectorIndex === 1 && currentLevelIndexInSector === 1) {
-                  victoryDialogue = 'dialogueClear7';
+                  victoryDialogue = 'dialogueClear6';
                 }
                 showDialogue(victoryDialogue, () => {
                   state.boss = null;
