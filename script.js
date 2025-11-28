@@ -529,6 +529,15 @@
     }
   ];
 
+  const ALL_BOSSES = [
+    makeLevel1().boss,
+    makeLevel2().boss,
+    makeLevel3().boss,
+    makeLevel4().boss,
+    makeLevel5().boss,
+    makeLevel6().boss
+  ];
+
   class Enemy {
     constructor(x, y, w, h, speed, sprite) {
       this.x = x;
@@ -1293,9 +1302,11 @@ class Boss {
       this.floatFrequency = 2;
       this.lastShotTime = 0;
       this.shootCooldown = 150; // 150ms cooldown
+      this.isDead = false;
     }
 
     shoot() {
+      if (this.isDead) return;
       const now = performance.now();
       if (now - this.lastShotTime < this.shootCooldown) return;
       this.lastShotTime = now;
@@ -1315,6 +1326,7 @@ class Boss {
     }
 
     activateShield() {
+      if (this.isDead) return;
       const now = performance.now();
       if (now > this.shieldCooldown) {
         this.shieldActive = true;
@@ -1326,7 +1338,7 @@ class Boss {
     }
 
     takeDamage(amount = 1, piercing = false) {
-      if (state.debug) return; // Player does not lose health in debug mode
+      if (this.isDead || state.debug) return;
       if (this.shieldActive && !piercing) return;
       this.hp -= amount;
       spawnParticles(this.x, this.y);
@@ -1338,15 +1350,32 @@ class Boss {
       }, 100);
       updateHearts();
       if (this.hp <= 0) {
-        if (state.boss) {
-          state.diedToBoss = true;
+        this.isDead = true;
+        spawnBossParticles(this.x, this.y);
+        if (gameState === STATE.WAVE_MODE) {
+          setTimeout(() => {
+            fetch(`assets/wavemodeEnd.json`)
+              .then(res => res.json())
+              .then(data => {
+                const formattedText = data.text
+                  .replace('[waves]', state.waveIndex + 1)
+                  .replace('[score]', state.score);
+                state.dialogue.fullText = formattedText;
+                showDialogue('wavemodeEnd', () => showScreen(STATE.MENU));
+              });
+          }, 5000);
+        } else {
+          if (state.boss) {
+            state.diedToBoss = true;
+          }
+          bossName.style.display = 'none';
+          showScreen(STATE.GAMEOVER);
         }
-        bossName.style.display = 'none';
-        showScreen(STATE.GAMEOVER);
       }
     }
 
     update(dt) {
+      if (this.isDead) return;
       this.floatTimer += dt;
       this.x += this.vx * dt;
       this.y += this.vy * dt;
@@ -1396,6 +1425,7 @@ class Boss {
     }
 
     render(ctx) {
+      if (this.isDead) return;
       const floatOffsetY = Math.sin(this.floatTimer * this.floatFrequency) * this.floatAmplitude;
       const skinImg = images[equippedSkin.replace('assets/', '').replace('.png', '')] || images.player;
       drawImageCentered(skinImg, this.x, this.y + floatOffsetY, this.w, this.h);
@@ -1410,6 +1440,7 @@ class Boss {
       this.y = canvas.height / DPR - 110;
       this.vx = 0;
       this.vy = 0;
+      this.isDead = false;
     }
   }
 
@@ -1439,7 +1470,8 @@ class Boss {
     fps: 0,
     diedToBoss: false,
     shotsFired: 0,
-    shotsHit: 0
+    shotsHit: 0,
+    lastGameState: STATE.MENU
   };
 
   // helpers
@@ -1461,6 +1493,9 @@ class Boss {
     screenAchievements.style.display = (s === STATE.ACHIEVEMENTS) ? 'flex' : 'none';
     screenPlayerArea.style.display = (s === STATE.PLAYER_AREA) ? 'flex' : 'none';
     screenScore.style.display = (s === STATE.SCORE) ? 'flex' : 'none';
+    if (s === STATE.PAUSED) {
+      state.lastGameState = gameState; // Store the state before pausing
+    }
     if(s === STATE.VICTORY || s === STATE.GAMEOVER) {
       if (gameState === STATE.WAVE_MODE && state.score > waveModeHighScore) {
         waveModeHighScore = state.score;
@@ -1474,21 +1509,34 @@ class Boss {
 
   function showDialogue(dialogueKey, onComplete, backgroundImageKey = 'motherShip') {
     playMusic('menu');
-    fetch(`assets/${dialogueKey}.json`)
-      .then(res => res.json())
-      .then(data => {
-        dialogueImage.src = data.characterImage;
-        motherShipImage.src = images[data.backgroundImage || backgroundImageKey].src;
-        state.dialogue.fullText = data.text;
-        state.dialogue.text = '';
-        state.dialogue.letterIndex = 0;
-        state.dialogue.timer = 0;
-        state.dialogue.active = true;
-        state.dialogue.goButtonTimerSet = false;
-        state.dialogue.onComplete = onComplete; // Store the callback
-        btnDialogueGo.style.display = 'none'; // Hide the button initially
-        showScreen(STATE.DIALOGUE);
-      });
+    if (dialogueKey === 'wavemodeEnd') {
+      dialogueImage.src = 'assets/lyraStarblade.png';
+      motherShipImage.src = images['motherShip'].src;
+      state.dialogue.text = '';
+      state.dialogue.letterIndex = 0;
+      state.dialogue.timer = 0;
+      state.dialogue.active = true;
+      state.dialogue.goButtonTimerSet = false;
+      state.dialogue.onComplete = onComplete; // Store the callback
+      btnDialogueGo.style.display = 'none'; // Hide the button initially
+      showScreen(STATE.DIALOGUE);
+    } else {
+      fetch(`assets/${dialogueKey}.json`)
+        .then(res => res.json())
+        .then(data => {
+          dialogueImage.src = data.characterImage;
+          motherShipImage.src = images[data.backgroundImage || backgroundImageKey].src;
+          state.dialogue.fullText = data.text;
+          state.dialogue.text = '';
+          state.dialogue.letterIndex = 0;
+          state.dialogue.timer = 0;
+          state.dialogue.active = true;
+          state.dialogue.goButtonTimerSet = false;
+          state.dialogue.onComplete = onComplete; // Store the callback
+          btnDialogueGo.style.display = 'none'; // Hide the button initially
+          showScreen(STATE.DIALOGUE);
+        });
+    }
   }
 
   function completeDialogueAndShowButton() {
@@ -1907,31 +1955,20 @@ function beginWaveModeGameplay() {
             state.waveProgress = 0;
             state.waveSpawning = true;
             state.waveSpawnTimer = 0;
-            waveInfo.textContent = `Wave ${state.waveIndex + 1}`;
-            if (state.waveIndex > 0 && state.waveIndex % 10 === 0) {
-              const bossTypes = ['boss', 'boss2', 'boss3', 'boss4', 'boss5', 'boss6'];
-              const randomBoss = bossTypes[Math.floor(Math.random() * bossTypes.length)];
-              const bossConfig = {
-                name: 'Random Boss',
-                spriteKey: randomBoss,
-                hp: 100 + state.waveIndex * 10,
-                w: 120, h: 120,
-                speed: 40 + state.waveIndex,
-                fireRate: Math.max(200, 1100 - state.waveIndex * 10),
-                bulletSpeed: 180 + state.waveIndex * 2
-              };
-              spawnBoss({ boss: bossConfig });
-              playMusic('boss1');
-              bossBar.style.display = 'block';
-              bossName.textContent = bossConfig.name;
-              bossName.style.display = 'block';
-              bossBarInner.style.width = '100%';
-            }
-          }
-        }
-      }
-    } else if (gameState === STATE.PLAYING) {
-      const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
+              waveInfo.textContent = `Wave ${state.waveIndex + 1}`;
+              if (state.waveIndex > 0 && state.waveIndex % 10 === 0) {
+                const randomBossConfig = ALL_BOSSES[Math.floor(Math.random() * ALL_BOSSES.length)];
+                spawnBoss({ boss: randomBossConfig });
+                playMusic('boss1');
+                bossBar.style.display = 'block';
+                bossName.textContent = randomBossConfig.name;
+                bossName.style.display = 'block';
+                bossBarInner.style.width = '100%';
+              }
+                      }
+                    }
+                  }
+                } else if (gameState === STATE.PLAYING) {      const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
       if(level && !state.boss){
         const totalWaves = level.waves.length;
         if(state.waveIndex < totalWaves){
@@ -2766,7 +2803,7 @@ screenDialogue.addEventListener('pointerdown', () => {
     resetConfirmationModal.style.display = 'none';
   });
   btnPause.addEventListener('click', () => showScreen(STATE.PAUSED));
-  btnResume.addEventListener('click', () => showScreen(STATE.PLAYING));
+  btnResume.addEventListener('click', () => showScreen(state.lastGameState));
   btnPauseToMenu.addEventListener('click', () => showScreen(STATE.MENU));
 
 })();
