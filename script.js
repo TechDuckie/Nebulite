@@ -228,7 +228,7 @@
     try {
       localStorage.setItem(WAVE_MODE_HIGH_SCORE_KEY, waveModeHighScore);
     } catch (e) {
-      console.error("Failed to save wave mode high score", e);
+      console.error("Failed to save wave mode highscore", e);
     }
   }
 
@@ -239,7 +239,7 @@
         waveModeHighScore = parseInt(saved, 10);
       }
     } catch (e) {
-      console.error("Failed to load wave mode high score", e);
+      console.error("Failed to load wave mode highscore", e);
     }
   }
 
@@ -2516,7 +2516,7 @@ screenDialogue.addEventListener('pointerdown', () => {
     scoresList.innerHTML = ''; 
 
     const waveModeHeader = document.createElement('h3');
-    waveModeHeader.textContent = 'Wave Mode High Score';
+    waveModeHeader.textContent = 'Wave Mode Highscore';
     scoresList.appendChild(waveModeHeader);
     const waveModeScore = document.createElement('p');
     waveModeScore.textContent = waveModeHighScore;
