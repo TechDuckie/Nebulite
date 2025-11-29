@@ -1566,6 +1566,8 @@ function beginWaveModeGameplay() {
   // reset state
   nebulas.length = 0;
   state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
+  state.particles.length = 0;
+  state.thrusterParticles.length = 0;
   
   state.score = 0;
   state.shotsFired = 0;
@@ -1594,6 +1596,8 @@ function beginWaveModeGameplay() {
     // reset state
     nebulas.length = 0;
     state.enemies.length = 0; state.lasers.length = 0; state.enemyBullets.length = 0; state.boss = null;
+    state.particles.length = 0;
+    state.thrusterParticles.length = 0;
     
     state.score = 0;
     state.shotsFired = 0;
@@ -1631,6 +1635,8 @@ function beginWaveModeGameplay() {
     // Clear projectiles
     state.lasers.length = 0;
     state.enemyBullets.length = 0;
+    state.particles.length = 0;
+    state.thrusterParticles.length = 0;
 
     // Reset UI
     updateHearts();
