@@ -1878,13 +1878,6 @@ function beginWaveModeGameplay() {
         stars.splice(i, 1);
       }
     }
-    for (let i = nebulas.length - 1; i >= 0; i--) {
-      const nebula = nebulas[i];
-      nebula.y += nebula.speed;
-      if (nebula.y > (canvas.height / DPR)) {
-        nebulas.splice(i, 1);
-      }
-    }
 
     // Dialogue typewriter effect
     if (gameState === STATE.DIALOGUE && state.dialogue.active) {
@@ -1907,6 +1900,15 @@ function beginWaveModeGameplay() {
 
     if(gameState === STATE.PAUSED) return;
     if(gameState !== STATE.PLAYING && gameState !== STATE.WAVE_MODE) return;
+
+    // Nebulas update
+    for (let i = nebulas.length - 1; i >= 0; i--) {
+      const nebula = nebulas[i];
+      nebula.y += nebula.speed;
+      if (nebula.y > (canvas.height / DPR)) {
+        nebulas.splice(i, 1);
+      }
+    }
 
     // Shield cooldown visual
     const now = performance.now();
