@@ -132,6 +132,16 @@
 
   window.addEventListener('keydown', e => {
     if (gameState === STATE.DIALOGUE) return;
+
+    if (e.code === 'Enter') {
+      e.preventDefault();
+      if (gameState === STATE.PLAYING || gameState === STATE.WAVE_MODE) {
+        showScreen(STATE.PAUSED);
+      } else if (gameState === STATE.PAUSED) {
+        showScreen(state.lastGameState);
+      }
+    }
+
     if (e.code === 'Space' && !e.repeat) state.player.shoot();
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') state.player.activateShield();
     updatePlayerVelocity();
