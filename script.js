@@ -131,6 +131,7 @@
   }
 
   window.addEventListener('keydown', e => {
+    if (gameState === STATE.DIALOGUE) return;
     if (e.code === 'Space' && !e.repeat) state.player.shoot();
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') state.player.activateShield();
     updatePlayerVelocity();
