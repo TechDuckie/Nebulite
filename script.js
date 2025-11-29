@@ -131,7 +131,7 @@
   }
 
   window.addEventListener('keydown', e => {
-    if (gameState === STATE.DIALOGUE) return;
+    if (gameState === STATE.DIALOGUE || gameState === STATE.MENU) return;
 
     if (e.code === 'Enter') {
       e.preventDefault();
