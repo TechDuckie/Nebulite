@@ -1868,7 +1868,7 @@ function beginWaveModeGameplay() {
     if (Math.random() > 0.95) {
       spawnStar();
     }
-    if (gameState === STATE.PLAYING && audioState.effectsEnabled && Math.random() > 0.992) {
+    if (gameState === STATE.PLAYING && audioState.effectsEnabled && Math.random() > (isDesktop ? 0.998 : 0.992)) {
       spawnNebula();
     }
     for (let i = stars.length - 1; i >= 0; i--) {
