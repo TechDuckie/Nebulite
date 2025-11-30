@@ -2149,6 +2149,8 @@ function beginWaveModeGameplay() {
                   }, dialogueBg);
                 }, 5000); // 5 second delay
               } else if (gameState === STATE.WAVE_MODE) {
+                spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
+                playSfx('explosion');
                 state.boss = null;
                 playMusic('wavemode');
               }
