@@ -561,6 +561,7 @@
       this.hp = 1;
       this.isAsteroid = sprite.startsWith('asteroid');
       if (this.isAsteroid) {
+        this.hp = 10;
         this.oscillateSpeed = (Math.random() * 0.5 + 0.5) * 1.5; // Random speedfactor for oscillation
         this.oscillateRange = Math.random() * 50 + 20; // Random range for oscillation
         this.oscillateTime = Math.random() * Math.PI * 2; // Starting phase for sine wave
@@ -2210,7 +2211,18 @@ function beginWaveModeGameplay() {
         if(rectIntersect(re, rl)){
           state.lasers.splice(li,1);
           state.shotsHit++;
-          if (!e.isAsteroid) {
+          if (e.isAsteroid) {
+            e.hp--;
+            e.y -= 5; // Push back
+            if (e.hp <= 0) {
+              spawnParticles(e.x + e.w / 2, e.y + e.h / 2);
+              state.enemies.splice(ei,1);
+              state.score += 10; // More points for asteroids
+              playSfx('explosion');
+            } else {
+              playSfx('playerDamage', 0.5); // Hit sound
+            }
+          } else {
             if (e.hp > 1) {
               spawnHitParticles(L.x + L.w / 2, L.y);
             }
@@ -2221,8 +2233,6 @@ function beginWaveModeGameplay() {
               state.score += 5;
               playSfx('explosion');
             }
-          } else {
-            playSfx('playerDamage', 0.5);
           }
           break;
         }
