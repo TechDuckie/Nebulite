@@ -1472,6 +1472,8 @@ class Boss {
     waveSpawning: false,
     waveSpawnTimer:0,
     waveCleared: false,
+    waveClearTimer: 0,
+    waveClearDelay: 3000, // 3 seconds
     warningFlash: { active: false, timer: 0, flashes: 0 },
     dialogue: { active: false, text: '', fullText: '', letterIndex: 0, timer: 0, speed: 50, goButtonTimerSet: false, onComplete: null },
     lastTime: performance.now(),
@@ -1967,27 +1969,33 @@ function beginWaveModeGameplay() {
           }
           if (state.waveProgress >= enemyCount) {
             state.waveSpawning = false;
+            state.waveCleared = false; // Reset for the new wave
           }
-        } else {
-          if (state.enemies.length === 0 && state.lasers.length === 0) {
+        } else if (!state.waveCleared && state.enemies.length === 0) {
+            state.waveCleared = true;
+            state.waveClearTimer = performance.now();
+        }
+        
+        if (state.waveCleared && performance.now() - state.waveClearTimer > state.waveClearDelay) {
             state.waveIndex++;
             state.waveProgress = 0;
             state.waveSpawning = true;
             state.waveSpawnTimer = 0;
-              waveInfo.textContent = `Wave ${state.waveIndex + 1}`;
-              if (state.waveIndex > 0 && state.waveIndex % 10 === 0) {
-                const randomBossConfig = ALL_BOSSES[Math.floor(Math.random() * ALL_BOSSES.length)];
-                spawnBoss({ boss: randomBossConfig });
-                playMusic('boss1');
-                bossBar.style.display = 'block';
-                bossName.textContent = randomBossConfig.name;
-                bossName.style.display = 'block';
-                bossBarInner.style.width = '100%';
-              }
-                      }
-                    }
-                  }
-                } else if (gameState === STATE.PLAYING) {      const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
+            waveInfo.textContent = `Wave ${state.waveIndex + 1}`;
+            if (state.waveIndex > 0 && state.waveIndex % 10 === 0) {
+              const randomBossConfig = ALL_BOSSES[Math.floor(Math.random() * ALL_BOSSES.length)];
+              spawnBoss({ boss: randomBossConfig });
+              playMusic('boss1');
+              bossBar.style.display = 'block';
+              bossName.textContent = randomBossConfig.name;
+              bossName.style.display = 'block';
+              bossBarInner.style.width = '100%';
+            }
+            state.waveCleared = false; // Ready for the next clear
+        }
+      }
+    } else if (gameState === STATE.PLAYING) {
+      const level = SECTORS[currentSectorIndex].levels[currentLevelIndexInSector];
       if(level && !state.boss){
         const totalWaves = level.waves.length;
         if(state.waveIndex < totalWaves){
@@ -2002,17 +2010,27 @@ function beginWaveModeGameplay() {
             }
             if(state.waveProgress >= waveCfg.enemyCount){
               state.waveSpawning = false;
+              state.waveCleared = false;
             }
-          } else {
-            if(state.enemies.length === 0 && state.lasers.length === 0){
-              state.waveIndex++;
-              state.waveProgress = 0;
-              state.waveSpawning = true;
-              state.waveSpawnTimer = 0;
-            }
+          } else if (!state.waveCleared && state.enemies.length === 0) {
+            state.waveCleared = true;
+            state.waveClearTimer = performance.now();
           }
-        } else {
-          if(!state.boss && state.enemies.length === 0 && state.lasers.length === 0){
+
+          if (state.waveCleared && performance.now() - state.waveClearTimer > state.waveClearDelay) {
+            state.waveIndex++;
+            state.waveProgress = 0;
+            state.waveSpawning = true;
+            state.waveSpawnTimer = 0;
+            state.waveCleared = false;
+          }
+        } else if (!state.waveCleared && state.enemies.length === 0) {
+            state.waveCleared = true;
+            state.waveClearTimer = performance.now();
+        }
+        
+        if (state.waveCleared && performance.now() - state.waveClearTimer > state.waveClearDelay) {
+          if(!state.boss){
             spawnBoss(level);
             playMusic(level.bossMusic);
             bossBar.style.display = 'block';
@@ -2020,6 +2038,7 @@ function beginWaveModeGameplay() {
             bossName.style.display = 'block';
             bossBarInner.style.width = '100%';
           }
+          state.waveCleared = false;
         }
       }
     }
@@ -2151,6 +2170,8 @@ function beginWaveModeGameplay() {
               } else if (gameState === STATE.WAVE_MODE) {
                 spawnBossParticles(state.boss.x + state.boss.w / 2, state.boss.y + state.boss.h / 2);
                 playSfx('explosion');
+                state.waveCleared = true; // Start the timer
+                state.waveClearTimer = performance.now();
                 state.boss = null;
                 playMusic('wavemode');
               }
